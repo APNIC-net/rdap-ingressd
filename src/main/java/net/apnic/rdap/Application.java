@@ -1,9 +1,12 @@
 package net.apnic.rdap;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
 
-@EnableAutoConfiguration
+/**
+ * Entry point for rdap-ingressd
+ */
+@SpringBootApplication
 public class Application
 {
     public static void main(String[] args)
