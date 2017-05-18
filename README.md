@@ -1,10 +1,14 @@
-# Introduction
+# Overview
 *rdap-ingressd* is a proxy and redirection server for the RDAP protocol.
 It recieves RDAP queries from clients and routes the request to the appropriate
 RDAP service by either:
 
 1. HTTP 301 redirect; or
 2. Proxying the request to another RDAP service and returning the result.
+
+# Licensing
+rdap-ingressd is licensed under the BSD licence. Check the [LICENSE
+file](LICENSE.txt).
 
 # RDAP Specification
 The RDAP protocol is specificed in the following IETF RFC's:
