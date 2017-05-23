@@ -9,14 +9,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.async.DeferredResult;
 
+/**
+ * Rest controller for handling help path segments in RDAP.
+ *
+ * There are no HEAD requests for help.
+ */
 @RestController
 @RequestMapping("/help")
 public class HelpRestController
     extends PathRestController
 {
+    /**
+     * Get request path segment for help information.
+     *
+     * @return Response entity for the proxied server.
+     */
     @RequestMapping(value="/", method=RequestMethod.GET)
-    public DeferredResult<ResponseEntity<byte[]>>
-        helpGet()
+    public DeferredResult<ResponseEntity<byte[]>> helpGet()
     {
         DeferredResult<ResponseEntity<byte[]>> result =
             new DeferredResult<ResponseEntity<byte[]>>();
