@@ -49,7 +49,7 @@ public class EntityRestController
      * @entity The entity to proxy for.
      * @return Response entity from the proxied server
      */
-    @RequestMapping(value="/{entity}", method=RequestMethod.GET)
+    @RequestMapping(value="/{entity}", method=RequestMethod.HEAD)
     public DeferredResult<ResponseEntity<Void>>
         entityHead(@PathVariable String entity)
     {
