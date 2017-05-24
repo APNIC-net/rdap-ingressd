@@ -134,7 +134,7 @@ public class IPRestController
      * @return Response entity from the proxied server.
      */
     @RequestMapping(value="/{ipAddress:.+}/{cidr:[0-9]+}",
-                    method=RequestMethod.GET)
+                    method=RequestMethod.HEAD)
     public DeferredResult<ResponseEntity<Void>>
         ipHeadWithCIDR(@PathVariable String ipAddress,
                        @PathVariable String cidr)
