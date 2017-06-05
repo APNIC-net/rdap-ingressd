@@ -122,6 +122,8 @@ public class RDAPAuthorityConfiguration
                     .collect(Collectors.toList());
                 authority.addServers(servers);
             }
+
+            authorityStore.addAuthority(authority);
         }
     }
 
