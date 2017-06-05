@@ -2,12 +2,17 @@ package net.apnic.rdap;
 
 import java.util.Properties;
 
+import net.apnic.rdap.directory.Directory;
+
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulServer;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import org.springframework.context.annotation.Bean;
 
 /**
  * Entry point for rdap-ingressd
@@ -17,6 +22,8 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 @EnableAutoConfiguration(exclude={ErrorMvcAutoConfiguration.class})
 public class Application
 {
+    private String test;
+
     public static void main(String[] args)
         throws Exception
     {
@@ -29,5 +36,11 @@ public class Application
         defaultProps.setProperty("spring.mvc.favicon.enabled", "false");
         app.setDefaultProperties(defaultProps);
         app.run(args);
+    }
+
+    @Bean
+    public String test()
+    {
+        return new String();
     }
 }
