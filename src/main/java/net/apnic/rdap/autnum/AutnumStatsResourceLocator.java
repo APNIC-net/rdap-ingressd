@@ -30,12 +30,20 @@ public class AutnumStatsResourceLocator
      * {@inheritDocs}
      */
     @Override
-    public RDAPAuthority authorityForResource(AsnRange autnum)
+    public RDAPAuthority authorityForResource(AsnRange range)
         throws ResourceNotFoundException
     {
-        throw new ResourceNotFoundException();
+        RDAPAuthority authority = resources.findExactOrFirstLessSpecific(range);
+        if(authority == null)
+        {
+            throw new ResourceNotFoundException();
+        }
+        return authority;
     }
 
+    /**
+     * {@inheritDocs}
+     */
     @Override
     public void putResourceMapping(AsnRange resource, RDAPAuthority authority)
     {
