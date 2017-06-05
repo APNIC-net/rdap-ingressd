@@ -128,15 +128,5 @@ public class IPStatsResourceLocatorTest
                         IpRange.parse("fe80:2001::a/128")), authority3);
         assertEquals(resourceLocator.authorityForResource(
                         IpRange.parse("fe80:2001::1/128")), authority4);
-        /*assertEquals(resourceLocator.authorityForResource(
-                        IpRange.parse("10.1.12.0/24")), authority2);
-        assertEquals(resourceLocator.authorityForResource(
-                        IpRange.parse("10.1.0.1/32")), authority2);
-        assertEquals(resourceLocator.authorityForResource(
-                        IpRange.parse("10.1.1.1/32")), authority3);
-        assertEquals(resourceLocator.authorityForResource(
-                        IpRange.parse("10.1.1.220/32")), authority3);
-        assertEquals(resourceLocator.authorityForResource(
-                        IpRange.parse("10.1.1.218/32")), authority4);*/
     }
 }
