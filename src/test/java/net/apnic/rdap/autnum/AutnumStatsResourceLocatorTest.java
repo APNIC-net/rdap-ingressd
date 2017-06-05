@@ -51,4 +51,29 @@ public class AutnumStatsResourceLocatorTest
 
         assertEquals(resourceLocator.authorityForResource(range), authority);
     }
+
+    @Test
+    void checkTreeMatching()
+        throws ResourceNotFoundException
+    {
+        AutnumStatsResourceLocator resourceLocator =
+            new AutnumStatsResourceLocator();
+        RDAPAuthority authority1 = new RDAPAuthority("apnic1");
+        RDAPAuthority authority2 = new RDAPAuthority("apnic2");
+        RDAPAuthority authority3 = new RDAPAuthority("apnic3");
+
+        resourceLocator.putResourceMapping(AsnRange.parse("1024-2048"),
+                                           authority1);
+        resourceLocator.putResourceMapping(AsnRange.parse("1030-1035"),
+                                           authority2);
+        resourceLocator.putResourceMapping(AsnRange.parse("1031"),
+                                           authority3);
+
+        assertEquals(resourceLocator.authorityForResource(
+                        AsnRange.parse("1050")), authority1);
+        assertEquals(resourceLocator.authorityForResource(
+                        AsnRange.parse("1032")), authority2);
+        assertEquals(resourceLocator.authorityForResource(
+                        AsnRange.parse("1031")), authority3);
+    }
 }
