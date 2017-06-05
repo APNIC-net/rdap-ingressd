@@ -12,7 +12,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulServer;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
-import org.springframework.context.annotation.Bean;
 
 /**
  * Entry point for rdap-ingressd
@@ -22,8 +21,6 @@ import org.springframework.context.annotation.Bean;
 @EnableAutoConfiguration(exclude={ErrorMvcAutoConfiguration.class})
 public class Application
 {
-    private String test;
-
     public static void main(String[] args)
         throws Exception
     {
@@ -36,11 +33,5 @@ public class Application
         defaultProps.setProperty("spring.mvc.favicon.enabled", "false");
         app.setDefaultProperties(defaultProps);
         app.run(args);
-    }
-
-    @Bean
-    public String test()
-    {
-        return new String();
     }
 }
