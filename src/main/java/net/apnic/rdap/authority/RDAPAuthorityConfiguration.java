@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties
+@ConfigurationProperties(prefix="rdap")
 public class RDAPAuthorityConfiguration
 {
     private static final Logger LOGGER =
@@ -60,9 +60,8 @@ public class RDAPAuthorityConfiguration
         }
     }
 
-    private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
-
     private List<AuthorityConfig> authorities;
+    private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
 
     @Bean
     public RDAPAuthorityStore authorityStore()
