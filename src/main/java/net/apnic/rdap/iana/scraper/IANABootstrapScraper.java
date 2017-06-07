@@ -19,6 +19,10 @@ public class IANABootstrapScraper
     private static final Logger LOGGER =
         Logger.getLogger(IANABootstrapScraper.class.getName());
 
+    /*
+     * Static init of URL members. We cannot do them in the normal way as
+     * contruction throws a checked error that needs to be caught.
+     */
     static
     {
         URL asnURL = null;
