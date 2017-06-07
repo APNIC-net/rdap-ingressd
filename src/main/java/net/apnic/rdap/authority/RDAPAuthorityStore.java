@@ -2,6 +2,7 @@ package net.apnic.rdap.authority;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Represents a store of authoritive RDAP authorities.
@@ -60,5 +61,24 @@ public class RDAPAuthorityStore
     public RDAPAuthority findAuthority(String authorityName)
     {
         return authoritiesMap.get(authorityName.trim().toLowerCase());
+    }
+
+    public RDAPAuthority findAuthorityByURL(URL url)
+    {
+        return serverMap.get(url);
+    }
+
+    public RDAPAuthority findAuthorityByURL(List<URL> serverUrls)
+    {
+        RDAPAuthority authority = null;
+        for(URL serverURL : serverUrls)
+        {
+            authority = findAuthorityByURL(serverURL);
+            if(authority != null)
+            {
+                return authority;
+            }
+        }
+        return authority;
     }
 }
