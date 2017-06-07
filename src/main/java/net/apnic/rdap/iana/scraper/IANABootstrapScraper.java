@@ -102,7 +102,7 @@ public class IANABootstrapScraper
     private ListenableFuture<ResponseEntity<JsonNode>>
         makeBootstrapRequest(URL bootStrapURL)
     {
-        HttpEntity<?> entity = new HttpEntity(requestHeaders);
+        HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
 
         try
         {
