@@ -102,7 +102,6 @@ public class IANABootstrapScraper
         this.ipStore = ipStore;
         restClient = new AsyncRestTemplate();
         setupRequestHeaders();
-        start();
     }
 
     private void setupRequestHeaders()
