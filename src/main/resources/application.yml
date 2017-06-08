@@ -31,7 +31,8 @@ rdap:
             iana:
                 enabled: true
         config:
-            - iana
+            order:
+                - iana
 
 endpoints:
     enabled: false

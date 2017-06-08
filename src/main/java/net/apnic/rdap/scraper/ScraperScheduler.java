@@ -11,4 +11,8 @@ public class ScraperScheduler
     {
         scrapers.add(scraper);
     }
+
+    public void start()
+    {
+    }
 }
