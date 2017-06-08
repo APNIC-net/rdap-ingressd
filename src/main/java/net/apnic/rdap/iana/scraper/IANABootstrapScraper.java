@@ -122,6 +122,8 @@ public class IANABootstrapScraper
         List<CompletableFuture<Void>> updateFutures = new ArrayList<>();
 
         updateFutures.add(updateASNData());
+        updateFutures.add(updateIPv4Data());
+        updateFutures.add(updateIPv6Data());
     }
 
     private CompletableFuture<ResponseEntity<JsonNode>>
