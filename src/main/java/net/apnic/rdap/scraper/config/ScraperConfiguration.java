@@ -28,10 +28,6 @@ public class ScraperConfiguration
     private List<String> order = null;
     private ScraperScheduler scraperScheduler = new ScraperScheduler();
 
-    public ScraperConfiguration()
-    {
-    }
-
     public List<String> getOrder()
     {
         return order;
@@ -46,13 +42,15 @@ public class ScraperConfiguration
         }
 
         initScraper();
+
+        LOGGER.log(Level.INFO, "Starting scraper scheduler");
         scraperScheduler.start();
         initialised = true;
     }
 
     private void initScraper()
     {
-        LOGGER.log(Level.CONFIG, "Adding scrapers " + order);
+        LOGGER.log(Level.INFO, "Initialising scraper scheduler with " + order);
 
         for(String scraperName : order)
         {
@@ -61,6 +59,8 @@ public class ScraperConfiguration
                 Scraper scraper = applicationContext.getBean(scraperName,
                                                              Scraper.class);
                 scraperScheduler.addScraper(scraper);
+                LOGGER.log(Level.INFO, "Adding scraper " + scraperName +
+                           " to scheduler");
             }
             catch(BeansException ex)
             {
