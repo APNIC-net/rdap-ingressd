@@ -26,6 +26,11 @@ rdap:
           servers:
               - https://rdap.lacnic.net/rdap/
 
+    scraping:
+        scrapers:
+            iana:
+                enabled: true
+
 endpoints:
     enabled: false
     pause:
