@@ -1,7 +1,12 @@
 package net.apnic.rdap.iana.config;
 
 import net.apnic.rdap.authority.RDAPAuthorityStore;
+import net.apnic.rdap.autnum.AsnRange;
+import net.apnic.rdap.domain.Domain;
 import net.apnic.rdap.iana.scraper.IANABootstrapScraper;
+import net.apnic.rdap.resource.ResourceStore;
+
+import net.ripe.ipresource.IpRange;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +17,11 @@ public class IANAConfiguration
 {
     @Bean
     @Autowired
-    public IANABootstrapScraper ianaScraper(RDAPAuthorityStore authorityStore)
+    public IANABootstrapScraper ianaScraper(RDAPAuthorityStore authorityStore,
+                                            ResourceStore<AsnRange> autnumStore,
+                                            ResourceStore<IpRange> ipStore)
     {
-        return new IANABootstrapScraper(authorityStore);
+        return new IANABootstrapScraper(authorityStore, autnumStore,
+                                        ipStore);
     }
 }

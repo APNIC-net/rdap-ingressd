@@ -3,6 +3,7 @@ package net.apnic.rdap.authority;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents an entity and their authorative data RDAP server.
@@ -105,6 +106,11 @@ public class RDAPAuthority
             throw new IllegalArgumentException("servers cannot be null");
         }
         this.servers.addAll(servers);
+    }
+
+    public static RDAPAuthority createAnonymousAuthority()
+    {
+        return new RDAPAuthority(UUID.randomUUID().toString());
     }
 
     /**

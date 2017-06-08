@@ -16,17 +16,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ResourceConfiguration
 {
-    private ResourceLocator<AsnRange> autnumResourceLocator =
+    private AutnumStatsResourceLocator autnumResourceLocator =
         new AutnumStatsResourceLocator();
 
-    private ResourceLocator<IpRange> ipResourceLocator =
+    private IPStatsResourceLocator ipResourceLocator =
         new IPStatsResourceLocator();
 
-    private ResourceLocator<Domain> domainResourceLocator =
+    private DomainStatsResourceLocator domainResourceLocator =
         new DomainStatsResourceLocator(ipResourceLocator);
 
     @Bean
     public ResourceLocator<AsnRange> autnumResourcelocator()
+    {
+        return autnumResourceLocator;
+    }
+
+    @Bean
+    public ResourceStore<AsnRange> autnumResourceStore()
     {
         return autnumResourceLocator;
     }
@@ -45,6 +51,12 @@ public class ResourceConfiguration
 
     @Bean
     public ResourceLocator<IpRange> ipResourceLocator()
+    {
+        return ipResourceLocator;
+    }
+
+    @Bean
+    public ResourceStore<IpRange> ipResourceStore()
     {
         return ipResourceLocator;
     }
