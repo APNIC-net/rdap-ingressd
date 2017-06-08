@@ -46,9 +46,8 @@ public class IPStatsResourceLocator
      * {@inheritDocs}
      */
     @Override
-    public void putResourceMapping(IpRange resource, RDAPAuthority authority)
+    public synchronized void putResourceMapping(IpRange resource, RDAPAuthority authority)
     {
-        System.out.println(resource + " - " + authority.getName());
         RDAPAuthority estAuthority =
             resources.findExactOrFirstLessSpecific(resource);
 

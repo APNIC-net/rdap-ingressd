@@ -102,6 +102,7 @@ public class IANABootstrapScraper
         this.ipStore = ipStore;
         restClient = new AsyncRestTemplate();
         setupRequestHeaders();
+        start();
     }
 
     private void setupRequestHeaders()
@@ -114,11 +115,9 @@ public class IANABootstrapScraper
     @Override
     public void start()
     {
-        List<CompletableFuture<Void>> updateFutures = new ArrayList<>();
-
-        updateFutures.add(updateASNData());
-        updateFutures.add(updateIPv4Data());
-        updateFutures.add(updateIPv6Data());
+        CompletableFuture.allOf(updateASNData(), updateDomainData(),
+                                updateIPv4Data(), updateIPv6Data())
+            .exceptionally((T) -> {System.out.println(T); T.printStackTrace(); return null;});
     }
 
     private CompletableFuture<ResponseEntity<JsonNode>>
