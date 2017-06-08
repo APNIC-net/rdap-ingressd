@@ -1,6 +1,6 @@
 package net.apnic.rdap.authority;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class RDAPAuthorityStore
 {
     private HashMap<String, RDAPAuthority> authoritiesMap = new HashMap<>();
-    private HashMap<URL, RDAPAuthority> serverMap = new HashMap<>();
+    private HashMap<URI, RDAPAuthority> serverMap = new HashMap<>();
 
     /**
      * Default constructor
@@ -24,7 +24,7 @@ public class RDAPAuthorityStore
     /**
      * Adds the supplied authority to this store.
      *
-     * If an authority with the same name, aliases and server URL already
+     * If an authority with the same name, aliases and server URI already
      * exists they will be overwritten with the new RDAPAuthority.
      *
      * @param authority The RDAPAuthority to add into this store
@@ -43,9 +43,10 @@ public class RDAPAuthorityStore
             authoritiesMap.put(alias, authority);
         }
 
-        for(URL serverURL : authority.getServers())
+        for(URI serverURI : authority.getServers())
         {
-            serverMap.put(serverURL, authority);
+            serverMap.put(RDAPAuthority.normalizeServerURI(serverURI),
+                          authority);
         }
     }
 
@@ -63,17 +64,17 @@ public class RDAPAuthorityStore
         return authoritiesMap.get(authorityName.trim().toLowerCase());
     }
 
-    public RDAPAuthority findAuthorityByURL(URL url)
+    public RDAPAuthority findAuthorityByURI(URI serverURI)
     {
-        return serverMap.get(url);
+        return serverMap.get(RDAPAuthority.normalizeServerURI(serverURI));
     }
 
-    public RDAPAuthority findAuthorityByURL(List<URL> serverUrls)
+    public RDAPAuthority findAuthorityByURI(List<URI> serverURIs)
     {
         RDAPAuthority authority = null;
-        for(URL serverURL : serverUrls)
+        for(URI serverURI : serverURIs)
         {
-            authority = findAuthorityByURL(serverURL);
+            authority = findAuthorityByURI(serverURI);
             if(authority != null)
             {
                 return authority;

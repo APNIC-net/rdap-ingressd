@@ -1,6 +1,6 @@
 package net.apnic.rdap.authority;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +14,7 @@ public class RDAPAuthority
 {
     private List<String> aliases = new ArrayList<String>();
     private String name;
-    private List<URL> servers = new ArrayList<URL>();
+    private List<URI> servers = new ArrayList<URI>();
 
     /**
      * Constructs a new authority with the given name.
@@ -78,34 +78,38 @@ public class RDAPAuthority
     }
 
     /**
-     * Adds an RDAP server URL to this authority.
+     * Adds an RDAP server URI to this authority.
      *
      * @param server Authorative RDAP url for this authority.
-     * @throws IllegalArgumentException When server URL is null
+     * @throws IllegalArgumentException When server URI is null
      */
-    public void addServer(URL server)
+    public void addServer(URI server)
     {
         if(server == null)
         {
-            throw new IllegalArgumentException("server url cannot be null");
+            throw new IllegalArgumentException("server uri cannot be null");
         }
-        servers.add(server);
+        servers.add(normalizeServerURI(server));
     }
 
     /**
-     * Adds a list server URL's for this authority.
+     * Adds a list server URI's for this authority.
      *
      * @param servers List of authorative RDAP url's for this authority.
      * @throws IllegalArgumentException When servers is null or servers
      *                                  contains null element.
      */
-    public void addServers(List<URL> servers)
+    public void addServers(List<URI> servers)
     {
         if(servers == null || servers.contains(null))
         {
             throw new IllegalArgumentException("servers cannot be null");
         }
-        this.servers.addAll(servers);
+
+        for(URI server : servers)
+        {
+            addServer(server);
+        }
     }
 
     public static RDAPAuthority createAnonymousAuthority()
@@ -161,8 +165,17 @@ public class RDAPAuthority
      *
      * @return List of registered servers
      */
-    public List<URL> getServers()
+    public List<URI> getServers()
     {
         return servers;
+    }
+
+    public static URI normalizeServerURI(URI server)
+    {
+        if(server.toASCIIString().endsWith("/") == false)
+        {
+            server = URI.create(server.toASCIIString() + "/");
+        }
+        return server;
     }
 }

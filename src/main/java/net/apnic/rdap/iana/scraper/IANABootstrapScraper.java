@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -44,11 +43,11 @@ public class IANABootstrapScraper
         public void process(RDAPAuthority authority, BootstrapService service);
     }
 
-    public static final URL ASN_URL;
-    public static final URL BASE_URL;
-    public static final URL DOMAIN_URL;
-    public static final URL IPV4_URL;
-    public static final URL IPV6_URL;
+    public static final URI ASN_URI;
+    public static final String BASE_URI_STR = "https://data.iana.org./rdap/";
+    public static final URI DOMAIN_URI;
+    public static final URI IPV4_URI;
+    public static final URI IPV6_URI;
     public static final List<String> SUPPORTED_VERSIONS = Arrays.asList("1.0");
 
     private static final Logger LOGGER =
@@ -62,39 +61,35 @@ public class IANABootstrapScraper
     private AsyncRestTemplate restClient = null;
 
     /*
-     * Static init of URL members. We cannot do them in the normal way as
+     * Static init of URI members. We cannot do them in the normal way as
      * contruction throws a checked error that needs to be caught.
      */
     static
     {
-        URL asnURL = null;
-        URL baseURL = null;
-        URL domainURL = null;
-        URL ipv4URL = null;
-        URL ipv6URL = null;
+        URI asnURI = null;
+        URI domainURI = null;
+        URI ipv4URI = null;
+        URI ipv6URI = null;
 
         try
         {
-            baseURL = new URL("https://data.iana.org/rdap/");
-            asnURL = new URL(baseURL, "asn.json");
-            domainURL = new URL(baseURL, "dns.json");
-            ipv4URL = new URL(baseURL, "ipv4.json");
-            ipv6URL = new URL(baseURL, "ipv6.json");
+            asnURI = new URI(BASE_URI_STR + "asn.json");
+            domainURI = new URI(BASE_URI_STR + "dns.json");
+            ipv4URI = new URI(BASE_URI_STR + "ipv4.json");
+            ipv6URI = new URI(BASE_URI_STR + "ipv6.json");
         }
-        catch(MalformedURLException ex)
+        catch(URISyntaxException ex)
         {
             LOGGER.log(Level.SEVERE, "Exception when generating IANA url's",
                        ex);
-
             throw new RuntimeException(ex);
         }
         finally
         {
-            ASN_URL = asnURL;
-            BASE_URL = baseURL;
-            DOMAIN_URL = domainURL;
-            IPV4_URL = ipv4URL;
-            IPV6_URL = ipv6URL;
+            ASN_URI = asnURI;
+            DOMAIN_URI = domainURI;
+            IPV4_URI = ipv4URI;
+            IPV6_URI = ipv6URI;
         }
     }
 
@@ -127,24 +122,14 @@ public class IANABootstrapScraper
     }
 
     private CompletableFuture<ResponseEntity<JsonNode>>
-        makeBootstrapRequest(URL bootStrapURL)
+        makeBootstrapRequest(URI bootStrapURI)
     {
         HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
 
-        try
-        {
-            ListenableFuture<ResponseEntity<JsonNode>> lFuture =
-                restClient.exchange(bootStrapURL.toURI(), HttpMethod.GET,
-                                    entity, JsonNode.class);
-            return ConcurrentUtil.buildCompletableFuture(lFuture);
-        }
-        catch(URISyntaxException ex)
-        {
-            CompletableFuture<ResponseEntity<JsonNode>> cf =
-                new CompletableFuture<>();
-            cf.completeExceptionally(ex);
-            return cf;
-        }
+        ListenableFuture<ResponseEntity<JsonNode>> lFuture =
+            restClient.exchange(bootStrapURI, HttpMethod.GET,
+                                entity, JsonNode.class);
+        return ConcurrentUtil.buildCompletableFuture(lFuture);
     }
 
     private void parseBootstrapResults(JsonNode bootstrapData,
@@ -171,24 +156,24 @@ public class IANABootstrapScraper
 
         for(BootstrapService service : result.getServices())
         {
-            List<URL> serviceURLs = null;
+            List<URI> serviceURIs = null;
 
             try
             {
-                serviceURLs = service.getServersByURL();
+                serviceURIs = service.getServersByURI();
             }
-            catch(MalformedURLException ex)
+            catch(URISyntaxException ex)
             {
                 throw new RuntimeException(ex);
             }
 
             RDAPAuthority authority =
-                authorityStore.findAuthorityByURL(serviceURLs);
+                authorityStore.findAuthorityByURI(serviceURIs);
 
             if(authority == null)
             {
                 authority = RDAPAuthority.createAnonymousAuthority();
-                authority.addServers(serviceURLs);
+                authority.addServers(serviceURIs);
                 authorityStore.addAuthority(authority);
             }
 
@@ -205,7 +190,7 @@ public class IANABootstrapScraper
 
     private CompletableFuture<Void> updateASNData()
     {
-        return makeBootstrapRequest(ASN_URL)
+        return makeBootstrapRequest(ASN_URI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
                 parseBootstrapResults(entity.getBody(),
@@ -222,7 +207,7 @@ public class IANABootstrapScraper
 
     private CompletableFuture<Void> updateDomainData()
     {
-        return makeBootstrapRequest(DOMAIN_URL)
+        return makeBootstrapRequest(DOMAIN_URI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
                 parseBootstrapResults(entity.getBody(),
@@ -232,9 +217,9 @@ public class IANABootstrapScraper
             });
     }
 
-    private CompletableFuture<Void> updateIPAllData(URL ipBootstrapURL)
+    private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI)
     {
-        return makeBootstrapRequest(ipBootstrapURL)
+        return makeBootstrapRequest(ipBootstrapURI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
                 parseBootstrapResults(entity.getBody(),
@@ -251,11 +236,11 @@ public class IANABootstrapScraper
 
     private CompletableFuture<Void> updateIPv4Data()
     {
-        return updateIPAllData(IPV4_URL);
+        return updateIPAllData(IPV4_URI);
     }
 
     private CompletableFuture<Void> updateIPv6Data()
     {
-        return updateIPAllData(IPV6_URL);
+        return updateIPAllData(IPV6_URI);
     }
 }

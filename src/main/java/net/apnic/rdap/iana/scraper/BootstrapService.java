@@ -2,8 +2,8 @@ package net.apnic.rdap.iana.scraper;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,7 @@ class BootstrapService
     public static final int RESOURCES_INDEX = 0;
     public static final int SERVERS_INDEX = 1;
 
-    private List<URL> serversByURL = null;
+    private List<URI> serversByURI = null;
     private List<List<String>> serviceElements = null;
 
     @JsonCreator
@@ -41,18 +41,18 @@ class BootstrapService
         return serviceElements.get(SERVERS_INDEX);
     }
 
-    public List<URL> getServersByURL()
-        throws MalformedURLException
+    public List<URI> getServersByURI()
+        throws URISyntaxException
     {
-        if(serversByURL == null)
+        if(serversByURI == null)
         {
-            serversByURL = new ArrayList<URL>();
+            serversByURI = new ArrayList<URI>();
             for(String server : getServers())
             {
-                serversByURL.add(new URL(server));
+                serversByURI.add(new URI(server));
             }
         }
 
-        return serversByURL;
+        return serversByURI;
     }
 }

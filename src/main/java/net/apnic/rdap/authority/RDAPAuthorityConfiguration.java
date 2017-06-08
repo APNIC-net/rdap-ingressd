@@ -1,7 +1,7 @@
 package net.apnic.rdap.authority;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,14 +106,14 @@ public class RDAPAuthorityConfiguration
 
             if(aConfig.getServers() != null)
             {
-                List<URL> servers = aConfig.getServers().stream()
-                    .map((String strURL) ->
+                List<URI> servers = aConfig.getServers().stream()
+                    .map((String strURI) ->
                     {
                         try
                         {
-                            return new URL(strURL);
+                            return new URI(strURI);
                         }
-                        catch(MalformedURLException ex)
+                        catch(URISyntaxException ex)
                         {
                             throw new RuntimeException(ex);
                         }
