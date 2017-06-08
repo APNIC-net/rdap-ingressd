@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class IANAConfiguration
 {
     @ConditionalOnProperty(value="rdap.scraping.scrapers.iana.enabled")
-    @Bean
+    @Bean(value="iana")
     @Autowired
     public IANABootstrapScraper ianaScraper(RDAPAuthorityStore authorityStore,
                                             ResourceStore<AsnRange> autnumStore,

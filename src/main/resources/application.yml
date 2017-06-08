@@ -30,6 +30,8 @@ rdap:
         scrapers:
             iana:
                 enabled: true
+        config:
+            - iana
 
 endpoints:
     enabled: false
