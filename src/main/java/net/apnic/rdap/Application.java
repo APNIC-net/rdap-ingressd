@@ -2,9 +2,13 @@ package net.apnic.rdap;
 
 import java.util.Properties;
 
+import net.apnic.rdap.directory.Directory;
+
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulServer;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
