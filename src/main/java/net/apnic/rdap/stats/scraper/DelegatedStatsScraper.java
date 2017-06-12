@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.Scanner;
 
 import net.apnic.rdap.scraper.Scraper;
+import net.apnic.rdap.stats.parser.AsnRecord;
 import net.apnic.rdap.stats.parser.DelegatedStatsException;
 import net.apnic.rdap.stats.parser.DelegatedStatsParser;
 import net.apnic.rdap.util.ConcurrentUtil;
@@ -44,10 +45,6 @@ public class DelegatedStatsScraper
         }
     }
 
-    private static final String FTP_SCHEME = "ftp";
-    private static final String HTTP_SCHEME = "http";
-    private static final String HTTPS_SCHEME = "https";
-
     private HttpHeaders requestHeaders = null;
     private AsyncRestTemplate restClient = null;
     private SupportedScheme statsScheme = null;
@@ -77,6 +74,10 @@ public class DelegatedStatsScraper
         this(new URI(statsURI));
     }
 
+    private void handleAutnumRecord(AsnRecord record)
+    {
+    }
+
     private CompletableFuture<InputStream> makeDelegatedHttpRequest()
     {
         HttpEntity<Resource> entity = new HttpEntity<Resource>(requestHeaders);
@@ -101,13 +102,13 @@ public class DelegatedStatsScraper
 
     private void processStatsInput(InputStream iStream)
     {
-        /*try
+        try
         {
-            //statsParser.parse(iStream);
+            DelegatedStatsParser.parse(iStream, this::handleAutnumRecord, null, null);
         }
         catch(DelegatedStatsException ex)
         {
-        }*/
+        }
     }
 
     private void setupRequestHeaders()
@@ -117,7 +118,8 @@ public class DelegatedStatsScraper
         requestHeaders.add(HttpHeaders.USER_AGENT, "");
     }
 
-    public void start()
+    @Override
+    public CompletableFuture<Void> start()
     {
         CompletableFuture<InputStream> request = null;
 
@@ -127,7 +129,7 @@ public class DelegatedStatsScraper
             request = makeDelegatedHttpRequest();
         }
 
-        request
+        return request
             .thenAccept((InputStream iStream) ->
             {
                 processStatsInput(iStream);

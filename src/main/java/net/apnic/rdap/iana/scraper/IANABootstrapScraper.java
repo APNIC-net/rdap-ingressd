@@ -33,11 +33,17 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
 /**
+ * Scraper for IANA bootstrap service.
  *
+ * @see RFC 7484
  */
 public class IANABootstrapScraper
     implements Scraper
 {
+    /**
+     * Lambda callback signature for mapping if authorities on to discovered
+     * bootstrap results.
+     */
     private interface ResourceMapper
     {
         public void process(RDAPAuthority authority, BootstrapService service);
@@ -93,17 +99,31 @@ public class IANABootstrapScraper
         }
     }
 
+    /**
+     * Constructor for creating an IANA bootstrap scraper.
+     *
+     * @param authorityStore Store to find authorities
+     * @param asnStore Store for emplacing asn resource mappings
+     * @param domainStore Store for emplacing domain resource mappings
+     * @param ipStore Store for emplacing ip resource mappings
+     */
     public IANABootstrapScraper(RDAPAuthorityStore authorityStore,
                                 ResourceStore<AsnRange> asnStore,
+                                ResourceStore<Domain> domainStore,
                                 ResourceStore<IpRange> ipStore)
     {
         this.authorityStore = authorityStore;
         this.asnStore = asnStore;
+        this.domainStore = domainStore;
         this.ipStore = ipStore;
         restClient = new AsyncRestTemplate();
         setupRequestHeaders();
     }
 
+    /**
+     * Sets up common HTTP headers used in every request to the IANA bootstrap
+     * service.
+     */
     private void setupRequestHeaders()
     {
         requestHeaders = new HttpHeaders();
@@ -111,12 +131,18 @@ public class IANABootstrapScraper
         requestHeaders.add(HttpHeaders.USER_AGENT, "");
     }
 
+    /**
+     * Main scraper method that quicks off a one time scrape of IANA.
+     *
+     * This method is trigger by a scraper scheduler.
+     *
+     * @see net.apnic.rdap.scraper.ScraperScheduler
+     */
     @Override
-    public void start()
+    public CompletableFuture<Void> start()
     {
-        CompletableFuture.allOf(updateASNData(), updateDomainData(),
-                                updateIPv4Data(), updateIPv6Data())
-            .exceptionally((T) -> {System.out.println(T); T.printStackTrace(); return null;});
+        return CompletableFuture.allOf(updateASNData(), updateDomainData(),
+                                       updateIPv4Data(), updateIPv6Data());
     }
 
     private CompletableFuture<ResponseEntity<JsonNode>>

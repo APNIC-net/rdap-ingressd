@@ -21,9 +21,10 @@ public class IANAConfiguration
     @Autowired
     public IANABootstrapScraper ianaScraper(RDAPAuthorityStore authorityStore,
                                             ResourceStore<AsnRange> autnumStore,
+                                            ResourceStore<Domain> domainStore,
                                             ResourceStore<IpRange> ipStore)
     {
         return new IANABootstrapScraper(authorityStore, autnumStore,
-                                        ipStore);
+                                        domainStore, ipStore);
     }
 }

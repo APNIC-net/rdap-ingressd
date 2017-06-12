@@ -1,6 +1,8 @@
 package net.apnic.rdap.scraper;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface Scraper
 {
-    public void start();
+    public CompletableFuture<Void> start();
 }

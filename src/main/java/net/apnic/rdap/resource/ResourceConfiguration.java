@@ -44,6 +44,12 @@ public class ResourceConfiguration
     }
 
     @Bean
+    public ResourceStore<Domain> domainResourceStore()
+    {
+        return domainResourceLocator;
+    }
+
+    @Bean
     public ResourceLocator<Entity> entityResourceLocator()
     {
         return new StaticResourceLocator<Entity>();
