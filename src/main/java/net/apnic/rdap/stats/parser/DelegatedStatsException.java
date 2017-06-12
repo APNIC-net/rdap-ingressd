@@ -17,4 +17,15 @@ public class DelegatedStatsException
     {
         super(message);
     }
+
+    /**
+     * Constructs an exception with the context of another throwable.
+     *
+     * @param ex Throwable to construct from
+     * @see java.lang.Exception
+     */
+    public DelegatedStatsException(Throwable ex)
+    {
+        super(ex);
+    }
 }

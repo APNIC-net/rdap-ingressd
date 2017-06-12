@@ -25,14 +25,14 @@ public class Header
     {
         if(fits(record) == false)
         {
-            throw new IllegalArugmentException("Not a header record");
+            throw new IllegalArgumentException("Not a header record");
         }
 
         this.version = record.get(0);
     }
 
     /**
-     * Checks a given CSVRecord to see if it contains a delegated stats header.
+     * Checks a given CSVRecord to confirm if it's a valid summary record.
      *
      * @param record CSVRecord to check
      * @return True if record is a header
@@ -45,7 +45,7 @@ public class Header
     /**
      * Returns the version contained in the header.
      *
-     * @return version string
+     * @return version String
      */
     public String getVersion()
     {

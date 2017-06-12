@@ -12,7 +12,6 @@ public class IPv4Record
 
     public static boolean fits(CSVRecord record)
     {
-        return record.size() == DEFAULT_RECORD_SIZE &&
-               record.get(2).equals("ipv4");
+        return Resource.fits(record) && record.get(2).equals("ipv4");
     }
 }

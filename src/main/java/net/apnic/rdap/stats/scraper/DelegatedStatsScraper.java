@@ -50,7 +50,6 @@ public class DelegatedStatsScraper
 
     private HttpHeaders requestHeaders = null;
     private AsyncRestTemplate restClient = null;
-    private DelegatedStatsParser statsParser = null;
     private SupportedScheme statsScheme = null;
     private URI statsURI = null;
 
@@ -68,7 +67,6 @@ public class DelegatedStatsScraper
         }
 
         this.restClient = new AsyncRestTemplate();
-        this.statsParser = new DelegatedStatsParser();
         this.statsURI = statsURI;
         setupRequestHeaders();
     }
