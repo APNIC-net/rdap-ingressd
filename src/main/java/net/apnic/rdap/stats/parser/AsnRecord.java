@@ -28,7 +28,7 @@ public class AsnRecord
      * Takes a CSV record that represents a single autnum record for a delegated
      * stats file.
      *
-     * @param record CSVRecord that contains the header information
+     * @param record CSVRecord that contains the autnum information
      * @throws IllegalArgumentException If CSVRecord is not an autnum record
      */
     public AsnRecord(CSVRecord record)
