@@ -13,8 +13,6 @@ public class Header
     private String version;
 
     /**
-     * Default constructor.
-     *
      * Takes a CSV record that represents the header from a delegated stats
      * file.
      *
@@ -32,7 +30,7 @@ public class Header
     }
 
     /**
-     * Checks a given CSVRecord to confirm if it's a valid summary record.
+     * Checks a given CSVRecord to confirm if it's a valid header record.
      *
      * @param record CSVRecord to check
      * @return True if record is a header
