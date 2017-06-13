@@ -120,6 +120,11 @@ public class IANABootstrapScraper
         setupRequestHeaders();
     }
 
+    public String getName()
+    {
+        return "iana-bootstrap-scraper";
+    }
+
     /**
      * Sets up common HTTP headers used in every request to the IANA bootstrap
      * service.

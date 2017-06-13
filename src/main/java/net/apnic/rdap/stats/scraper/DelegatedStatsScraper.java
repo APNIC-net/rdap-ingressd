@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
-public class DelegatedStatsScraper
+public abstract class DelegatedStatsScraper
     implements Scraper
 {
     private enum SupportedScheme
