@@ -30,9 +30,12 @@ rdap:
         scrapers:
             iana:
                 enabled: true
+            nro:
+                enabled: true
         config:
             order:
                 - iana
+                - nro
 
 endpoints:
     enabled: false

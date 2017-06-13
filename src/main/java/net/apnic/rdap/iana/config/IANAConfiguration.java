@@ -13,6 +13,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration singleton for IANA scraping activities.
+ */
 @Configuration
 public class IANAConfiguration
 {
