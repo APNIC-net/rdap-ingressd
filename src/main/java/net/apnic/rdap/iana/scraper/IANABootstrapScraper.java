@@ -145,6 +145,15 @@ public class IANABootstrapScraper
                                        updateIPv4Data(), updateIPv6Data());
     }
 
+    /**
+     * Grunt work method that performs all bootstrap http requests and returns
+     * the servers http response.
+     *
+     * Assumes per the RFC that all requests are going to be GET.
+     *
+     * @param bootStrapURI The URI to call as apart of this request.
+     * @return Promise of the server response with a JSON body.
+     */
     private CompletableFuture<ResponseEntity<JsonNode>>
         makeBootstrapRequest(URI bootStrapURI)
     {
@@ -156,6 +165,10 @@ public class IANABootstrapScraper
         return ConcurrentUtil.buildCompletableFuture(lFuture);
     }
 
+    /**
+     * Parses the results from any bootstrap request calling the provided
+     * mapping
+     */
     private void parseBootstrapResults(JsonNode bootstrapData,
                                        ResourceMapper mapper)
     {
@@ -212,6 +225,11 @@ public class IANABootstrapScraper
         }
     }
 
+    /**
+     * Drives the main update cycle for asn bootstrap results.
+     *
+     * @return Promise that's complete when an IANA asn update has complete
+     */
     private CompletableFuture<Void> updateASNData()
     {
         return makeBootstrapRequest(ASN_URI)
@@ -229,6 +247,11 @@ public class IANABootstrapScraper
             });
     }
 
+    /**
+     * Drives the main update cycle for domain bootstrap results
+     *
+     * @return Promise that's complete when an IANA domain update has complete
+     */
     private CompletableFuture<Void> updateDomainData()
     {
         return makeBootstrapRequest(DOMAIN_URI)
@@ -241,6 +264,13 @@ public class IANABootstrapScraper
             });
     }
 
+    /**
+     * Utility method that shares the same logic for driving all ip address
+     * updates.
+     *
+     * @param ipBootstrapURI The URI for the ip bootstrap data to process
+     * @return Promise that's complete when an IANA ip update has complete
+     */
     private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI)
     {
         return makeBootstrapRequest(ipBootstrapURI)
@@ -258,11 +288,23 @@ public class IANABootstrapScraper
             });
     }
 
+    /**
+     * Drives the main update cycle for ipv4 bootstrap results.
+     *
+     * Proxies through to updateIPAllData()
+     * @return Promise that's complete when an IANA ipv4 update has complete
+     */
     private CompletableFuture<Void> updateIPv4Data()
     {
         return updateIPAllData(IPV4_URI);
     }
 
+    /**
+     * Drives the main update cycle for ipv6 bootstrap results.
+     *
+     * Proxies through to updateIPAllData()
+     * @return Promise that's complete when an IANA ipv6 update has complete
+     */
     private CompletableFuture<Void> updateIPv6Data()
     {
         return updateIPAllData(IPV6_URI);
