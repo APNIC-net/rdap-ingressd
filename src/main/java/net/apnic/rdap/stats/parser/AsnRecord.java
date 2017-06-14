@@ -60,7 +60,7 @@ public class AsnRecord
     public AsnRange toAsnRange()
     {
         long asnStart = Long.parseLong(getStart());
-        int value = Integer.parseInt(getValue());
+        long value = Long.parseLong(getValue());
         long asnEnd = asnStart + --value;
 
         return AsnRange.parse(String.format("%d%s%d", asnStart,
