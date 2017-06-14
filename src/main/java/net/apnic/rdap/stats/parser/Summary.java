@@ -8,6 +8,9 @@ import org.apache.commons.csv.CSVRecord;
 public class Summary
     implements Line
 {
+    /**
+     * Enum representing the different types of summaries possible.
+     */
     public enum SummaryType
     {
         ASN("asn"),
@@ -21,9 +24,26 @@ public class Summary
             this.typeStr = typeStr;
         }
 
+        public String getValue()
+        {
+            return typeStr;
+        }
+
         public String toString()
         {
-            return this.typeStr;
+            return getValue();
+        }
+
+        public static SummaryType getEnum(String valueStr)
+        {
+            for(SummaryType type : values())
+            {
+                if(type.getValue().equals(valueStr))
+                {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("No SummaryType for value");
         }
     }
 
@@ -60,8 +80,8 @@ public class Summary
             throw new IllegalArgumentException("Not a summary record");
         }
 
-        this.noRecords = Integer.parseInt(record.get(5));
-        this.type = SummaryType.valueOf(record.get(2));
+        this.noRecords = Integer.parseInt(record.get(4));
+        this.type = SummaryType.getEnum(record.get(2));
     }
 
     /**

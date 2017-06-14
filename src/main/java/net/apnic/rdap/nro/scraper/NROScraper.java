@@ -5,7 +5,12 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.apnic.rdap.autnum.AsnRange;
+import net.apnic.rdap.authority.RDAPAuthorityStore;
+import net.apnic.rdap.resource.ResourceStore;
 import net.apnic.rdap.stats.scraper.DelegatedStatsScraper;
+
+import net.ripe.ipresource.IpRange;
 
 /**
  * Scraper for NRO delegated stats
@@ -36,9 +41,11 @@ public class NROScraper
         }
     }
 
-    public NROScraper()
+    public NROScraper(RDAPAuthorityStore authorityStore,
+                      ResourceStore<AsnRange> asnStore,
+                      ResourceStore<IpRange> ipStore)
     {
-        super(NRO_STATS_URI);
+        super(NRO_STATS_URI, authorityStore, asnStore, ipStore);
     }
 
     public String getName()

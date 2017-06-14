@@ -120,6 +120,10 @@ public class IANABootstrapScraper
         setupRequestHeaders();
     }
 
+    /**
+     * {@inheritDocs}
+     */
+    @Override
     public String getName()
     {
         return "iana-bootstrap-scraper";

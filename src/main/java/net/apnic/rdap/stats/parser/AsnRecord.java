@@ -8,7 +8,7 @@ import org.apache.commons.csv.CSVRecord;
  * Represents a single autnum record in a delegated stats file.
  */
 public class AsnRecord
-    extends Resource
+    extends ResourceRecord
 {
     public static final String ASN_TYPE = "asn";
 
@@ -49,7 +49,7 @@ public class AsnRecord
      */
     public static boolean fits(CSVRecord record)
     {
-        return Resource.fits(record) && record.get(2).equals(ASN_TYPE);
+        return ResourceRecord.fits(record) && record.get(2).equals(ASN_TYPE);
     }
 
     /**
@@ -59,9 +59,9 @@ public class AsnRecord
      */
     public AsnRange toAsnRange()
     {
-        int asnStart = Integer.parseInt(getStart());
+        long asnStart = Long.parseLong(getStart());
         int value = Integer.parseInt(getValue());
-        int asnEnd = asnStart + --value;
+        long asnEnd = asnStart + --value;
 
         return AsnRange.parse(String.format("%d%s%d", asnStart,
                                             AsnRange.ASN_RANGE_SEPARATOR,

@@ -8,11 +8,19 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.Scanner;
 
+import net.apnic.rdap.authority.RDAPAuthority;
+import net.apnic.rdap.authority.RDAPAuthorityStore;
+import net.apnic.rdap.autnum.AsnRange;
+import net.apnic.rdap.resource.ResourceStore;
 import net.apnic.rdap.scraper.Scraper;
 import net.apnic.rdap.stats.parser.AsnRecord;
 import net.apnic.rdap.stats.parser.DelegatedStatsException;
 import net.apnic.rdap.stats.parser.DelegatedStatsParser;
+import net.apnic.rdap.stats.parser.IPRecord;
+import net.apnic.rdap.stats.parser.ResourceRecord;
 import net.apnic.rdap.util.ConcurrentUtil;
+
+import net.ripe.ipresource.IpRange;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -23,9 +31,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
+/**
+ * Abstract scraper for fetching delegated stats files and parsing the results.
+ */
 public abstract class DelegatedStatsScraper
     implements Scraper
 {
+    /**
+     * Enum contains the supported schemas that can be used as a delegated stats
+     * URI.
+     */
     private enum SupportedScheme
     {
         HTTP("http"),
@@ -45,12 +60,28 @@ public abstract class DelegatedStatsScraper
         }
     }
 
+    private ResourceStore<AsnRange> asnStore = null;
+    private RDAPAuthorityStore authorityStore = null;
+    private ResourceStore<IpRange> ipStore = null;
     private HttpHeaders requestHeaders = null;
     private AsyncRestTemplate restClient = null;
     private SupportedScheme statsScheme = null;
     private URI statsURI = null;
 
-    public DelegatedStatsScraper(URI statsURI)
+    /**
+     * Construct initialises this DelegatedStatsScraper with an already
+     * validated URI.
+     *
+     * The supplied statsURI must have a scheme that is in SupportedScheme.
+     *
+     * @param statsURI URI to fetch delegated stats from
+     * @throws IllegalArgumentException Thrown when the URI scheme is not
+     *                                  supported.
+     */
+    public DelegatedStatsScraper(URI statsURI,
+                                 RDAPAuthorityStore authorityStore,
+                                 ResourceStore<AsnRange> asnStore,
+                                 ResourceStore<IpRange> ipStore)
     {
         try
         {
@@ -63,21 +94,61 @@ public abstract class DelegatedStatsScraper
             throw new IllegalArgumentException("Non support scheme for URI");
         }
 
+        this.asnStore = asnStore;
+        this.authorityStore = authorityStore;
+        this.ipStore = ipStore;
         this.restClient = new AsyncRestTemplate();
         this.statsURI = statsURI;
         setupRequestHeaders();
     }
 
-    public DelegatedStatsScraper(String statsURI)
+    /**
+     * Proxy constructor for DelegatedStatsScraper(URI).
+     *
+     * Constructs a new URI object from the provided string.
+     *
+     * @param statsURI URI to fetch delegated stats from
+     * @throws URISyntaxException Then a URI object cannot be constructed from
+     *                            statsURI
+     * @see DelegatedStatsScraper(URI statsURI)
+     */
+    public DelegatedStatsScraper(String statsURI,
+                                 RDAPAuthorityStore authorityStore,
+                                 ResourceStore<AsnRange> asnStore,
+                                 ResourceStore<IpRange> ipStore)
         throws URISyntaxException
     {
-        this(new URI(statsURI));
+        this(new URI(statsURI), authorityStore, asnStore, ipStore);
     }
 
     private void handleAutnumRecord(AsnRecord record)
     {
+        handleGenericRecord(record, record.toAsnRange(), asnStore);
     }
 
+    private <T> void handleGenericRecord(ResourceRecord resourceRecord,
+                                         T resource,
+                                         ResourceStore<T> resourceStore)
+    {
+        RDAPAuthority authority =
+            authorityStore.findAuthority(resourceRecord.getRegistry());
+
+        if(authority == null)
+        {
+            authority = new RDAPAuthority(resourceRecord.getRegistry());
+        }
+
+        resourceStore.putResourceMapping(resource, authority);
+    }
+
+    private void handleIPRecord(IPRecord record)
+    {
+        handleGenericRecord(record, record.toIPRange(), ipStore);
+    }
+
+    /**
+     *
+     */
     private CompletableFuture<InputStream> makeDelegatedHttpRequest()
     {
         HttpEntity<Resource> entity = new HttpEntity<Resource>(requestHeaders);
@@ -100,17 +171,10 @@ public abstract class DelegatedStatsScraper
             });
     }
 
-    private void processStatsInput(InputStream iStream)
-    {
-        try
-        {
-            DelegatedStatsParser.parse(iStream, this::handleAutnumRecord, null, null);
-        }
-        catch(DelegatedStatsException ex)
-        {
-        }
-    }
-
+    /**
+     * Initialises and creates a common headers object that is used for all
+     * HTTP delegated stats requests.
+     */
     private void setupRequestHeaders()
     {
         requestHeaders = new HttpHeaders();
@@ -118,6 +182,9 @@ public abstract class DelegatedStatsScraper
         requestHeaders.add(HttpHeaders.USER_AGENT, "");
     }
 
+    /**
+     * {@inheritDocs}
+     */
     @Override
     public CompletableFuture<Void> start()
     {
@@ -132,7 +199,17 @@ public abstract class DelegatedStatsScraper
         return request
             .thenAccept((InputStream iStream) ->
             {
-                processStatsInput(iStream);
+                try
+                {
+                    DelegatedStatsParser.parse(iStream,
+                                               this::handleAutnumRecord,
+                                               this::handleIPRecord,
+                                               this::handleIPRecord);
+                }
+                catch(Exception ex)
+                {
+                    throw new RuntimeException(ex);
+                }
             });
     }
 }

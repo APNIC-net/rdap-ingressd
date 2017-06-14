@@ -2,7 +2,7 @@ package net.apnic.rdap.stats.parser;
 
 import org.apache.commons.csv.CSVRecord;
 
-public abstract class Resource
+public abstract class ResourceRecord
     implements Line
 {
     static final int MIN_RECORD_SIZE = 7;
@@ -13,7 +13,8 @@ public abstract class Resource
     String type = null;
     String value = null;
 
-    public Resource(String registry, String type, String start, String value)
+    public ResourceRecord(String registry, String type, String start,
+                          String value)
     {
         this.registry = registry;
         this.start = start;
@@ -21,7 +22,7 @@ public abstract class Resource
         this.value = value;
     }
 
-    public Resource(CSVRecord record)
+    public ResourceRecord(CSVRecord record)
     {
         if(fits(record) == false)
         {

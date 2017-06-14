@@ -15,7 +15,7 @@ public class DelegatedStatsParser
     /**
      * Interface for passing handlers for specific resources to the parser.
      */
-    public interface RecordHandler<T extends Resource>
+    public interface RecordHandler<T extends ResourceRecord>
     {
         public void handleRecord(T resource);
     }
@@ -62,8 +62,12 @@ public class DelegatedStatsParser
         Header header = null;
         ParserAnalytics analytics = new ParserAnalytics();
 
+        // For every CSV row we need to parse it and figure out whats in the
+        // row.
         for(CSVRecord record : records)
         {
+            // If this is a header line. If more than one is encounted than
+            // we need to throw an error as the file is in a bad state.
             if(Header.fits(record))
             {
                 if(header != null)
