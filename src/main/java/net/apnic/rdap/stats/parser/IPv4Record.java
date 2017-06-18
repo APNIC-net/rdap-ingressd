@@ -50,9 +50,9 @@ public class IPv4Record
     @Override
     public IpRange toIPRange()
     {
-        int intValue = Integer.parseInt(getValue()) - 1;
-        IpAddress addressStart = IpAddress.parse(getStart());
-        IpAddress addressEnd = new Ipv4Address(addressStart.getValue().add(BigInteger.valueOf(intValue)));
+        long value = Long.parseLong(getValue()) - 1;
+        Ipv4Address addressStart = Ipv4Address.parse(getStart());
+        Ipv4Address addressEnd = new Ipv4Address(addressStart.longValue() + value);
 
         return IpRange.range(addressStart, addressEnd);
     }

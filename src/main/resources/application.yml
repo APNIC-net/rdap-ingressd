@@ -54,31 +54,19 @@ zuul:
     routes:
         autnum:
             path: /autnum/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         domain:
             path: /domain/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         entity:
             path: /entity/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         help:
             path: /help
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         ip:
             path: /ip/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         nameserver:
             path: /nameserver/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
