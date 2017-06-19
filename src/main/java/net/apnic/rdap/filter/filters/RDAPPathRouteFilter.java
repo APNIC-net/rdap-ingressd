@@ -3,7 +3,7 @@ package net.apnic.rdap.filter.filters;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.ZuulFilter;
 
-import java.net.URL;
+import java.net.URI;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.error.MalformedRequestException;
@@ -51,7 +51,13 @@ public abstract class RDAPPathRouteFilter
         try
         {
             RDAPAuthority authority = runRDAPFilter(path);
-            context.setRouteHost(authority.getServers().get(0).toURL());
+
+            URI serverURI = authority.getDefaultServerURI();
+            if(serverURI == null)
+            {
+                throw new ResourceNotFoundException();
+            }
+            context.setRouteHost(serverURI.toURL());
         }
         catch(ResourceNotFoundException ex)
         {

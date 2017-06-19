@@ -12,9 +12,12 @@ import java.util.UUID;
  */
 public class RDAPAuthority
 {
+    private static final String BEST_SCHEME = "https";
+
     private List<String> aliases = new ArrayList<String>();
     private String name;
     private List<URI> servers = new ArrayList<URI>();
+    private URI defaultServerURI = null;
 
     /**
      * Constructs a new authority with the given name.
@@ -149,6 +152,26 @@ public class RDAPAuthority
         return aliases;
     }
 
+    /**
+     * Returns whats is considered the best URI to use for this RDAPAuthority.
+     *
+     * @return Best URI to communicate with this server on.
+     */
+    public URI getDefaultServerURI()
+    {
+        if(defaultServerURI == null)
+        {
+            for(URI serverURI : servers)
+            {
+                defaultServerURI = serverURI;
+                if(serverURI.getScheme().equals(BEST_SCHEME))
+                {
+                    break;
+                }
+            }
+        }
+        return defaultServerURI;
+    }
 
     /**
      * Returns the name for this authority.
