@@ -49,34 +49,48 @@ public class RDAPRequestPath
                 "requestPath does not have enough fields");
         }
 
-        setRequestType();
+        requestType = RDAPRequestType.getEnum(pathParts[0]);
     }
 
     /**
+     * Static construction method for making new RDAPRequestPath objects.
      *
+     * @param requestPath Request path to use for the new RDAPRequestPath
+     * @see RDAPRequestPath()
      */
     public static RDAPRequestPath createRequestPath(String requestPath)
     {
         return new RDAPRequestPath(requestPath);
     }
 
-    public String getPath()
+    /**
+     * Returns the request path that this object was constructed with.
+     *
+     * @return Request path used in this object
+     */
+    public String getRequestPath()
     {
         return requestPath;
     }
 
+    /**
+     * Returns all parameters for this path segment
+     *
+     * @return Parameters in path segment
+     */
     public String[] getRequestParams()
     {
-        return Arrays.copyOfRange(pathParts, 2, pathParts.length);
+        return Arrays.copyOfRange(pathParts, 1, pathParts.length);
     }
 
+    /**
+     * The request type this object represents
+     *
+     * @return Request type for the supplied path segment
+     * @see RDAPRequestType
+     */
     public RDAPRequestType getRequestType()
     {
         return requestType;
-    }
-
-    private void setRequestType()
-    {
-        requestType = RDAPRequestType.getEnum(pathParts[0]);
     }
 }
