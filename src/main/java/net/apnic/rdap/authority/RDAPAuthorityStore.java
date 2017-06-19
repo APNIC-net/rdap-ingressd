@@ -51,6 +51,20 @@ public class RDAPAuthorityStore
     }
 
     /**
+     * Creates a new RDAPAuthority for the supplied name and adds it to this
+     * store.
+     *
+     * @param name The new authority name
+     * @param RDAPAuthority The newly create authority
+     */
+    public RDAPAuthority createAuthority(String name)
+    {
+        RDAPAuthority authority = new RDAPAuthority(name);
+        addAuthority(authority);
+        return authority;
+    }
+
+    /**
      * Finds the authority that is registered for the given name.
      *
      * The supplied name is trimmed and converted to lowercase before the
