@@ -13,7 +13,7 @@ import net.apnic.rdap.stats.scraper.DelegatedStatsScraper;
 import net.ripe.ipresource.IpRange;
 
 /**
- * Scraper for NRO delegated stats
+ * Scraper for NRO delegated stats.
  */
 public class NROScraper
     extends DelegatedStatsScraper
@@ -41,6 +41,15 @@ public class NROScraper
         }
     }
 
+    /**
+     * Takes the needed value to construct a valid delegated stats scraper.
+     *
+     * @param authorityStore Store for finding authorities while scraping
+     * @param asnStore Store for asn records to insert discovered resources in
+     *                 while scraping
+     * @param ipStore Store for ip records to insert discovered resources in
+     *                while scraping
+     */
     public NROScraper(RDAPAuthorityStore authorityStore,
                       ResourceStore<AsnRange> asnStore,
                       ResourceStore<IpRange> ipStore)
@@ -48,6 +57,10 @@ public class NROScraper
         super(NRO_STATS_URI, authorityStore, asnStore, ipStore);
     }
 
+    /**
+     * {@inheritDocs}
+     */
+    @Override
     public String getName()
     {
         return "nro-scraper";
