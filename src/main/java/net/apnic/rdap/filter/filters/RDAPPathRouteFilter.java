@@ -6,12 +6,17 @@ import com.netflix.zuul.ZuulFilter;
 import java.net.URL;
 
 import net.apnic.rdap.authority.RDAPAuthority;
+import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.config.RequestContextKeys;
 import net.apnic.rdap.filter.RDAPRequestPath;
 import net.apnic.rdap.filter.RDAPRequestType;
+import net.apnic.rdap.resource.ResourceNotFoundException;
 
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 
+/**
+ *
+ */
 public abstract class RDAPPathRouteFilter
     extends ZuulFilter
 {
@@ -43,21 +48,25 @@ public abstract class RDAPPathRouteFilter
         RDAPRequestPath path =
             (RDAPRequestPath)context.get(RequestContextKeys.RDAP_REQUEST_PATH);
 
-        RDAPAuthority authority = runRDAPFilter(path);
-
         try
         {
+            RDAPAuthority authority = runRDAPFilter(path);
             context.setRouteHost(authority.getServers().get(0).toURL());
+        }
+        catch(ResourceNotFoundException ex)
+        {
+            //TODO
         }
         catch(Exception ex)
         {
-            System.out.println("Exception caught");
+            throw new RuntimeException(ex);
         }
 
         return null;
     }
 
-    public abstract RDAPAuthority runRDAPFilter(RDAPRequestPath path);
+    public abstract RDAPAuthority runRDAPFilter(RDAPRequestPath path)
+        throws ResourceNotFoundException, MalformedRequestException;
 
     public abstract RDAPRequestType supportedRequestType();
 }
