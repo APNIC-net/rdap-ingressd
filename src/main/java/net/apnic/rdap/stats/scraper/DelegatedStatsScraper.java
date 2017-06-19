@@ -121,11 +121,27 @@ public abstract class DelegatedStatsScraper
         this(new URI(statsURI), authorityStore, asnStore, ipStore);
     }
 
+    /**
+     * Callback to handle a discovered autnum record from a delegated stats
+     * file.
+     *
+     * @param record Asn record from a delegated stats file.
+     */
     private void handleAutnumRecord(AsnRecord record)
     {
         handleGenericRecord(record, record.toAsnRange(), asnStore);
     }
 
+    /**
+     * Proxy function that is capable of taking a delegated stats record and
+     * inserting that record into a provided resource store.
+     *
+     * @param resourceRecord Resource record to handle
+     * @param resource The derived resource from a resourceRecord that gets
+     *                 inserted into the provided resourceStore
+     * @param resourceStore The Resource store to insert the resource into with
+     *                      the authority discovered through the resourceRecord
+     */
     private <T> void handleGenericRecord(ResourceRecord resourceRecord,
                                          T resource,
                                          ResourceStore<T> resourceStore)
@@ -135,19 +151,32 @@ public abstract class DelegatedStatsScraper
 
         if(authority == null)
         {
-            authority = new RDAPAuthority(resourceRecord.getRegistry());
+            authority = authorityStore.createAuthority(
+                resourceRecord.getRegistry());
         }
 
         resourceStore.putResourceMapping(resource, authority);
     }
 
+    /**
+     * Callback to handle a discovered ip record from a delegated stats
+     * file.
+     *
+     * @param record IP record from a delegated stats file.
+     */
     private void handleIPRecord(IPRecord record)
     {
         handleGenericRecord(record, record.toIPRange(), ipStore);
     }
 
     /**
+     * Function performs the heavy lifting for making a request for a delegated
+     * stats file from this classes URI.
      *
+     * Function is async and returns a future with a stream of the data returned
+     * from the request.
+     *
+     * @return Future containing a stream of the data recieved from the server
      */
     private CompletableFuture<InputStream> makeDelegatedHttpRequest()
     {
