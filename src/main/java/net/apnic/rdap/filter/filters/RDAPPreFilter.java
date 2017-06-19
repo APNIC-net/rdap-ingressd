@@ -8,6 +8,9 @@ import net.apnic.rdap.filter.RDAPRequestPath;
 
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 
+/**
+ *
+ */
 public class RDAPPreFilter
     extends ZuulFilter
 {
@@ -33,6 +36,7 @@ public class RDAPPreFilter
     public Object run()
     {
         RequestContext context = RequestContext.getCurrentContext();
+
         RDAPRequestPath path = RDAPRequestPath.createRequestPath(
                 context.getRequest().getRequestURI());
 
