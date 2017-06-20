@@ -22,6 +22,7 @@ public class IPRouteFilter
 
     public IPRouteFilter(ResourceLocator<IpRange> ipLocator)
     {
+        super(null);
         this.ipLocator = ipLocator;
     }
 

@@ -6,6 +6,7 @@ import com.netflix.zuul.ZuulFilter;
 import java.net.URI;
 
 import net.apnic.rdap.authority.RDAPAuthority;
+import net.apnic.rdap.directory.Directory;
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.config.RequestContextKeys;
 import net.apnic.rdap.filter.RDAPRequestPath;
@@ -20,6 +21,13 @@ import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 public abstract class RDAPPathRouteFilter
     extends ZuulFilter
 {
+    private Directory directory = null;
+
+    public RDAPPathRouteFilter(Directory directory)
+    {
+        this.directory = directory;
+    }
+
     @Override
     public int filterOrder()
     {
@@ -30,6 +38,11 @@ public abstract class RDAPPathRouteFilter
     public String filterType()
     {
         return FilterConstants.ROUTE_TYPE;
+    }
+
+    public Directory getDirectory()
+    {
+        return directory;
     }
 
     public boolean shouldFilter()
