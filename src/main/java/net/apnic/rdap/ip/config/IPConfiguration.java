@@ -1,9 +1,7 @@
 package net.apnic.rdap.ip.config;
 
+import net.apnic.rdap.directory.Directory;
 import net.apnic.rdap.ip.filters.IPRouteFilter;
-import net.apnic.rdap.resource.ResourceLocator;
-
-import net.ripe.ipresource.IpRange;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +12,8 @@ public class IPConfiguration
 {
     @Bean
     @Autowired
-    public IPRouteFilter ipRouteFilter(ResourceLocator<IpRange> ipLocator)
+    public IPRouteFilter ipRouteFilter(Directory directory)
     {
-        return new IPRouteFilter(ipLocator);
+        return new IPRouteFilter(directory);
     }
 }

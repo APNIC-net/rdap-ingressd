@@ -1,11 +1,11 @@
 package net.apnic.rdap.ip.filters;
 
 import net.apnic.rdap.authority.RDAPAuthority;
+import net.apnic.rdap.directory.Directory;
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.filters.RDAPPathRouteFilter;
 import net.apnic.rdap.filter.RDAPRequestPath;
 import net.apnic.rdap.filter.RDAPRequestType;
-import net.apnic.rdap.resource.ResourceLocator;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
 import net.ripe.ipresource.IpAddress;
@@ -18,12 +18,9 @@ import net.ripe.ipresource.IpResourceType;
 public class IPRouteFilter
     extends RDAPPathRouteFilter
 {
-    private ResourceLocator<IpRange> ipLocator;
-
-    public IPRouteFilter(ResourceLocator<IpRange> ipLocator)
+    public IPRouteFilter(Directory directory)
     {
-        super(null);
-        this.ipLocator = ipLocator;
+        super(directory);
     }
 
     @Override
@@ -50,7 +47,7 @@ public class IPRouteFilter
                 prefixLength = Integer.parseInt(args[1]);
             }
 
-            return ipLocator.authorityForResource(
+            return getDirectory().getIPAuthority(
                 IpRange.prefix(address, prefixLength));
         }
         catch(NumberFormatException ex)
