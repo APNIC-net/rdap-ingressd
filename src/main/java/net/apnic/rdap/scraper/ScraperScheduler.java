@@ -75,9 +75,22 @@ public class ScraperScheduler
         scrapers.add(scraper);
     }
 
+    /**
+     * Indicates if this scheduler has been started
+     *
+     * @return Scheduler has been started
+     */
+    public boolean hasStarted()
+    {
+        return started;
+    }
+
+    /**
+     * Starts the scheduler and associated scrapers
+     */
     public void start()
     {
-        if(started == true)
+        if(hasStarted())
         {
             return;
         }
