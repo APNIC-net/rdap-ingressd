@@ -1,42 +1,4 @@
 
-rdap:
-    authorities:
-        - name: apnic
-          servers:
-              - https://rdap.apnic.net
-              - http://rdap.apnic.net
-
-        - name: ripe
-          aliases:
-              - ripencc
-          servers:
-              - https://rdap.db.ripe.net/
-
-        - name: afrinic
-          servers:
-              - https://rdap.afrinic.net/rdap/
-              - http://rdap.afrinic.net/rdap/
-
-        - name: arin
-          servers:
-              - https://rdap.arin.net/registry
-              - http://rdap.arin.net/registry
-
-        - name: lacnic
-          servers:
-              - https://rdap.lacnic.net/rdap/
-
-    scraping:
-        scrapers:
-            iana:
-                enabled: true
-            nro:
-                enabled: true
-        config:
-            order:
-                - iana
-                - nro
-
 endpoints:
     enabled: false
     pause:
@@ -70,3 +32,5 @@ zuul:
         nameserver:
             path: /nameserver/**
             stripPrefix: false
+
+spring.profiles.include: 'rdap'
