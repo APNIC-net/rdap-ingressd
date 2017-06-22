@@ -76,3 +76,11 @@ docker run -p 8080:8080 apnic/rdap-ingressd
 
 See the [deploy](deploy.md) documentation for more detailed instructions on
 deploying the Docker image.
+
+# Validating
+To validate that *rdap-ingressd* is working an RDAP query can be issued against
+the service:
+
+```
+curl -X GET http://localhost:8080
+```
