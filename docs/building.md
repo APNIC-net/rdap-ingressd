@@ -62,14 +62,17 @@ Where <version> is the version of the project that has been checkout with git.
 Use the following command to build a docker image of *rdap-ingressd*
 
 ```
-docker build . -t rdap-ingressd
+docker build . -t apnic/rdap-ingressd
 ```
 
 ## Running
 The created docker image can now be executed with the following:
 
 ```
-docker run -p 8080:8080 rdap-ingressd
+docker run -p 8080:8080 apnic/rdap-ingressd
 ```
 
 *rdap-ingressd* is now listening and available on port 8080.
+
+See the [deploy](deploy.md) documentation for more detailed instructions on
+deploying the Docker image.
