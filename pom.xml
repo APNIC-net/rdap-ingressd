@@ -96,6 +96,13 @@
                 </includes>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
         </resources>
 
         <plugins>
