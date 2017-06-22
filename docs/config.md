@@ -4,8 +4,8 @@ in *rdap-ingressd*
 
 # Configuration File
 *rdap-ingressd* is configured through a yaml file by the name of
-*application-rdap.yml* with a static starting point located at
-```src/main/resource/application-rdap.yml```
+*application-rdap.yml* with a static starting point for creating the file
+located at ```src/main/resource/application-rdap.yml```
 
 or
 
@@ -42,13 +42,20 @@ rdap:
           servers:
               - https://rdap.lacnic.net/rdap/
 
-    craping:
+    scraping:
         scrapers:
+            # Individual scrapers available in rdap-ingressd can be enabled and
+            # disabled
             iana:
                 enabled: true
             nro:
                 enabled: true
         config:
+            # Order in which scrapers are run
             order:
                 - iana
                 - nro
+```
+
+To configure *rdap-ingressd* at runtime it's necessary to create a config file
+that can be given to the application. See [deploy](deploy.md) documentation.
