@@ -4,6 +4,7 @@ import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.ZuulFilter;
 
 import java.net.URI;
+import java.net.URL;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.directory.Directory;
@@ -22,6 +23,7 @@ public abstract class RDAPPathRouteFilter
     extends ZuulFilter
 {
     private Directory directory = null;
+    private RDAPRequestPath rdapRequestPath = null;
 
     public RDAPPathRouteFilter(Directory directory)
     {
@@ -45,12 +47,24 @@ public abstract class RDAPPathRouteFilter
         return directory;
     }
 
+    public RDAPRequestPath getRDAPRequestPath()
+    {
+        if(rdapRequestPath == null)
+        {
+            RequestContext context = RequestContext.getCurrentContext();
+            rdapRequestPath = (RDAPRequestPath)
+                context.get(RequestContextKeys.RDAP_REQUEST_PATH);
+        }
+        return rdapRequestPath;
+    }
+
     public boolean shouldFilter()
     {
-        RequestContext context = RequestContext.getCurrentContext();
-        RDAPRequestPath path =
-            (RDAPRequestPath)context.get(RequestContextKeys.RDAP_REQUEST_PATH);
-
+        RDAPRequestPath path = getRDAPRequestPath();
+        if(path == null)
+        {
+            return false;
+        }
         return supportedRequestType() == path.getRequestType();
     }
 
@@ -58,8 +72,7 @@ public abstract class RDAPPathRouteFilter
     public Object run()
     {
         RequestContext context = RequestContext.getCurrentContext();
-        RDAPRequestPath path =
-            (RDAPRequestPath)context.get(RequestContextKeys.RDAP_REQUEST_PATH);
+        RDAPRequestPath path = getRDAPRequestPath();
 
         try
         {
@@ -70,7 +83,16 @@ public abstract class RDAPPathRouteFilter
             {
                 throw new ResourceNotFoundException();
             }
-            context.setRouteHost(serverURI.toURL());
+
+            if(authority.getRoutingAction() == RDAPAuthority.RoutingAction.REDIRECT)
+            {
+                context.unset();
+                context.getResponse().sendRedirect(serverURI.resolve(path.getRequestPath()).toString());
+            }
+            else
+            {
+                context.setRouteHost(serverURI.toURL());
+            }
         }
         catch(ResourceNotFoundException ex)
         {

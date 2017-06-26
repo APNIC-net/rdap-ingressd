@@ -26,6 +26,10 @@ rdap:
           servers:
               - https://rdap.lacnic.net/rdap/
 
+    routing:
+      defaultAction: redirect
+      master: apnic
+
     scraping:
         scrapers:
             iana:

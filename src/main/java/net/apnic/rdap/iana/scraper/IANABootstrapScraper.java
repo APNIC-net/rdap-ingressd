@@ -218,9 +218,8 @@ public class IANABootstrapScraper
 
             if(authority == null)
             {
-                authority = RDAPAuthority.createAnonymousAuthority();
+                authority = authorityStore.createAnonymousAuthority();
                 authority.addServers(serviceURIs);
-                authorityStore.addAuthority(authority);
             }
 
             try

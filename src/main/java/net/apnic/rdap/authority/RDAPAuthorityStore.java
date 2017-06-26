@@ -12,6 +12,8 @@ import java.util.List;
 public class RDAPAuthorityStore
 {
     private HashMap<String, RDAPAuthority> authoritiesMap = new HashMap<>();
+    private RDAPAuthority.RoutingAction defaultRoutingAction =
+        RDAPAuthority.RoutingAction.REDIRECT;
     private HashMap<URI, RDAPAuthority> serverMap = new HashMap<>();
 
     /**
@@ -50,6 +52,14 @@ public class RDAPAuthorityStore
         }
     }
 
+    public RDAPAuthority createAnonymousAuthority()
+    {
+        RDAPAuthority authority = RDAPAuthority.createAnonymousAuthority(
+            getDefaultRoutingAction());
+        addAuthority(authority);
+        return authority;
+    }
+
     /**
      * Creates a new RDAPAuthority for the supplied name and adds it to this
      * store.
@@ -59,7 +69,8 @@ public class RDAPAuthorityStore
      */
     public RDAPAuthority createAuthority(String name)
     {
-        RDAPAuthority authority = new RDAPAuthority(name);
+        RDAPAuthority authority = new RDAPAuthority(name,
+                                                    getDefaultRoutingAction());
         addAuthority(authority);
         return authority;
     }
@@ -95,5 +106,10 @@ public class RDAPAuthorityStore
             }
         }
         return authority;
+    }
+
+    public RDAPAuthority.RoutingAction getDefaultRoutingAction()
+    {
+        return defaultRoutingAction;
     }
 }

@@ -12,12 +12,48 @@ import java.util.UUID;
  */
 public class RDAPAuthority
 {
+    public static enum RoutingAction
+    {
+        PROXY("proxy"),
+        REDIRECT("redirect");
+
+        private String value = null;
+
+        private RoutingAction(String value)
+        {
+            this.value = value;
+        }
+
+        public static RoutingAction getEnum(String valueStr)
+        {
+            for(RoutingAction type : values())
+            {
+                if(type.getValue().equals(valueStr))
+                {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("No RoutingType for value");
+        }
+
+        public String getValue()
+        {
+            return value;
+        }
+
+        public String toString()
+        {
+            return getValue();
+        }
+    };
+
     private static final String BEST_SCHEME = "https";
 
     private List<String> aliases = new ArrayList<String>();
-    private String name;
-    private List<URI> servers = new ArrayList<URI>();
     private URI defaultServerURI = null;
+    private String name;
+    private RoutingAction routingAction = null;
+    private List<URI> servers = new ArrayList<URI>();
 
     /**
      * Constructs a new authority with the given name.
@@ -27,7 +63,7 @@ public class RDAPAuthority
      * @param name Unique name to represent this authrotiy
      * @throws IllegalArgumentException When name is null or trim().emtpy()
      */
-    public RDAPAuthority(String name)
+    public RDAPAuthority(String name, RoutingAction routingAction)
         throws IllegalArgumentException
     {
         if(name == null || name.trim().isEmpty())
@@ -36,6 +72,7 @@ public class RDAPAuthority
         }
 
         this.name = name.trim().toLowerCase();
+        this.routingAction = routingAction;
     }
 
     /**
@@ -115,9 +152,9 @@ public class RDAPAuthority
         }
     }
 
-    public static RDAPAuthority createAnonymousAuthority()
+    public static RDAPAuthority createAnonymousAuthority(RoutingAction routingAction)
     {
-        return new RDAPAuthority(UUID.randomUUID().toString());
+        return new RDAPAuthority(UUID.randomUUID().toString(), routingAction);
     }
 
     /**
@@ -181,6 +218,16 @@ public class RDAPAuthority
     public String getName()
     {
         return this.name;
+    }
+
+    /**
+     * Returns teh routing action for this authority.
+     *
+     * @return RoutingAction for this authority
+     */
+    public RoutingAction getRoutingAction()
+    {
+        return routingAction;
     }
 
     /**
