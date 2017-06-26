@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URL;
 
 import net.apnic.rdap.authority.RDAPAuthority;
+import net.apnic.rdap.authority.routing.RoutingAction;
 import net.apnic.rdap.directory.Directory;
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.config.RequestContextKeys;
@@ -84,7 +85,7 @@ public abstract class RDAPPathRouteFilter
                 throw new ResourceNotFoundException();
             }
 
-            if(authority.getRoutingAction() == RDAPAuthority.RoutingAction.REDIRECT)
+            if(authority.getRoutingAction() == RoutingAction.REDIRECT)
             {
                 context.unset();
                 context.getResponse().sendRedirect(serverURI.resolve(path.getRequestPath()).toString());

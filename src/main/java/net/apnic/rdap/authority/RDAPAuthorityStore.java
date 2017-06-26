@@ -1,5 +1,7 @@
 package net.apnic.rdap.authority;
 
+import net.apnic.rdap.authority.routing.RoutingAction;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -12,16 +14,8 @@ import java.util.List;
 public class RDAPAuthorityStore
 {
     private HashMap<String, RDAPAuthority> authoritiesMap = new HashMap<>();
-    private RDAPAuthority.RoutingAction defaultRoutingAction =
-        RDAPAuthority.RoutingAction.REDIRECT;
+    private RoutingAction defaultRoutingAction = RoutingAction.REDIRECT;
     private HashMap<URI, RDAPAuthority> serverMap = new HashMap<>();
-
-    /**
-     * Default constructor
-     */
-    public RDAPAuthorityStore()
-    {
-    }
 
     /**
      * Adds the supplied authority to this store.
@@ -69,8 +63,12 @@ public class RDAPAuthorityStore
      */
     public RDAPAuthority createAuthority(String name)
     {
-        RDAPAuthority authority = new RDAPAuthority(name,
-                                                    getDefaultRoutingAction());
+        return createAuthority(name, getDefaultRoutingAction());
+    }
+
+    public RDAPAuthority createAuthority(String name, RoutingAction action)
+    {
+        RDAPAuthority authority = new RDAPAuthority(name, action);
         addAuthority(authority);
         return authority;
     }
@@ -108,8 +106,13 @@ public class RDAPAuthorityStore
         return authority;
     }
 
-    public RDAPAuthority.RoutingAction getDefaultRoutingAction()
+    public RoutingAction getDefaultRoutingAction()
     {
         return defaultRoutingAction;
+    }
+
+    public void setDefaultRoutingAction(RoutingAction action)
+    {
+        this.defaultRoutingAction = action;
     }
 }

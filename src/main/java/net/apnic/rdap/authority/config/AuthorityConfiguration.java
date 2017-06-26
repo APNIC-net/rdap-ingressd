@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
+import net.apnic.rdap.authority.routing.RoutingAction;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,20 +18,16 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix="rdap")
-public class RDAPAuthorityConfiguration
+public class AuthorityConfiguration
 {
     private static final Logger LOGGER =
-        Logger.getLogger(RDAPAuthorityConfiguration.class.getName());
+        Logger.getLogger(AuthorityConfiguration.class.getName());
 
     public static class AuthorityConfig
     {
         private List<String> aliases;
         private String name;
         private List<String> servers;
-
-        public AuthorityConfig()
-        {
-        }
 
         public List<String> getAliases()
         {
@@ -63,8 +60,36 @@ public class RDAPAuthorityConfiguration
         }
     }
 
+    public static class RoutingConfig
+    {
+        private RoutingAction defaultAction;
+        private String masterAuthority;
+
+        public RoutingAction getDefaultAction()
+        {
+            return defaultAction;
+        }
+
+        public String getMasterAuthority()
+        {
+            return masterAuthority;
+        }
+
+        public void setDefaultAction(String defaultAction)
+        {
+            this.defaultAction =
+                RoutingAction.getEnum(defaultAction);
+        }
+
+        public void setMasterAuthority(String masterAuthority)
+        {
+            this.masterAuthority = masterAuthority;
+        }
+    }
+
     private List<AuthorityConfig> authorities;
     private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
+    private RoutingConfig routing;
 
     @Bean
     public RDAPAuthorityStore authorityStore()
@@ -97,12 +122,37 @@ public class RDAPAuthorityConfiguration
         return authorities;
     }
 
+    public void setRouting(RoutingConfig routing)
+    {
+        this.routing = routing;
+    }
+
+    public RoutingConfig getRouting()
+    {
+        return this.routing;
+    }
+
     private void setupAuthorityStore()
     {
+        if(routing.getDefaultAction() != null)
+        {
+            authorityStore().setDefaultRoutingAction(routing.getDefaultAction());
+        }
+
         for(AuthorityConfig aConfig : authorities)
         {
-            RDAPAuthority authority =
-                authorityStore().createAuthority(aConfig.getName());
+            RDAPAuthority authority = null;
+
+            if(aConfig.getName().equals(routing.getMasterAuthority()))
+            {
+                authority = authorityStore().createAuthority(aConfig.getName(),
+                                                             RoutingAction.PROXY);
+            }
+            else
+            {
+                authority = authorityStore().createAuthority(aConfig.getName());
+            }
+
             if(aConfig.getAliases() != null)
             {
                 authority.addAliases(aConfig.getAliases());

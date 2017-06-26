@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import net.apnic.rdap.authority.routing.RoutingAction;
+
 /**
  * Represents an entity and their authorative data RDAP server.
  *
@@ -12,41 +14,6 @@ import java.util.UUID;
  */
 public class RDAPAuthority
 {
-    public static enum RoutingAction
-    {
-        PROXY("proxy"),
-        REDIRECT("redirect");
-
-        private String value = null;
-
-        private RoutingAction(String value)
-        {
-            this.value = value;
-        }
-
-        public static RoutingAction getEnum(String valueStr)
-        {
-            for(RoutingAction type : values())
-            {
-                if(type.getValue().equals(valueStr))
-                {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("No RoutingType for value");
-        }
-
-        public String getValue()
-        {
-            return value;
-        }
-
-        public String toString()
-        {
-            return getValue();
-        }
-    };
-
     private static final String BEST_SCHEME = "https";
 
     private List<String> aliases = new ArrayList<String>();
