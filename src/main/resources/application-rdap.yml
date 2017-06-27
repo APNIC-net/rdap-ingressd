@@ -28,7 +28,7 @@ rdap:
 
     routing:
       defaultAction: redirect
-      masterAuthority: apnic
+      masterAuthority: null
 
     scraping:
         scrapers:
