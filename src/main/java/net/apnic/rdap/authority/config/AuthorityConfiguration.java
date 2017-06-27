@@ -16,6 +16,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Main configuration class for all authority related config properties and
+ * setup.
+ */
 @Configuration
 @ConfigurationProperties(prefix="rdap")
 public class AuthorityConfiguration
@@ -23,6 +27,10 @@ public class AuthorityConfiguration
     private static final Logger LOGGER =
         Logger.getLogger(AuthorityConfiguration.class.getName());
 
+    /**
+     * Class represents a single authority definition under rdap.authorities
+     * in the application-rdap.yml config file.
+     */
     public static class AuthorityConfig
     {
         private List<String> aliases;
@@ -60,6 +68,10 @@ public class AuthorityConfiguration
         }
     }
 
+    /**
+     * Class represents the config properties located under rdap.routing in the
+     * application-rdap.yml config file.
+     */
     public static class RoutingConfig
     {
         private RoutingAction defaultAction;
@@ -88,15 +100,22 @@ public class AuthorityConfiguration
     }
 
     private List<AuthorityConfig> authorities;
-    private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
+    //private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
     private RoutingConfig routing;
 
+    /**
+     * RDAPAuthorityStore bean used through the application
+     */
     @Bean
     public RDAPAuthorityStore authorityStore()
     {
-        return authorityStore;
+        return new RDAPAuthorityStore();
     }
 
+    /**
+     * Init method to process configuration after this class has been
+     * constructed.
+     */
     @PostConstruct
     public void init()
         throws Exception
@@ -112,26 +131,58 @@ public class AuthorityConfiguration
         }
     }
 
+    /**
+     * Sets a list of configuration authorities to process by this class.
+     *
+     * @param authorities List of configuration authorities
+     */
     public void setAuthorities(List<AuthorityConfig> authorities)
     {
         this.authorities = authorities;
     }
 
+    /**
+     * Returns a list configuration authorities in use by this class.
+     *
+     * It is valid behaviour for this function to return null.
+     *
+     * @return List of configuration authorities
+     */
     public List<AuthorityConfig> getAuthorities()
     {
         return authorities;
     }
 
+    /**
+     * Sets the routing configuration object used by this class to configure
+     * authorities at run time.
+     *
+     * @param routing RoutingConfig object
+     */
     public void setRouting(RoutingConfig routing)
     {
         this.routing = routing;
     }
 
+    /**
+     * Returns the routing configuration object in use by this class.
+     *
+     * It is valid behaviour for this function to return null.
+     *
+     * @return RoutingConfig in use
+     */
     public RoutingConfig getRouting()
     {
         return this.routing;
     }
 
+    /**
+     * Sets up the authority store bean used by this application.
+     *
+     * - Adds any predefined authorities in configuration files to the store
+     * - Sets the default routing policy
+     * - Configures the default rdap authority
+     */
     private void setupAuthorityStore()
     {
         if(routing.getDefaultAction() != null)
@@ -176,7 +227,7 @@ public class AuthorityConfiguration
                 authority.addServers(servers);
             }
 
-            authorityStore.addAuthority(authority);
+            authorityStore().addAuthority(authority);
         }
     }
 
