@@ -63,20 +63,29 @@ public class RDAPAuthority
     public void addAlias(String alias)
         throws IllegalArgumentException
     {
-        addAliasDetail(alias);
+        alias = addAliasDetail(alias);
         if(eventListener != null)
         {
             eventListener.authorityAliasesAdded(this, Arrays.asList(alias));
         }
     }
 
-    private void addAliasDetail(String alias)
+    /**
+     * Internal detail function for adding a new single alias mapping to this
+     * authority.
+     *
+     * @param alias to add and normalise
+     * @return normalised alias that has been added
+     */
+    private String addAliasDetail(String alias)
     {
         if(alias == null || alias.trim().isEmpty())
         {
             throw new IllegalArgumentException("alias cannot be null or emtpy");
         }
-        aliases.add(alias.trim().toLowerCase());
+        alias = alias.trim().toLowerCase();
+        aliases.add(alias);
+        return alias;
     }
 
     /**
@@ -97,14 +106,16 @@ public class RDAPAuthority
             throw new IllegalArgumentException("aliases cannot by null");
         }
 
+        ArrayList<String> normAliases = new ArrayList<String>();
+
         for(String alias : aliases)
         {
-            addAliasDetail(alias);
+            normAliases.add(addAliasDetail(alias));
         }
 
         if(eventListener != null)
         {
-            eventListener.authorityAliasesAdded(this, aliases);
+            eventListener.authorityAliasesAdded(this, normAliases);
         }
     }
 
