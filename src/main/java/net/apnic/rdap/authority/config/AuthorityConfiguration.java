@@ -75,16 +75,16 @@ public class AuthorityConfiguration
     public static class RoutingConfig
     {
         private RoutingAction defaultAction;
-        private String masterAuthority;
+        private String defaultAuthority;
 
         public RoutingAction getDefaultAction()
         {
             return defaultAction;
         }
 
-        public String getMasterAuthority()
+        public String getDefaultAuthority()
         {
-            return masterAuthority;
+            return defaultAuthority;
         }
 
         public void setDefaultAction(String defaultAction)
@@ -93,9 +93,9 @@ public class AuthorityConfiguration
                 RoutingAction.getEnum(defaultAction);
         }
 
-        public void setMasterAuthority(String masterAuthority)
+        public void setDefaultAuthority(String defaultAuthority)
         {
-            this.masterAuthority = masterAuthority;
+            this.defaultAuthority = defaultAuthority;
         }
     }
 
@@ -194,7 +194,7 @@ public class AuthorityConfiguration
         {
             RDAPAuthority authority = null;
 
-            if(aConfig.getName().equals(routing.getMasterAuthority()))
+            if(aConfig.getName().equals(routing.getDefaultAuthority()))
             {
                 authority = authorityStore().createAuthority(aConfig.getName(),
                                                              RoutingAction.PROXY);

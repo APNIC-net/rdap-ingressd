@@ -42,6 +42,17 @@ rdap:
           servers:
               - https://rdap.lacnic.net/rdap/
 
+    routing:
+        # The default routing action to take for authorities. Accepts either
+        # redirect or proxy
+        defaultAction: redirect
+
+        # Allows rdap-ingressd to proxy unroutable requests to a default
+        # authority. The name of the authority specificed here can be null or
+        # a name specified in authorities above. All requests to this authority
+        # are proxied.
+        defaultAuthority: null
+
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
