@@ -165,6 +165,14 @@ public class RDAPAuthority
         }
     }
 
+    /**
+     * Creates a new authority with a name that is randomly set.
+     *
+     * Name is currently generated from a UUID
+     *
+     * @param routingAction The routing action of the newly created authority
+     * @return RDAPAuthority Newly created anonymouse authority
+     */
     public static RDAPAuthority createAnonymousAuthority(RoutingAction routingAction)
     {
         return new RDAPAuthority(UUID.randomUUID().toString(), routingAction);
@@ -223,6 +231,11 @@ public class RDAPAuthority
         return defaultServerURI;
     }
 
+    /**
+     * Provides the event listener that has been registered onto this authority.
+     *
+     * @return RDAPAuthorityEventListener object that has been registered
+     */
     public RDAPAuthorityEventListener getEventListener()
     {
         return eventListener;
@@ -267,6 +280,12 @@ public class RDAPAuthority
         return server;
     }
 
+    /**
+     * Sets the event listener for this authority.
+     *
+     * @param eventListener Event listener to set on this authority
+     * @see RDAPAuthorityEventListener
+     */
     public void setEventListener(RDAPAuthorityEventListener eventListener)
     {
         this.eventListener = eventListener;
