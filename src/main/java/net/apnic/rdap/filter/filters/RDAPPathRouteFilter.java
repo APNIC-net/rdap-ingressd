@@ -17,9 +17,6 @@ import net.apnic.rdap.resource.ResourceNotFoundException;
 
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 
-/**
- *
- */
 public abstract class RDAPPathRouteFilter
     extends ZuulFilter
 {

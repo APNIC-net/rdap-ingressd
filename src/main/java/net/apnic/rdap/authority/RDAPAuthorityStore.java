@@ -12,6 +12,7 @@ import java.util.List;
  * Such authorities would be RIR's and TLD operators.
  */
 public class RDAPAuthorityStore
+    implements RDAPAuthorityEventListener
 {
     private HashMap<String, RDAPAuthority> authoritiesMap = new HashMap<>();
     private RoutingAction defaultRoutingAction = RoutingAction.REDIRECT;
@@ -34,12 +35,31 @@ public class RDAPAuthorityStore
         }
         authoritiesMap.put(authority.getName(), authority);
 
-        for(String alias : authority.getAliases())
+        authorityAliasesAdded(authority, authority.getAliases());
+        authorityServersAdded(authority, authority.getServers());
+
+        authority.setEventListener(this);
+    }
+
+    /**
+     * {@inheritDocs}
+     */
+    public void authorityAliasesAdded(RDAPAuthority authority,
+                                      List<String> addAliases)
+    {
+        for(String alias : addAliases)
         {
             authoritiesMap.put(alias, authority);
         }
+    }
 
-        for(URI serverURI : authority.getServers())
+    /**
+     * {@inheritDocs}
+     */
+    public void authorityServersAdded(RDAPAuthority authority,
+                                      List<URI> addServers)
+    {
+        for(URI serverURI : addServers)
         {
             serverMap.put(RDAPAuthority.normalizeServerURI(serverURI),
                           authority);

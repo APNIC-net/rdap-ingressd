@@ -2,6 +2,7 @@ package net.apnic.rdap.authority;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,9 +19,18 @@ public class RDAPAuthority
 
     private List<String> aliases = new ArrayList<String>();
     private URI defaultServerURI = null;
+    private RDAPAuthorityEventListener eventListener = null;
     private String name;
     private RoutingAction routingAction = null;
     private List<URI> servers = new ArrayList<URI>();
+
+    /**
+     *
+     */
+    public RDAPAuthority(String name)
+    {
+        this(name, RoutingAction.REDIRECT);
+    }
 
     /**
      * Constructs a new authority with the given name.
@@ -53,6 +63,15 @@ public class RDAPAuthority
     public void addAlias(String alias)
         throws IllegalArgumentException
     {
+        addAliasDetail(alias);
+        if(eventListener != null)
+        {
+            eventListener.authorityAliasesAdded(this, Arrays.asList(alias));
+        }
+    }
+
+    private void addAliasDetail(String alias)
+    {
         if(alias == null || alias.trim().isEmpty())
         {
             throw new IllegalArgumentException("alias cannot be null or emtpy");
@@ -80,7 +99,12 @@ public class RDAPAuthority
 
         for(String alias : aliases)
         {
-            addAlias(alias);
+            addAliasDetail(alias);
+        }
+
+        if(eventListener != null)
+        {
+            eventListener.authorityAliasesAdded(this, aliases);
         }
     }
 
@@ -97,6 +121,12 @@ public class RDAPAuthority
             throw new IllegalArgumentException("server uri cannot be null");
         }
         servers.add(normalizeServerURI(server));
+
+        if(eventListener != null)
+        {
+            System.out.println("HERERERE");
+            eventListener.authorityServersAdded(this, Arrays.asList(server));
+        }
     }
 
     /**
@@ -115,7 +145,12 @@ public class RDAPAuthority
 
         for(URI server : servers)
         {
-            addServer(server);
+            this.servers.add(normalizeServerURI(server));
+        }
+
+        if(eventListener != null)
+        {
+            eventListener.authorityServersAdded(this, servers);
         }
     }
 
@@ -177,6 +212,11 @@ public class RDAPAuthority
         return defaultServerURI;
     }
 
+    public RDAPAuthorityEventListener getEventListener()
+    {
+        return eventListener;
+    }
+
     /**
      * Returns the name for this authority.
      *
@@ -214,5 +254,10 @@ public class RDAPAuthority
             server = URI.create(server.toASCIIString() + "/");
         }
         return server;
+    }
+
+    public void setEventListener(RDAPAuthorityEventListener eventListener)
+    {
+        this.eventListener = eventListener;
     }
 }
