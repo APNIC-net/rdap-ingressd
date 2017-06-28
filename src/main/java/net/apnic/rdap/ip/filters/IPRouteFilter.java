@@ -13,16 +13,29 @@ import net.ripe.ipresource.IpRange;
 import net.ripe.ipresource.IpResourceType;
 
 /**
- *
+ * Filter for handling ip path segments in RDAP requests.
  */
 public class IPRouteFilter
     extends RDAPPathRouteFilter
 {
+    /**
+     * Main constructor which takes the Directory to use for locating ip
+     * authorities.
+     *
+     * @param directory
+     * @see RDAPPathRouteFilter
+     */
     public IPRouteFilter(Directory directory)
     {
         super(directory);
     }
 
+    /**
+     * Main run method for filter which takes the incoming requests and find the
+     * ip authority.
+     *
+     * @see RDAPPathRouteFilter
+     */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
         throws ResourceNotFoundException, MalformedRequestException
@@ -60,6 +73,9 @@ public class IPRouteFilter
         }
     }
 
+    /**
+     * {@inheritDocs}
+     */
     @Override
     public RDAPRequestType supportedRequestType()
     {

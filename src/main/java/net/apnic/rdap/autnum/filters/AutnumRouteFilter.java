@@ -10,16 +10,29 @@ import net.apnic.rdap.filter.RDAPRequestType;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
 /**
- *
+ * Filter for handling autnum path segments in RDAP requests.
  */
 public class AutnumRouteFilter
     extends RDAPPathRouteFilter
 {
+    /**
+     * Main constructor which takes the Directory to use for locating autnum
+     * authorities.
+     *
+     * @param directory
+     * @see RDAPPathRouteFilter
+     */
     public AutnumRouteFilter(Directory directory)
     {
         super(directory);
     }
 
+    /**
+     * Main run method for filter which takes that incoming requests and finds
+     * the autnum authority.
+     *
+     * @see RDAPPathRouteFilter
+     */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
         throws ResourceNotFoundException, MalformedRequestException
@@ -42,6 +55,9 @@ public class AutnumRouteFilter
         }
     }
 
+    /**
+     * {@inheritDocs}
+     */
     @Override
     public RDAPRequestType supportedRequestType()
     {
