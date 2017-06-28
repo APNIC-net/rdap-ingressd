@@ -11,11 +11,13 @@ class DomainUtils
     private final static int ARPA4_THROW_INDEX = Domain.ARPA4_FIELD_COUNT;
     private final static int ARPA6_THROW_INDEX = Domain.ARPA6_FIELD_COUNT;
     private final static int IPV4_FIELD_BITS = 8;
+    private final static int IPV4_MAX_FIELD_VALUE = 255;
+    private final static int IPV4_MAX_FIELDS = 4;
     private final static int IPV6_BYTE_COUNT = 16;
     private final static int IPV6_FIELD_BITS = 4;
+    private final static int IPV6_MAX_FIELD_VALUE = 0xf;
+    private final static int IPV6_MAX_FIELDS = 32;
     private final static int MIN_IP_FIELDS = 1;
-    private final static int MAX_IPV4_FIELDS = 4;
-    private final static int MAX_IPV6_FIELDS = 32;
 
     public static IpRange ipAddressForArpaDomain(Domain domain)
         throws IllegalArgumentException
@@ -42,20 +44,26 @@ class DomainUtils
         long ipAddress = 0;
         int fieldsToProcess = domainFields.length - ARPA4_THROW_INDEX;
 
-        if(fieldsToProcess < MIN_IP_FIELDS || fieldsToProcess > MAX_IPV4_FIELDS)
+        if(fieldsToProcess < MIN_IP_FIELDS || fieldsToProcess > IPV4_MAX_FIELDS)
         {
             throw new IllegalArgumentException(
                 "IPv4 arpa domain has invalid number of fields \"" +
                 fieldsToProcess + "\"");
         }
 
-        for(int i = fieldsToProcess - 1, bytePos = MAX_IPV4_FIELDS - 1;
+        long fieldValue = 0;
+        for(int i = fieldsToProcess - 1, bytePos = IPV4_MAX_FIELDS - 1;
             i >= 0; --i, --bytePos)
         {
             try
             {
-                ipAddress |=
-                    Byte.parseByte(domainFields[i]) << (IPV4_FIELD_BITS * bytePos);
+                fieldValue = Long.parseLong(domainFields[i]);
+                if(fieldValue > IPV4_MAX_FIELD_VALUE || fieldValue < 0)
+                {
+                    throw new NumberFormatException();
+                }
+
+                ipAddress |= fieldValue << IPV4_FIELD_BITS * bytePos;
             }
             catch(NumberFormatException ex)
             {
@@ -75,7 +83,7 @@ class DomainUtils
         byte[] ipAddress = new byte[IPV6_BYTE_COUNT];
         int fieldsToProcess = domainFields.length - ARPA6_THROW_INDEX;
 
-        if(fieldsToProcess < MIN_IP_FIELDS || fieldsToProcess > MAX_IPV6_FIELDS)
+        if(fieldsToProcess < MIN_IP_FIELDS || fieldsToProcess > IPV6_MAX_FIELDS)
         {
             throw new IllegalArgumentException(
                 "IPv6 arpa domain has invalid number of fields \"" +
@@ -83,13 +91,19 @@ class DomainUtils
         }
 
         // Very ugly
+        byte fieldValue = 0;
         for(int i = fieldsToProcess - 1, bytePos = 0, nibblePos = 1;
             i >= 0; --i, bytePos += (nibblePos == 0 ? 1 : 0), nibblePos ^= 1)
         {
             try
             {
-                ipAddress[bytePos] |=
-                    Byte.parseByte(domainFields[i], 16) << (IPV6_FIELD_BITS * nibblePos);
+                fieldValue = Byte.parseByte(domainFields[i], 16);
+                if(fieldValue > IPV6_MAX_FIELD_VALUE || fieldValue < 0)
+                {
+                    throw new NumberFormatException();
+                }
+
+                ipAddress[bytePos] |= fieldValue << IPV6_FIELD_BITS * nibblePos;
             }
             catch(NumberFormatException ex)
             {
