@@ -29,7 +29,11 @@ public class DomainStatsResourceLocator
         {
             return handleArpaDomain(domain);
         }
-        throw new ResourceNotFoundException();
+        else if(tldMap.containsKey(domain.getTLD()) == false)
+        {
+            throw new ResourceNotFoundException();
+        }
+        return tldMap.get(domain.getTLD());
     }
 
     private RDAPAuthority handleArpaDomain(Domain domain)
@@ -41,5 +45,6 @@ public class DomainStatsResourceLocator
 
     public void putResourceMapping(Domain resource, RDAPAuthority authority)
     {
+        tldMap.put(resource.getTLD(), authority);
     }
 }

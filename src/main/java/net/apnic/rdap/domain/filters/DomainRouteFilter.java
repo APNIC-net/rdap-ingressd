@@ -9,17 +9,30 @@ import net.apnic.rdap.filter.RDAPRequestPath;
 import net.apnic.rdap.filter.RDAPRequestType;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
+/**
+ * Filter for handling domain path segments in RDAP requests
+ */
 public class DomainRouteFilter
     extends RDAPPathRouteFilter
 {
     private static final int DOMAIN_PARAM_INDEX = 0;
     private static final int NO_REQUEST_PARAMS = 1;
 
+    /**
+     * Main constructor which takes the Directory to use for locating domain
+     * authorities.
+     *
+     * @param directory
+     * @see RDAPPathRouteFilter
+     */
     public DomainRouteFilter(Directory directory)
     {
         super(directory);
     }
 
+    /**
+     *
+     */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
         throws ResourceNotFoundException, MalformedRequestException

@@ -268,6 +268,11 @@ public class IANABootstrapScraper
                 parseBootstrapResults(entity.getBody(),
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
+                        for(String tldDomain : service.getResources())
+                        {
+                            Domain domain = new Domain(tldDomain);
+                            domainStore.putResourceMapping(domain, authority);
+                        }
                     });
             });
     }
