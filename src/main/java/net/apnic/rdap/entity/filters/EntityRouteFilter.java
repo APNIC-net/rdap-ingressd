@@ -9,6 +9,9 @@ import net.apnic.rdap.filter.RDAPRequestPath;
 import net.apnic.rdap.filter.RDAPRequestType;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
+/**
+ * Filter for handling entity path segments in RDAP requests
+ */
 public class EntityRouteFilter
     extends RDAPPathRouteFilter
 {
@@ -16,7 +19,8 @@ public class EntityRouteFilter
     private static final int NO_REQUEST_PARAMS = 1;
 
     /**
-     *
+     * Main constructor which takes the Directory to use for locating entity
+     * authorities.
      */
     public EntityRouteFilter(Directory directory)
     {
@@ -24,7 +28,10 @@ public class EntityRouteFilter
     }
 
     /**
+     * Main run method for filter which takes the incoming request and finds an
+     * entity authority.
      *
+     * @see RDAPPathRouteFilter
      */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)

@@ -9,6 +9,9 @@ import net.apnic.rdap.filter.RDAPRequestType;
 import net.apnic.rdap.nameserver.NameServer;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
+/**
+ * Filter for handling nameserver path segments in RDAP requests
+ */
 public class NameServerRouteFilter
     extends RDAPPathRouteFilter
 {
@@ -16,7 +19,11 @@ public class NameServerRouteFilter
     private static final int NO_REQUEST_PARAMS = 1;
 
     /**
+     * Main constructor which takes the Directory to use for locating
+     * nameserver authorities.
      *
+     * @param directory
+     * @see RDAPPathRouteFilter
      */
     public NameServerRouteFilter(Directory directory)
     {
@@ -24,7 +31,10 @@ public class NameServerRouteFilter
     }
 
     /**
+     * Main run method for filter which takes the incoming request and finds a
+     * namerserver authority.
      *
+     * @see RDAPathRouteFilter
      */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
