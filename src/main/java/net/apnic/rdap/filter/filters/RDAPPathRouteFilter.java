@@ -21,7 +21,6 @@ public abstract class RDAPPathRouteFilter
     extends ZuulFilter
 {
     private Directory directory = null;
-    private RDAPRequestPath rdapRequestPath = null;
 
     public RDAPPathRouteFilter(Directory directory)
     {
@@ -47,13 +46,8 @@ public abstract class RDAPPathRouteFilter
 
     public RDAPRequestPath getRDAPRequestPath()
     {
-        if(rdapRequestPath == null)
-        {
-            RequestContext context = RequestContext.getCurrentContext();
-            rdapRequestPath = (RDAPRequestPath)
-                context.get(RequestContextKeys.RDAP_REQUEST_PATH);
-        }
-        return rdapRequestPath;
+        RequestContext context = RequestContext.getCurrentContext();
+        return (RDAPRequestPath)context.get(RequestContextKeys.RDAP_REQUEST_PATH);
     }
 
     public boolean shouldFilter()
