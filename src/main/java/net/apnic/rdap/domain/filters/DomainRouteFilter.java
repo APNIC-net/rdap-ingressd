@@ -31,7 +31,10 @@ public class DomainRouteFilter
     }
 
     /**
+     * Main run method for filter which takes the incoming request and find a
+     * domain authority.
      *
+     * @see RDAPPathRouteFilter
      */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
@@ -56,6 +59,9 @@ public class DomainRouteFilter
         }
     }
 
+    /**
+     * {@inheritDocs}
+     */
     @Override
     public RDAPRequestType supportedRequestType()
     {
