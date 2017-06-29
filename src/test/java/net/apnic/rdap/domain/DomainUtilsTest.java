@@ -36,18 +36,18 @@ public class DomainUtilsTest
     static Stream<Arguments> validArpa6Provider()
     {
         return Stream.of(
-            ObjectArrayArguments.create(new Domain("a.in6.arpa"),
+            ObjectArrayArguments.create(new Domain("a.ip6.arpa"),
                                         IpRange.parse("a000::/4")),
-            ObjectArrayArguments.create(new Domain("a.0.in6.arpa"),
+            ObjectArrayArguments.create(new Domain("a.0.ip6.arpa"),
                                         IpRange.parse("a00::/8")),
-            ObjectArrayArguments.create(new Domain("1.0.0.2.in6.arpa"),
+            ObjectArrayArguments.create(new Domain("1.0.0.2.ip6.arpa"),
                                         IpRange.parse("2001::/16")),
-            ObjectArrayArguments.create(new Domain("f.1.0.0.2.in6.arpa"),
+            ObjectArrayArguments.create(new Domain("f.1.0.0.2.ip6.arpa"),
                                         IpRange.parse("2001:f000::/20")),
             ObjectArrayArguments.create(
-                new Domain("d.0.0.0.c.0.0.0.b.0.0.0.a.0.0.0.in6.arpa"),
+                new Domain("d.0.0.0.c.0.0.0.b.0.0.0.a.0.0.0.ip6.arpa"),
                 IpRange.parse("a:b:c:d::/64")),
-            ObjectArrayArguments.create(new Domain("0.8.e.f.in6.arpa"),
+            ObjectArrayArguments.create(new Domain("0.8.e.f.ip6.arpa"),
                                         IpRange.parse("fe80::/16")));
     }
 
@@ -82,9 +82,9 @@ public class DomainUtilsTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {".in6.arpa", "in6.arpa", "w.in6.arpa",
-                            "w.a.a.in6.arpa", "a.f4.in6.arpa", "a.-f.in6.arpa",
-                            "1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.in6.arpa"})
+    @ValueSource(strings = {".ip6.arpa", "ip6.arpa", "w.ip6.arpa",
+                            "w.a.a.ip6.arpa", "a.f4.ip6.arpa", "a.-f.ip6.arpa",
+                            "1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.ip6.arpa"})
     void checkInvalidArap6DomainToIPParsing(String arpaDomain)
     {
         Domain domain = new Domain(arpaDomain);

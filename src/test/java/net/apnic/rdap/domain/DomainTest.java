@@ -24,8 +24,8 @@ public class DomainTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2.in6.arpa", "0.2.in6.arpa",
-                            "f.0.2.in6.arpa", "f.f.0.2.in6.arpa"})
+    @ValueSource(strings = {"2.ip6.arpa", "0.2.ip6.arpa",
+                            "f.0.2.ip6.arpa", "f.f.0.2.ip6.arpa"})
     public void domainNameIsArpa6(String arpaDomain)
     {
         Domain domain = new Domain(arpaDomain);
