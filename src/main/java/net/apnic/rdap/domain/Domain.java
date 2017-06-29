@@ -8,7 +8,7 @@ public class Domain
     public final static String ARPA_DOMAIN = "arpa.";
     public final static String ARPA4_DOMAIN = "in-addr.arpa.";
     public final static int ARPA4_FIELD_COUNT = 2;
-    public final static String ARPA6_DOMAIN = "in6.arpa.";
+    public final static String ARPA6_DOMAIN = "ip6.arpa.";
     public final static int ARPA6_FIELD_COUNT = 2;
 
     private String domain;
