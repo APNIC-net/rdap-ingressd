@@ -1,5 +1,6 @@
 package net.apnic.rdap.resource;
 
+import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.autnum.AutnumStatsResourceLocator;
 import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.domain.Domain;
@@ -10,6 +11,8 @@ import net.apnic.rdap.nameserver.NameServer;
 
 import net.ripe.ipresource.IpRange;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -50,9 +53,11 @@ public class ResourceConfiguration
     }
 
     @Bean
-    public ResourceLocator<Entity> entityResourceLocator()
+    @Autowired
+    public ResourceLocator<Entity> entityResourceLocator(
+        @Qualifier("defaultAuthority") RDAPAuthority defaultAuthority)
     {
-        return new StaticResourceLocator<Entity>();
+        return new StaticResourceLocator<Entity>(defaultAuthority);
     }
 
     @Bean
@@ -68,8 +73,10 @@ public class ResourceConfiguration
     }
 
     @Bean
-    public ResourceLocator<NameServer> nsResourcelocator()
+    @Autowired
+    public ResourceLocator<NameServer> nsResourcelocator(
+        @Qualifier("defaultAuthority") RDAPAuthority defaultAuthority)
     {
-        return new StaticResourceLocator<NameServer>();
+        return new StaticResourceLocator<NameServer>(defaultAuthority);
     }
 }

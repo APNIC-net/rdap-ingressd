@@ -113,6 +113,17 @@ public class AuthorityConfiguration
     }
 
     /**
+     * Returns the default authority for routing.
+     *
+     * @return Default routing authority
+     */
+    @Bean
+    public RDAPAuthority defaultAuthority()
+    {
+        return authorityStore().findAuthority(routing.getDefaultAuthority());
+    }
+
+    /**
      * Init method to process configuration after this class has been
      * constructed.
      */
