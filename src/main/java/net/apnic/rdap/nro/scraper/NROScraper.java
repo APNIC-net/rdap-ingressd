@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
-import net.apnic.rdap.resource.ResourceStore;
+import net.apnic.rdap.resource.store.ResourceStorage;
 import net.apnic.rdap.stats.scraper.DelegatedStatsScraper;
 
 import net.ripe.ipresource.IpRange;
@@ -50,11 +50,9 @@ public class NROScraper
      * @param ipStore Store for ip records to insert discovered resources in
      *                while scraping
      */
-    public NROScraper(RDAPAuthorityStore authorityStore,
-                      ResourceStore<AsnRange> asnStore,
-                      ResourceStore<IpRange> ipStore)
+    public NROScraper()
     {
-        super(NRO_STATS_URI, authorityStore, asnStore, ipStore);
+        super(NRO_STATS_URI);
     }
 
     /**

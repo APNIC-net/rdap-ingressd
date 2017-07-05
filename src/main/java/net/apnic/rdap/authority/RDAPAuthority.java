@@ -135,7 +135,6 @@ public class RDAPAuthority
 
         if(eventListener != null)
         {
-            System.out.println("HERERERE");
             eventListener.authorityServersAdded(this, Arrays.asList(server));
         }
     }

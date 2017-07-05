@@ -17,7 +17,7 @@ import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.domain.Domain;
-import net.apnic.rdap.resource.ResourceStore;
+import net.apnic.rdap.resource.store.ResourceStore;
 import net.apnic.rdap.scraper.Scraper;
 import net.apnic.rdap.util.ConcurrentUtil;
 
@@ -59,10 +59,6 @@ public class IANABootstrapScraper
     private static final Logger LOGGER =
         Logger.getLogger(IANABootstrapScraper.class.getName());
 
-    private RDAPAuthorityStore authorityStore = null;
-    private ResourceStore<AsnRange> asnStore = null;
-    private ResourceStore<Domain> domainStore = null;
-    private ResourceStore<IpRange> ipStore = null;
     private HttpHeaders requestHeaders = null;
     private AsyncRestTemplate restClient = null;
 
@@ -101,21 +97,9 @@ public class IANABootstrapScraper
 
     /**
      * Constructor for creating an IANA bootstrap scraper.
-     *
-     * @param authorityStore Store to find authorities
-     * @param asnStore Store for emplacing asn resource mappings
-     * @param domainStore Store for emplacing domain resource mappings
-     * @param ipStore Store for emplacing ip resource mappings
      */
-    public IANABootstrapScraper(RDAPAuthorityStore authorityStore,
-                                ResourceStore<AsnRange> asnStore,
-                                ResourceStore<Domain> domainStore,
-                                ResourceStore<IpRange> ipStore)
+    public IANABootstrapScraper()
     {
-        this.authorityStore = authorityStore;
-        this.asnStore = asnStore;
-        this.domainStore = domainStore;
-        this.ipStore = ipStore;
         restClient = new AsyncRestTemplate();
         setupRequestHeaders();
     }
@@ -148,10 +132,13 @@ public class IANABootstrapScraper
      * @see net.apnic.rdap.scraper.ScraperScheduler
      */
     @Override
-    public CompletableFuture<Void> start()
+    public CompletableFuture<Void> start(ResourceStore store,
+                                         RDAPAuthorityStore authorityStore)
     {
-        return CompletableFuture.allOf(updateASNData(), updateDomainData(),
-                                       updateIPv4Data(), updateIPv6Data());
+        return CompletableFuture.allOf(updateASNData(store, authorityStore),
+                                       updateDomainData(store, authorityStore),
+                                       updateIPv4Data(store, authorityStore), 
+                                       updateIPv6Data(store, authorityStore));
     }
 
     /**
@@ -179,6 +166,7 @@ public class IANABootstrapScraper
      * mapping
      */
     private void parseBootstrapResults(JsonNode bootstrapData,
+                                       RDAPAuthorityStore authorityStore,
                                        ResourceMapper mapper)
     {
         JsonNode version = bootstrapData.get("version");
@@ -238,18 +226,19 @@ public class IANABootstrapScraper
      *
      * @return Promise that's complete when an IANA asn update has complete
      */
-    private CompletableFuture<Void> updateASNData()
+    private CompletableFuture<Void> updateASNData(ResourceStore store,
+                                                  RDAPAuthorityStore authorityStore)
     {
         return makeBootstrapRequest(ASN_URI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
-                parseBootstrapResults(entity.getBody(),
+                parseBootstrapResults(entity.getBody(), authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
                         for(String strAsnRange : service.getResources())
                         {
                             AsnRange asnRange = AsnRange.parse(strAsnRange);
-                            asnStore.putResourceMapping(asnRange, authority);
+                            store.putAutnumMapping(asnRange, authority);
                         }
                     });
             });
@@ -260,18 +249,19 @@ public class IANABootstrapScraper
      *
      * @return Promise that's complete when an IANA domain update has complete
      */
-    private CompletableFuture<Void> updateDomainData()
+    private CompletableFuture<Void> updateDomainData(ResourceStore store,
+                                                     RDAPAuthorityStore authorityStore)
     {
         return makeBootstrapRequest(DOMAIN_URI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
-                parseBootstrapResults(entity.getBody(),
+                parseBootstrapResults(entity.getBody(), authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
                         for(String tldDomain : service.getResources())
                         {
                             Domain domain = new Domain(tldDomain);
-                            domainStore.putResourceMapping(domain, authority);
+                            store.putDomainMapping(domain, authority);
                         }
                     });
             });
@@ -284,18 +274,20 @@ public class IANABootstrapScraper
      * @param ipBootstrapURI The URI for the ip bootstrap data to process
      * @return Promise that's complete when an IANA ip update has complete
      */
-    private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI)
+    private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI,
+                                                    ResourceStore store,
+                                                    RDAPAuthorityStore authorityStore)
     {
         return makeBootstrapRequest(ipBootstrapURI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
-                parseBootstrapResults(entity.getBody(),
+                parseBootstrapResults(entity.getBody(), authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
                         for(String strIpRange : service.getResources())
                         {
                             IpRange ipRange = IpRange.parse(strIpRange);
-                            ipStore.putResourceMapping(ipRange, authority);
+                            store.putIPMapping(ipRange, authority);
                         }
                     });
             });
@@ -307,9 +299,10 @@ public class IANABootstrapScraper
      * Proxies through to updateIPAllData()
      * @return Promise that's complete when an IANA ipv4 update has complete
      */
-    private CompletableFuture<Void> updateIPv4Data()
+    private CompletableFuture<Void> updateIPv4Data(ResourceStore store,
+                                                   RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(IPV4_URI);
+        return updateIPAllData(IPV4_URI, store, authorityStore);
     }
 
     /**
@@ -318,8 +311,9 @@ public class IANABootstrapScraper
      * Proxies through to updateIPAllData()
      * @return Promise that's complete when an IANA ipv6 update has complete
      */
-    private CompletableFuture<Void> updateIPv6Data()
+    private CompletableFuture<Void> updateIPv6Data(ResourceStore store,
+                                                   RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(IPV6_URI);
+        return updateIPAllData(IPV6_URI, store, authorityStore);
     }
 }

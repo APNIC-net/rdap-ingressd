@@ -1,4 +1,4 @@
-package net.apnic.rdap.resource;
+package net.apnic.rdap.resource.config;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.autnum.AutnumStatsResourceLocator;
@@ -8,6 +8,9 @@ import net.apnic.rdap.domain.DomainStatsResourceLocator;
 import net.apnic.rdap.entity.Entity;
 import net.apnic.rdap.ip.IPStatsResourceLocator;
 import net.apnic.rdap.nameserver.NameServer;
+import net.apnic.rdap.resource.ResourceLocator;
+import net.apnic.rdap.resource.StaticResourceLocator;
+import net.apnic.rdap.resource.store.ResourceStorage;
 
 import net.ripe.ipresource.IpRange;
 
@@ -35,7 +38,7 @@ public class ResourceConfiguration
     }
 
     @Bean
-    public ResourceStore<AsnRange> autnumResourceStore()
+    public ResourceStorage<AsnRange> autnumResourceStorage()
     {
         return autnumResourceLocator;
     }
@@ -47,7 +50,7 @@ public class ResourceConfiguration
     }
 
     @Bean
-    public ResourceStore<Domain> domainResourceStore()
+    public ResourceStorage<Domain> domainResourceStorage()
     {
         return domainResourceLocator;
     }
@@ -67,7 +70,7 @@ public class ResourceConfiguration
     }
 
     @Bean
-    public ResourceStore<IpRange> ipResourceStore()
+    public ResourceStorage<IpRange> ipResourceStorage()
     {
         return ipResourceLocator;
     }

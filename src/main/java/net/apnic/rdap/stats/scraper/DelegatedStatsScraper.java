@@ -11,7 +11,7 @@ import java.util.Scanner;
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.autnum.AsnRange;
-import net.apnic.rdap.resource.ResourceStore;
+import net.apnic.rdap.resource.store.ResourceStore;
 import net.apnic.rdap.scraper.Scraper;
 import net.apnic.rdap.stats.parser.AsnRecord;
 import net.apnic.rdap.stats.parser.DelegatedStatsException;
@@ -60,9 +60,6 @@ public abstract class DelegatedStatsScraper
         }
     }
 
-    private ResourceStore<AsnRange> asnStore = null;
-    private RDAPAuthorityStore authorityStore = null;
-    private ResourceStore<IpRange> ipStore = null;
     private HttpHeaders requestHeaders = null;
     private AsyncRestTemplate restClient = null;
     private SupportedScheme statsScheme = null;
@@ -78,10 +75,7 @@ public abstract class DelegatedStatsScraper
      * @throws IllegalArgumentException Thrown when the URI scheme is not
      *                                  supported.
      */
-    public DelegatedStatsScraper(URI statsURI,
-                                 RDAPAuthorityStore authorityStore,
-                                 ResourceStore<AsnRange> asnStore,
-                                 ResourceStore<IpRange> ipStore)
+    public DelegatedStatsScraper(URI statsURI)
     {
         try
         {
@@ -94,9 +88,6 @@ public abstract class DelegatedStatsScraper
             throw new IllegalArgumentException("Non support scheme for URI");
         }
 
-        this.asnStore = asnStore;
-        this.authorityStore = authorityStore;
-        this.ipStore = ipStore;
         this.restClient = new AsyncRestTemplate();
         this.statsURI = statsURI;
         setupRequestHeaders();
@@ -112,13 +103,10 @@ public abstract class DelegatedStatsScraper
      *                            statsURI
      * @see DelegatedStatsScraper(URI statsURI)
      */
-    public DelegatedStatsScraper(String statsURI,
-                                 RDAPAuthorityStore authorityStore,
-                                 ResourceStore<AsnRange> asnStore,
-                                 ResourceStore<IpRange> ipStore)
+    public DelegatedStatsScraper(String statsURI)
         throws URISyntaxException
     {
-        this(new URI(statsURI), authorityStore, asnStore, ipStore);
+        this(new URI(statsURI));
     }
 
     /**
@@ -127,9 +115,11 @@ public abstract class DelegatedStatsScraper
      *
      * @param record Asn record from a delegated stats file.
      */
-    private void handleAutnumRecord(AsnRecord record)
+    private void handleAutnumRecord(AsnRecord record, ResourceStore store,
+                                    RDAPAuthorityStore authorityStore)
     {
-        handleGenericRecord(record, record.toAsnRange(), asnStore);
+        store.putAutnumMapping(record.toAsnRange(),
+                               recordAuthority(record, authorityStore));
     }
 
     /**
@@ -138,13 +128,13 @@ public abstract class DelegatedStatsScraper
      *
      * @param resourceRecord Resource record to handle
      * @param resource The derived resource from a resourceRecord that gets
+     * 
      *                 inserted into the provided resourceStore
      * @param resourceStore The Resource store to insert the resource into with
      *                      the authority discovered through the resourceRecord
      */
-    private <T> void handleGenericRecord(ResourceRecord resourceRecord,
-                                         T resource,
-                                         ResourceStore<T> resourceStore)
+    private RDAPAuthority recordAuthority(ResourceRecord resourceRecord,
+                                         RDAPAuthorityStore authorityStore)
     {
         RDAPAuthority authority =
             authorityStore.findAuthority(resourceRecord.getRegistry());
@@ -154,8 +144,7 @@ public abstract class DelegatedStatsScraper
             authority = authorityStore.createAuthority(
                 resourceRecord.getRegistry());
         }
-
-        resourceStore.putResourceMapping(resource, authority);
+        return authority;
     }
 
     /**
@@ -164,9 +153,11 @@ public abstract class DelegatedStatsScraper
      *
      * @param record IP record from a delegated stats file.
      */
-    private void handleIPRecord(IPRecord record)
+    private void handleIPRecord(IPRecord record, ResourceStore store,
+                                RDAPAuthorityStore authorityStore)
     {
-        handleGenericRecord(record, record.toIPRange(), ipStore);
+        store.putIPMapping(record.toIPRange(),
+                           recordAuthority(record, authorityStore));
     }
 
     /**
@@ -215,7 +206,8 @@ public abstract class DelegatedStatsScraper
      * {@inheritDocs}
      */
     @Override
-    public CompletableFuture<Void> start()
+    public CompletableFuture<Void> start(ResourceStore store,
+                                         RDAPAuthorityStore authorityStore)
     {
         CompletableFuture<InputStream> request = null;
 
@@ -231,9 +223,12 @@ public abstract class DelegatedStatsScraper
                 try
                 {
                     DelegatedStatsParser.parse(iStream,
-                                               this::handleAutnumRecord,
-                                               this::handleIPRecord,
-                                               this::handleIPRecord);
+                        asnRecord -> handleAutnumRecord(asnRecord, store,
+                                                        authorityStore),
+                        ipRecord -> handleIPRecord(ipRecord, store,
+                                                   authorityStore),
+                        ipRecord -> handleIPRecord(ipRecord, store,
+                                                   authorityStore));
                 }
                 catch(Exception ex)
                 {

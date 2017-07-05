@@ -9,6 +9,7 @@ import net.apnic.rdap.scraper.Scraper;
 import net.apnic.rdap.scraper.ScraperScheduler;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,8 @@ public class ScraperConfiguration
     private ApplicationContext applicationContext = null;
     private boolean initialised = false;
     private List<String> order = null;
-    private ScraperScheduler scraperScheduler = new ScraperScheduler();
+    @Autowired
+    private ScraperScheduler scraperScheduler;
 
     /**
      * Returns the order scrapers have been configured to run in the application
@@ -84,15 +86,6 @@ public class ScraperConfiguration
                            scraperName, ex);
             }
         }
-    }
-
-    /**
-     * Scheduler bean.
-     */
-    @Bean
-    public ScraperScheduler scraperScheduler()
-    {
-        return scraperScheduler;
     }
 
     /**

@@ -1,4 +1,4 @@
-package net.apnic.rdap.resource;
+package net.apnic.rdap.resource.store;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 
@@ -10,8 +10,12 @@ import net.apnic.rdap.authority.RDAPAuthority;
  *
  * @param <Resource> The type of resource this interface assists in storing.
  */
-public interface ResourceStore<Resource>
+public interface ResourceStorage<Resource>
 {
+    public ResourceStorage<Resource> initialiseNew();
+
+    public void moveStorage(ResourceStorage<Resource> newStorage);
+
     public void putResourceMapping(Resource resource, RDAPAuthority authority)
         throws IllegalArgumentException;
 }
