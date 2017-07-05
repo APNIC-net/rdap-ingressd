@@ -14,7 +14,7 @@ import net.ripe.ipresource.IpRange;
  * Resource locator for domain name authorities and a store for this
  * information.
  *
- * Class acts as boath a resource locator and a store for Domain resources to
+ * Class acts as both a resource locator and a store for Domain resources to
  * authority mappings.
  */
 public class DomainStatsResourceLocator

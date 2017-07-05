@@ -19,7 +19,7 @@ public interface Scraper
      * Main worker method that gets called by the scheduler for each scraper.
      *
      * @param store Resource storage to placed scraped results into
-     * @return Future that is fulfilled when the scraper finishes it's tasks.
+     * @return Future that is fulfilled when the scraper finishes its tasks.
      */
     public CompletableFuture<Void> start(ResourceStore resourceStore,
                                          RDAPAuthorityStore authorityStore);

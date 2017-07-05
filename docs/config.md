@@ -1,21 +1,17 @@
 # Overview
-The following documentation depicts the external configuration that is possible
-in *rdap-ingressd*
+The following documentation depicts the external configuration that is
+possible in *rdap-ingressd*.
 
 # Configuration File
-*rdap-ingressd* is configured through a yaml file by the name of
-*application-rdap.yml* with a static starting point for creating the file
-located at ```src/main/resource/application-rdap.yml```
-
-or
+*rdap-ingressd* is configured through a YAML file by the name of
+*application-rdap.yml*.  The static path of the file is
+```src/main/resource/application-rdap.yml```.  Its syntax is like so:
 
 ```
 rdap:
-     #If it is known a head of time a list of pre defined rdap authorities can
-     #be configured. Each authority takes the form of:
-     # name: <primary_authority_name>
-     # aliases: # Optional list of aliases this authority can be known as.
-     # servers: # List of one or more rdap server URI's for the authority
+    # A list of RDAP authorities may be configured ahead of time, if
+    # required.  Each authority has a name, an optional list of
+    # aliases, and a list of RDAP servers.
     authorities:
         - name: apnic
           servers:
@@ -44,29 +40,30 @@ rdap:
 
     routing:
         # The default routing action to take for authorities. Accepts either
-        # redirect or proxy
+        # redirect or proxy.
         defaultAction: redirect
 
-        # Allows rdap-ingressd to proxy unroutable requests to a default
-        # authority. The name of the authority specificed here can be null or
-        # a name specified in authorities above. All requests to this authority
-        # are proxied.
+        # Allows rdap-ingressd to proxy unroutable requests to a
+        # default authority. The name of the authority specificed here
+        # can be null or a name specified in the 'authorities' section 
+        # above. All requests to this authority are proxied.
         defaultAuthority: null
 
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
-            # disabled
+            # disabled.
             iana:
                 enabled: true
             nro:
                 enabled: true
         config:
-            # Order in which scrapers are run
+            # Order in which scrapers are run.
             order:
                 - iana
                 - nro
 ```
 
-To configure *rdap-ingressd* at runtime it's necessary to create a config file
-that can be given to the application. See [deploy](deploy.md) documentation.
+To configure *rdap-ingressd* at runtime, it's necessary to create a
+configuration file that can be given to the application. See
+[deploy](deploy.md) documentation.

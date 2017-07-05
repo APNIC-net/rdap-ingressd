@@ -1,9 +1,9 @@
 # Overview
-The following document contains information for building *rdap-ingressd* from
-both source and as a Docker container.
+The following document contains information for building
+*rdap-ingressd* both from source and as a Docker container.
 
 # Requirements
-The following requirements need to be available in order to build the project.
+The following requirements need to be met in order to build the project.
 
 - [Git](https://git-scm.com/)
 
@@ -19,7 +19,7 @@ Docker Container:
 # Obtaining The Source Code
 
 The first step in building *rdap-ingressd* is to obtain the source code with
-git.
+Git.
 
 ```
 git clone https://github.com/APNIC-net/rdap-ingressd
@@ -29,44 +29,45 @@ git clone https://github.com/APNIC-net/rdap-ingressd
 
 ## Building
 *rdap-ingressd* is built using maven. To create a new build of the project
-please run the following maven command.
+please run the following Maven command.
 
 ```
 mvn package
 ```
 
-The projects jars have now been created and can be executed.
+The project's JARs have now been created and can be executed.
 
 ## Running
-The project can be executed in one of two ways. The first is through maven using
-spring-boot or by executing the create jar directly with java.
+The project can be executed in one of two ways. The first is through Maven using
+spring-boot:run, and the second is by executing the JAR directly.
 
-Executing with maven:
+Executing with Maven:
 
 ```
 mvn spring-boot:run
 ```
 
-Executing with java:
+Executing with Java:
 
 ```
 java -jar target/rdap-ingressd-<version>.jar
 ```
-Where <version> is the version of the project that has been checkout with git.
+Where <version> is the version of the project that has been checked
+out with Git.
 
 *rdap-ingressd* is now listening and available on port 8080.
 
 # Building & Running With Docker
 
 ## Building
-Use the following command to build a docker image of *rdap-ingressd*
+Use the following command to build a Docker image of *rdap-ingressd*
 
 ```
 docker build . -t apnic/rdap-ingressd
 ```
 
 ## Running
-The created docker image can now be executed with the following:
+The created Docker image can now be executed:
 
 ```
 docker run -p 8080:8080 apnic/rdap-ingressd
@@ -78,9 +79,9 @@ See the [deploy](deploy.md) documentation for more detailed instructions on
 deploying the Docker image.
 
 # Validating
-To validate that *rdap-ingressd* is working an RDAP query can be issued against
+To validate that *rdap-ingressd* is working, an RDAP query can be issued against
 the service:
 
 ```
-curl -X GET http://localhost:8080
+curl -X GET http://localhost:8080/ip/1.2.3.4
 ```

@@ -40,9 +40,9 @@ public class ScraperScheduler
      * Takes the ResourceStore this scheduler is to work on as well as an
      * authority store for mapping resources to rdap authorities.
      *
-     * The ResourceStore supplied to this scrpaer is reconstructed every time
+     * The ResourceStore supplied to this scraper is reconstructed every time
      * this scheduler runs. This is to make sure a consitent view of the data is
-     * always available and never in a non authorative state.
+     * always available and never in a non-authoritative state.
      *
      * @params resourceStore The ResourceStore to rebuild with this scheduler.
      * @params authorityStore The RDAPAuthorityStore to use for associating
@@ -80,7 +80,7 @@ public class ScraperScheduler
     }
 
     /**
-     * Starts the scheduler and associated scrapers indefinetly.
+     * Starts the scheduler and associated scrapers indefinitely.
      *
      * If this scheduler has already been started previously calls to this
      * method will return immediately.

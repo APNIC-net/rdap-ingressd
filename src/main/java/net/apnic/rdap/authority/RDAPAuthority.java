@@ -170,7 +170,7 @@ public class RDAPAuthority
      * Name is currently generated from a UUID
      *
      * @param routingAction The routing action of the newly created authority
-     * @return RDAPAuthority Newly created anonymouse authority
+     * @return RDAPAuthority Newly created anonymous authority
      */
     public static RDAPAuthority createAnonymousAuthority(RoutingAction routingAction)
     {
@@ -210,9 +210,9 @@ public class RDAPAuthority
     }
 
     /**
-     * Returns whats is considered the best URI to use for this RDAPAuthority.
+     * Returns the best URI to use for this RDAPAuthority.
      *
-     * @return Best URI to communicate with this server on.
+     * @return Best URI for communicating with this server.
      */
     public URI getDefaultServerURI()
     {
@@ -251,7 +251,7 @@ public class RDAPAuthority
     }
 
     /**
-     * Returns teh routing action for this authority.
+     * Returns the routing action for this authority.
      *
      * @return RoutingAction for this authority
      */

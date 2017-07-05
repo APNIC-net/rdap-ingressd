@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 /**
  * Helper class that takes a request path sent to this RDAP server and provides
- * additional more context so further passing can be done.
+ * additional context so further passing can be done.
  */
 public class RDAPRequestPath
 {

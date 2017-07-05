@@ -62,7 +62,7 @@ public class DelegatedStatsParser
         Header header = null;
         ParserAnalytics analytics = new ParserAnalytics();
 
-        // For every CSV row we need to parse it and figure out whats in the
+        // For every CSV row we need to parse it and figure out what's in the
         // row.
         for(CSVRecord record : records)
         {

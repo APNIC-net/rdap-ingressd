@@ -40,7 +40,7 @@ public class IANABootstrapScraper
     implements Scraper
 {
     /**
-     * Lambda callback signature for mapping if authorities on to discovered
+     * Lambda callback signature for mapping of authorities on to discovered
      * bootstrap results.
      */
     private interface ResourceMapper
@@ -63,7 +63,7 @@ public class IANABootstrapScraper
 
     /*
      * Static init of URI members. We cannot do them in the normal way as
-     * contruction throws a checked error that needs to be caught.
+     * construction throws a checked error that needs to be caught.
      */
     static
     {
@@ -124,9 +124,9 @@ public class IANABootstrapScraper
     }
 
     /**
-     * Main scraper method that quicks off a one time scrape of IANA.
+     * Main scraper method that dispatches a one-time scrape of IANA.
      *
-     * This method is trigger by a scraper scheduler.
+     * This method is triggered by a scraper scheduler.
      *
      * @see net.apnic.rdap.scraper.ScraperScheduler
      */
@@ -142,11 +142,11 @@ public class IANABootstrapScraper
 
     /**
      * Grunt work method that performs all bootstrap http requests and returns
-     * the servers http response.
+     * the server's http response.
      *
      * Assumes per the RFC that all requests are going to be GET.
      *
-     * @param bootStrapURI The URI to call as apart of this request.
+     * @param bootStrapURI The URI to call as a part of this request.
      * @return Promise of the server response with a JSON body.
      */
     private CompletableFuture<ResponseEntity<JsonNode>>
@@ -234,7 +234,8 @@ public class IANABootstrapScraper
     /**
      * Drives the main update cycle for asn bootstrap results.
      *
-     * @return Promise that's complete when an IANA asn update has complete
+     * @return Promise that's complete when an IANA asn update has
+     * completed.
      */
     private CompletableFuture<Void> updateASNData(ResourceStore store,
                                                   RDAPAuthorityStore authorityStore)
@@ -257,7 +258,8 @@ public class IANABootstrapScraper
     /**
      * Drives the main update cycle for domain bootstrap results
      *
-     * @return Promise that's complete when an IANA domain update has complete
+     * @return Promise that's complete when an IANA domain update has
+     * completed.
      */
     private CompletableFuture<Void> updateDomainData(ResourceStore store,
                                                      RDAPAuthorityStore authorityStore)
@@ -282,7 +284,8 @@ public class IANABootstrapScraper
      * updates.
      *
      * @param ipBootstrapURI The URI for the ip bootstrap data to process
-     * @return Promise that's complete when an IANA ip update has complete
+     * @return Promise that's complete when an IANA ip update has
+     * completed
      */
     private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI,
                                                     ResourceStore store,
@@ -307,7 +310,8 @@ public class IANABootstrapScraper
      * Drives the main update cycle for ipv4 bootstrap results.
      *
      * Proxies through to updateIPAllData()
-     * @return Promise that's complete when an IANA ipv4 update has complete
+     * @return Promise that's complete when an IANA ipv4 update has
+     * complete.
      */
     private CompletableFuture<Void> updateIPv4Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)
@@ -319,7 +323,8 @@ public class IANABootstrapScraper
      * Drives the main update cycle for ipv6 bootstrap results.
      *
      * Proxies through to updateIPAllData()
-     * @return Promise that's complete when an IANA ipv6 update has complete
+     * @return Promise that's complete when an IANA ipv6 update has
+     * complete.
      */
     private CompletableFuture<Void> updateIPv6Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)

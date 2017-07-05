@@ -4,16 +4,16 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Interface provides callbacks for registerying change events on RDAPAuthority
+ * Interface provides callbacks for registering change events on RDAPAuthority
  * classes.
  *
  * Intended use for this class is for RDAPAuthorityStore that needs to maintain
- * data structure lookups for authorities based on name(s) and URIs
+ * data structure lookups for authorities based on name(s) and URIs.
  */
 public interface RDAPAuthorityEventListener
 {
     /**
-     * Callback called for when new aliases are added to a given authority.
+     * Callback called when new aliases are added to a given authority.
      *
      * @param authority The authority that has had new aliases added
      * @param addedAliases List of aliases that have been added to the
@@ -23,7 +23,7 @@ public interface RDAPAuthorityEventListener
                                       List<String> addedAliases);
 
     /**
-     * Callback called for when new servers are added to a given authority.
+     * Callback called when new servers are added to a given authority.
      *
      * @param authority The authority that has had new servers added
      * @param addedServers List of servers that have been added to the

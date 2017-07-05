@@ -22,7 +22,7 @@ class ParserAnalytics
          * Constructs a SummaryAnalytics object with the provided Summary
          * object.
          *
-         * Counter is initliased to zero.
+         * Counter is initialised to zero.
          *
          * @param summary Summary object to count against.
          */
@@ -36,10 +36,10 @@ class ParserAnalytics
         }
 
         /**
-         * Increments this objects counter against the Summary.
+         * Increments this object's counter against the Summary.
          *
-         * If the counter goes higher than the attached Summaries getNoRecords()
-         * a DelegatedStatsException is thrown.
+         * If the counter goes higher than the attached Summary's
+         * getNoRecords(), a DelegatedStatsException is thrown.
          *
          * @throws DelegatedStatsException When counter is incremented past the
          *                                 summary.

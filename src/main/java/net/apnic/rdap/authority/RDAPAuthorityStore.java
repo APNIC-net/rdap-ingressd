@@ -22,7 +22,7 @@ public class RDAPAuthorityStore
      * Adds the supplied authority to this store.
      *
      * If an authority with the same name, aliases and server URI already
-     * exists they will be overwritten with the new RDAPAuthority.
+     * exists it will be overwritten with the new RDAPAuthority.
      *
      * @param authority The RDAPAuthority to add into this store
      * @throws IllegalArgumentException When authority is null
@@ -79,7 +79,7 @@ public class RDAPAuthorityStore
      * store.
      *
      * @param name The new authority name
-     * @param RDAPAuthority The newly create authority
+     * @param RDAPAuthority The newly created authority
      */
     public RDAPAuthority createAuthority(String name)
     {

@@ -53,7 +53,7 @@ class BootstrapService
     }
 
     /**
-     * Returns the server URI's where authorative information can be found for
+     * Returns the server URIs where authoritative information can be found for
      * the resources described by this service.
      *
      * @return List of servers and their string representation
@@ -64,14 +64,14 @@ class BootstrapService
     }
 
     /**
-     * Returns this services servers as actual URI objects.
+     * Returns this service's servers as actual URI objects.
      *
-     * Users of this function must be read to catch errors as its plausible that
-     * a non conformant server URI could be passed which will result in an error
-     * being thrown.
+     * Users of this function must be ready to catch errors as it's
+     * plausible that a nonconformant server URI could be passed which
+     * will result in an error being thrown.
      *
      * @return List of server and their URI representations
-     * @throws URISyntaxException for when a URI does not conformto URI standard
+     * @throws URISyntaxException for when a URI does not conform to URI standard
      * @see getServers()
      */
     public List<URI> getServersByURI()

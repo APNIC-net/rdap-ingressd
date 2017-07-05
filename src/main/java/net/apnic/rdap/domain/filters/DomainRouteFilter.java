@@ -31,8 +31,8 @@ public class DomainRouteFilter
     }
 
     /**
-     * Main run method for filter which takes the incoming request and find a
-     * domain authority.
+     * Main run method for filter which takes the incoming request and
+     * finds a domain authority.
      *
      * @see RDAPPathRouteFilter
      */
