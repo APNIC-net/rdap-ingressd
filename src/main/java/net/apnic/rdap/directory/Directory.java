@@ -29,6 +29,7 @@ public class Directory
     private ResourceLocator<AsnRange> asnLocator;
     private ResourceLocator<Domain> domainLocator;
     private ResourceLocator<Entity> entityLocator;
+    private ResourceLocator<Void> helpLocator;
     private ResourceLocator<IpRange> ipLocator;
     private ResourceLocator<NameServer> nsLocator;
 
@@ -36,12 +37,14 @@ public class Directory
     public Directory(ResourceLocator<AsnRange> asnLocator,
                      ResourceLocator<Domain> domainLocator,
                      ResourceLocator<Entity> entityLocator,
+                     ResourceLocator<Void> helpLocator,
                      ResourceLocator<IpRange> ipLocator,
                      ResourceLocator<NameServer> nsLocator)
     {
         this.asnLocator = asnLocator;
         this.domainLocator = domainLocator;
         this.entityLocator = entityLocator;
+        this.helpLocator = helpLocator;
         this.ipLocator = ipLocator;
         this.nsLocator = nsLocator;
     }
@@ -62,6 +65,12 @@ public class Directory
         throws ResourceNotFoundException
     {
         return locatorProxy(entity, entityLocator);
+    }
+
+    public RDAPAuthority getHelpAuthority()
+        throws ResourceNotFoundException
+    {
+        return locatorProxy(null, helpLocator);
     }
 
     public RDAPAuthority getIPAuthority(IpRange block)

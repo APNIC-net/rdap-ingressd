@@ -1,31 +1,4 @@
 
-rdap:
-    authorities:
-        - name: apnic
-          servers:
-              - https://rdap.apnic.net
-              - http://rdap.apnic.net
-
-        - name: ripe
-          aliases:
-              - ripencc
-          servers:
-              - https://rdap.db.ripe.net/
-
-        - name: afrinic
-          servers:
-              - https://rdap.afrinic.net/rdap/
-              - http://rdap.afrinic.net/rdap/
-
-        - name: arin
-          servers:
-              - https://rdap.arin.net/registry
-              - http://rdap.arin.net/registry
-
-        - name: lacnic
-          servers:
-              - https://rdap.lacnic.net/rdap/
-
 endpoints:
     enabled: false
     pause:
@@ -43,31 +16,21 @@ zuul:
     routes:
         autnum:
             path: /autnum/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         domain:
             path: /domain/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         entity:
             path: /entity/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         help:
             path: /help
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         ip:
             path: /ip/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
         nameserver:
             path: /nameserver/**
-            url: https://rdap.apnic.net
-            sensitiveHeaders:
             stripPrefix: false
+
+spring.profiles.include: 'rdap'

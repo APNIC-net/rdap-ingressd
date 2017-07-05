@@ -1,9 +1,11 @@
 package net.apnic.rdap.autnum;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.resource.ResourceLocator;
 import net.apnic.rdap.resource.ResourceNotFoundException;
-import net.apnic.rdap.resource.ResourceStore;
+import net.apnic.rdap.resource.store.ResourceStorage;
 
 import net.ripe.ipresource.etree.IpResourceIntervalStrategy;
 import net.ripe.ipresource.etree.NestedIntervalMap;
@@ -15,15 +17,17 @@ import net.ripe.ipresource.etree.NestedIntervalMap;
  * authority mappings.
  */
 public class AutnumStatsResourceLocator
-    implements ResourceLocator<AsnRange>, ResourceStore<AsnRange>
+    implements ResourceLocator<AsnRange>, ResourceStorage<AsnRange>
 {
-    private NestedIntervalMap<AsnRange, RDAPAuthority> resources;
+    private AtomicReference<NestedIntervalMap<AsnRange, RDAPAuthority>> resources;
 
     public AutnumStatsResourceLocator()
     {
         IpResourceIntervalStrategy<AsnRange> strategy =
             IpResourceIntervalStrategy.<AsnRange>getInstance();
-        resources = new NestedIntervalMap<AsnRange, RDAPAuthority>(strategy);
+        resources =
+            new AtomicReference<NestedIntervalMap<AsnRange, RDAPAuthority>>(
+                new NestedIntervalMap<AsnRange, RDAPAuthority>(strategy));
     }
 
     /**
@@ -33,7 +37,8 @@ public class AutnumStatsResourceLocator
     public RDAPAuthority authorityForResource(AsnRange range)
         throws ResourceNotFoundException
     {
-        RDAPAuthority authority = resources.findExactOrFirstLessSpecific(range);
+        RDAPAuthority authority =
+            resources.get().findExactOrFirstLessSpecific(range);
         if(authority == null)
         {
             throw new ResourceNotFoundException();
@@ -45,14 +50,44 @@ public class AutnumStatsResourceLocator
      * {@inheritDocs}
      */
     @Override
+    public ResourceStorage<AsnRange> initialiseNew()
+    {
+        return new AutnumStatsResourceLocator();
+    }
+
+    /**
+     * {@inheritDocs}
+     */
+    @Override
+    public void moveStorage(ResourceStorage<AsnRange> asnStorage)
+    {
+        if(getClass() != asnStorage.getClass())
+        {
+            return;
+        }
+
+        AutnumStatsResourceLocator newLocator =
+            (AutnumStatsResourceLocator)asnStorage;
+
+        this.resources.set(newLocator.resources.get());
+        IpResourceIntervalStrategy<AsnRange> strategy =
+            IpResourceIntervalStrategy.<AsnRange>getInstance();
+        newLocator.resources.set(
+            new NestedIntervalMap<AsnRange, RDAPAuthority>(strategy));
+    }
+
+    /**
+     * {@inheritDocs}
+     */
+    @Override
     public void putResourceMapping(AsnRange resource, RDAPAuthority authority)
     {
         RDAPAuthority estAuthority =
-            resources.findExactOrFirstLessSpecific(resource);
+            resources.get().findExactOrFirstLessSpecific(resource);
 
         if(estAuthority == null || estAuthority.equals(authority) == false)
         {
-            resources.put(resource, authority);
+            resources.get().put(resource, authority);
         }
     }
 }

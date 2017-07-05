@@ -1,8 +1,12 @@
 package net.apnic.rdap.authority;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import net.apnic.rdap.authority.routing.RoutingAction;
 
 /**
  * Represents an entity and their authorative data RDAP server.
@@ -11,9 +15,22 @@ import java.util.List;
  */
 public class RDAPAuthority
 {
+    private static final String BEST_SCHEME = "https";
+
     private List<String> aliases = new ArrayList<String>();
+    private URI defaultServerURI = null;
+    private RDAPAuthorityEventListener eventListener = null;
     private String name;
-    private List<URL> servers = new ArrayList<URL>();
+    private RoutingAction routingAction = null;
+    private List<URI> servers = new ArrayList<URI>();
+
+    /**
+     *
+     */
+    public RDAPAuthority(String name)
+    {
+        this(name, RoutingAction.REDIRECT);
+    }
 
     /**
      * Constructs a new authority with the given name.
@@ -23,7 +40,7 @@ public class RDAPAuthority
      * @param name Unique name to represent this authrotiy
      * @throws IllegalArgumentException When name is null or trim().emtpy()
      */
-    public RDAPAuthority(String name)
+    public RDAPAuthority(String name, RoutingAction routingAction)
         throws IllegalArgumentException
     {
         if(name == null || name.trim().isEmpty())
@@ -32,6 +49,7 @@ public class RDAPAuthority
         }
 
         this.name = name.trim().toLowerCase();
+        this.routingAction = routingAction;
     }
 
     /**
@@ -45,11 +63,29 @@ public class RDAPAuthority
     public void addAlias(String alias)
         throws IllegalArgumentException
     {
+        alias = addAliasDetail(alias);
+        if(eventListener != null)
+        {
+            eventListener.authorityAliasesAdded(this, Arrays.asList(alias));
+        }
+    }
+
+    /**
+     * Internal detail function for adding a new single alias mapping to this
+     * authority.
+     *
+     * @param alias to add and normalise
+     * @return normalised alias that has been added
+     */
+    private String addAliasDetail(String alias)
+    {
         if(alias == null || alias.trim().isEmpty())
         {
             throw new IllegalArgumentException("alias cannot be null or emtpy");
         }
-        aliases.add(alias.trim().toLowerCase());
+        alias = alias.trim().toLowerCase();
+        aliases.add(alias);
+        return alias;
     }
 
     /**
@@ -70,41 +106,75 @@ public class RDAPAuthority
             throw new IllegalArgumentException("aliases cannot by null");
         }
 
+        ArrayList<String> normAliases = new ArrayList<String>();
+
         for(String alias : aliases)
         {
-            addAlias(alias);
+            normAliases.add(addAliasDetail(alias));
+        }
+
+        if(eventListener != null)
+        {
+            eventListener.authorityAliasesAdded(this, normAliases);
         }
     }
 
     /**
-     * Adds an RDAP server URL to this authority.
+     * Adds an RDAP server URI to this authority.
      *
      * @param server Authorative RDAP url for this authority.
-     * @throws IllegalArgumentException When server URL is null
+     * @throws IllegalArgumentException When server URI is null
      */
-    public void addServer(URL server)
+    public void addServer(URI server)
     {
         if(server == null)
         {
-            throw new IllegalArgumentException("server url cannot be null");
+            throw new IllegalArgumentException("server uri cannot be null");
         }
-        servers.add(server);
+        servers.add(normalizeServerURI(server));
+
+        if(eventListener != null)
+        {
+            eventListener.authorityServersAdded(this, Arrays.asList(server));
+        }
     }
 
     /**
-     * Adds a list server URL's for this authority.
+     * Adds a list server URI's for this authority.
      *
      * @param servers List of authorative RDAP url's for this authority.
      * @throws IllegalArgumentException When servers is null or servers
      *                                  contains null element.
      */
-    public void addServers(List<URL> servers)
+    public void addServers(List<URI> servers)
     {
         if(servers == null || servers.contains(null))
         {
             throw new IllegalArgumentException("servers cannot be null");
         }
-        this.servers.addAll(servers);
+
+        for(URI server : servers)
+        {
+            this.servers.add(normalizeServerURI(server));
+        }
+
+        if(eventListener != null)
+        {
+            eventListener.authorityServersAdded(this, servers);
+        }
+    }
+
+    /**
+     * Creates a new authority with a name that is randomly set.
+     *
+     * Name is currently generated from a UUID
+     *
+     * @param routingAction The routing action of the newly created authority
+     * @return RDAPAuthority Newly created anonymous authority
+     */
+    public static RDAPAuthority createAnonymousAuthority(RoutingAction routingAction)
+    {
+        return new RDAPAuthority(UUID.randomUUID().toString(), routingAction);
     }
 
     /**
@@ -139,6 +209,36 @@ public class RDAPAuthority
         return aliases;
     }
 
+    /**
+     * Returns the best URI to use for this RDAPAuthority.
+     *
+     * @return Best URI for communicating with this server.
+     */
+    public URI getDefaultServerURI()
+    {
+        if(defaultServerURI == null)
+        {
+            for(URI serverURI : servers)
+            {
+                defaultServerURI = serverURI;
+                if(serverURI.getScheme().equals(BEST_SCHEME))
+                {
+                    break;
+                }
+            }
+        }
+        return defaultServerURI;
+    }
+
+    /**
+     * Provides the event listener that has been registered onto this authority.
+     *
+     * @return RDAPAuthorityEventListener object that has been registered
+     */
+    public RDAPAuthorityEventListener getEventListener()
+    {
+        return eventListener;
+    }
 
     /**
      * Returns the name for this authority.
@@ -151,12 +251,42 @@ public class RDAPAuthority
     }
 
     /**
+     * Returns the routing action for this authority.
+     *
+     * @return RoutingAction for this authority
+     */
+    public RoutingAction getRoutingAction()
+    {
+        return routingAction;
+    }
+
+    /**
      * Returns a list of servers registered for this authority.
      *
      * @return List of registered servers
      */
-    public List<URL> getServers()
+    public List<URI> getServers()
     {
         return servers;
+    }
+
+    public static URI normalizeServerURI(URI server)
+    {
+        if(server.toASCIIString().endsWith("/") == false)
+        {
+            server = URI.create(server.toASCIIString() + "/");
+        }
+        return server;
+    }
+
+    /**
+     * Sets the event listener for this authority.
+     *
+     * @param eventListener Event listener to set on this authority
+     * @see RDAPAuthorityEventListener
+     */
+    public void setEventListener(RDAPAuthorityEventListener eventListener)
+    {
+        this.eventListener = eventListener;
     }
 }

@@ -1,0 +1,54 @@
+rdap:
+    # A list of RDAP authorities may be configured ahead of time, if
+    # required.  Each authority has a name, an optional list of
+    # aliases, and a list of RDAP servers.
+    authorities:
+        - name: apnic
+          servers:
+              - https://rdap.apnic.net
+              - http://rdap.apnic.net
+
+        - name: ripe
+          aliases:
+              - ripencc
+          servers:
+              - https://rdap.db.ripe.net/
+
+        - name: afrinic
+          servers:
+              - https://rdap.afrinic.net/rdap/
+              - http://rdap.afrinic.net/rdap/
+
+        - name: arin
+          servers:
+              - https://rdap.arin.net/registry
+              - http://rdap.arin.net/registry
+
+        - name: lacnic
+          servers:
+              - https://rdap.lacnic.net/rdap/
+
+    routing:
+        # The default routing action to take for authorities. Accepts either
+        # redirect or proxy.
+        defaultAction: redirect
+
+        # Allows rdap-ingressd to proxy unroutable requests to a
+        # default authority. The name of the authority specificed here
+        # can be null or a name specified in the 'authorities' section
+        # above. All requests to this authority are proxied.
+        defaultAuthority: null
+
+    scraping:
+        scrapers:
+            # Individual scrapers available in rdap-ingressd can be enabled and
+            # disabled.
+            iana:
+                enabled: true
+            nro:
+                enabled: true
+        config:
+            # Order in which scrapers are run.
+            order:
+                - iana
+                - nro

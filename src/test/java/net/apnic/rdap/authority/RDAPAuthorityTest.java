@@ -1,7 +1,7 @@
 package net.apnic.rdap.authority;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,19 +18,19 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class RDAPAuthorityTest
 {
     static Stream<Arguments> validAuthorityParams()
-        throws MalformedURLException
+        throws URISyntaxException
     {
         return Stream.of(
             ObjectArrayArguments.create(
                 "apnic", Arrays.asList("apnic1", "apnic2", "apnic3"),
-                Arrays.asList(new URL("https://rdap.apnic.net"),
-                              new URL("http://rdap.apnic.net"))),
+                Arrays.asList(new URI("https://rdap.apnic.net/"),
+                              new URI("http://rdap.apnic.net/"))),
             ObjectArrayArguments.create(
                 "ripe", Arrays.asList("ripencc", "ripe1", "ripe2"),
-                Arrays.asList(new URL("https://rdap.db.ripe.net/"))),
+                Arrays.asList(new URI("https://rdap.db.ripe.net/"))),
             ObjectArrayArguments.create(
                 "arin", Arrays.asList("arin1", "arin2", "arin3"),
-                Arrays.asList(new URL("https://rdap.arin.net/registry"))));
+                Arrays.asList(new URI("https://rdap.arin.net/registry/"))));
     }
 
     @ParameterizedTest
@@ -57,7 +57,7 @@ public class RDAPAuthorityTest
 
     @ParameterizedTest
     @MethodSource(names = "validAuthorityParams")
-    void checkAliasAdding(String name, List<String> aliases, List<URL> servers)
+    void checkAliasAdding(String name, List<String> aliases, List<URI> servers)
     {
         RDAPAuthority authority = new RDAPAuthority(name);
         authority.addAliases(aliases);
@@ -95,7 +95,7 @@ public class RDAPAuthorityTest
 
     @ParameterizedTest
     @MethodSource(names = "validAuthorityParams")
-    void checkServerAdding(String name, List<String> aliases, List<URL> servers)
+    void checkServerAdding(String name, List<String> aliases, List<URI> servers)
     {
         RDAPAuthority authority = new RDAPAuthority(name);
         authority.addServers(servers);
@@ -103,7 +103,7 @@ public class RDAPAuthorityTest
         assertEquals(authority.getServers(), servers);
 
         authority = new RDAPAuthority(name);
-        for(URL server : servers)
+        for(URI server : servers)
         {
             authority.addServer(server);
         }
@@ -129,7 +129,7 @@ public class RDAPAuthorityTest
 
     @ParameterizedTest
     @MethodSource(names = "validAuthorityParams")
-    void checkEquals(String name, List<String> aliases, List<URL> servers)
+    void checkEquals(String name, List<String> aliases, List<URI> servers)
     {
         RDAPAuthority authority1 = new RDAPAuthority(name);
         RDAPAuthority authority2 = new RDAPAuthority(name);
