@@ -64,6 +64,14 @@ public class ResourceConfiguration
     }
 
     @Bean
+    @Autowired
+    public ResourceLocator<Void> helpResourceLocator(
+        @Qualifier("defaultAuthority") RDAPAuthority defaultAuthority)
+    {
+        return new StaticResourceLocator<Void>(defaultAuthority);
+    }
+
+    @Bean
     public ResourceLocator<IpRange> ipResourceLocator()
     {
         return ipResourceLocator;
