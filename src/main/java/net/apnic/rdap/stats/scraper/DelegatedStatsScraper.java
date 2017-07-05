@@ -18,7 +18,6 @@ import net.apnic.rdap.stats.parser.DelegatedStatsException;
 import net.apnic.rdap.stats.parser.DelegatedStatsParser;
 import net.apnic.rdap.stats.parser.IPRecord;
 import net.apnic.rdap.stats.parser.ResourceRecord;
-import net.apnic.rdap.util.ConcurrentUtil;
 
 import net.ripe.ipresource.IpRange;
 
@@ -29,7 +28,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Abstract scraper for fetching delegated stats files and parsing the results.
@@ -61,7 +61,7 @@ public abstract class DelegatedStatsScraper
     }
 
     private HttpHeaders requestHeaders = null;
-    private AsyncRestTemplate restClient = null;
+    private RestTemplate restClient = null;
     private SupportedScheme statsScheme = null;
     private URI statsURI = null;
 
@@ -88,7 +88,7 @@ public abstract class DelegatedStatsScraper
             throw new IllegalArgumentException("Non support scheme for URI");
         }
 
-        this.restClient = new AsyncRestTemplate();
+        this.restClient = new RestTemplate();
         this.statsURI = statsURI;
         setupRequestHeaders();
     }
@@ -172,13 +172,21 @@ public abstract class DelegatedStatsScraper
     private CompletableFuture<InputStream> makeDelegatedHttpRequest()
     {
         HttpEntity<Resource> entity = new HttpEntity<Resource>(requestHeaders);
+        CompletableFuture<ResponseEntity<Resource>> future = new CompletableFuture();
 
-        ListenableFuture<ResponseEntity<Resource>> lFuture =
-            restClient.exchange(statsURI, HttpMethod.GET,
-                                entity, Resource.class);
+        try
+        {
+            ResponseEntity<Resource> rVal =
+                restClient.exchange(statsURI, HttpMethod.GET,
+                                    entity, Resource.class);
+            future.complete(rVal);
+        }
+        catch(RestClientException ex)
+        {
+            future.completeExceptionally(ex);
+        }
 
-        return ConcurrentUtil.buildCompletableFuture(lFuture)
-            .thenApply((ResponseEntity<Resource> responseEntity) ->
+        return future.thenApply((ResponseEntity<Resource> responseEntity) ->
             {
                 try
                 {
