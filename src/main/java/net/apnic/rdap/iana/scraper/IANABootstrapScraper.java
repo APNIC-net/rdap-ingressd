@@ -19,7 +19,6 @@ import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.domain.Domain;
 import net.apnic.rdap.resource.store.ResourceStore;
 import net.apnic.rdap.scraper.Scraper;
-import net.apnic.rdap.util.ConcurrentUtil;
 
 import net.ripe.ipresource.IpRange;
 
@@ -28,9 +27,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Scraper for IANA bootstrap service.
@@ -60,7 +59,7 @@ public class IANABootstrapScraper
         Logger.getLogger(IANABootstrapScraper.class.getName());
 
     private HttpHeaders requestHeaders = null;
-    private AsyncRestTemplate restClient = null;
+    private RestTemplate restClient = null;
 
     /*
      * Static init of URI members. We cannot do them in the normal way as
@@ -100,7 +99,7 @@ public class IANABootstrapScraper
      */
     public IANABootstrapScraper()
     {
-        restClient = new AsyncRestTemplate();
+        restClient = new RestTemplate();
         setupRequestHeaders();
     }
 
@@ -154,11 +153,21 @@ public class IANABootstrapScraper
         makeBootstrapRequest(URI bootStrapURI)
     {
         HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
+        CompletableFuture future = new CompletableFuture();
 
-        ListenableFuture<ResponseEntity<JsonNode>> lFuture =
-            restClient.exchange(bootStrapURI, HttpMethod.GET,
-                                entity, JsonNode.class);
-        return ConcurrentUtil.buildCompletableFuture(lFuture);
+        try
+        {
+            ResponseEntity<JsonNode> rVal =
+                restClient.exchange(bootStrapURI, HttpMethod.GET,
+                                    entity, JsonNode.class);
+            future.complete(rVal);
+        }
+        catch(RestClientException ex)
+        {
+            future.completeExceptionally(ex);
+        }
+
+        return future;
     }
 
     /**
