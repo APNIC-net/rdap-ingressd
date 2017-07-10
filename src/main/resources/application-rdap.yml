@@ -39,6 +39,15 @@ rdap:
         # above. All requests to this authority are proxied.
         defaultAuthority: null
 
+    notices:
+      - title: Terms and Conditions
+        description:
+          - This is a test
+        links:
+          - href: http://www.apnic.net/db/dbcopyright.html
+            rel: terms-of-service
+            type: text/html
+
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
