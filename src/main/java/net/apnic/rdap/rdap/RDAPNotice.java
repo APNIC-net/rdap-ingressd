@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RDAPNotice
+    implements Cloneable
 {
     private List<String> descriptions = null;
     private List<RDAPLink> links = null;
@@ -32,6 +33,25 @@ public class RDAPNotice
         return this;
     }
 
+    public RDAPNotice clone()
+    {
+        RDAPNotice notice = new RDAPNotice();
+        notice.setDescription(getDescriptions());
+        notice.setTitle(getTitle());
+
+        if(getLinks() != null)
+        {
+            List<RDAPLink> links = new ArrayList<RDAPLink>();
+            for(RDAPLink link: getLinks())
+            {
+                links.add(link.clone());
+            }
+            notice.setLinks(links);
+        }
+
+        return notice;
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("description")
     public List<String> getDescriptions()
@@ -51,6 +71,20 @@ public class RDAPNotice
     public String getTitle()
     {
         return title;
+    }
+
+    public RDAPNotice setNoticeContext(String context)
+    {
+        if(getLinks() == null)
+        {
+            return this;
+        }
+
+        for(RDAPLink link : getLinks())
+        {
+            link.setValue(context);
+        }
+        return this;
     }
 
     public RDAPNotice setDescription(List<String> descriptions)

@@ -4,11 +4,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RDAPLink
+    implements Cloneable
 {
-    private String href;
-    private String rel;
-    private String type;
-    private String value;
+    private String href = null;
+    private String rel = null;
+    private String type = null;
+    private String value = null;
+
+    public RDAPLink clone()
+    {
+        RDAPLink link = new RDAPLink();
+        link.setHref(getHref());
+        link.setRel(getRel());
+        link.setType(getType());
+        link.setValue(getValue());
+        return link;
+    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getHref()

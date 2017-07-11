@@ -1,5 +1,6 @@
 package net.apnic.rdap.error.controller;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 import net.apnic.rdap.error.MalformedRequestException;
@@ -27,7 +28,7 @@ public class ZuulErrorController
 {
     private static final String EXCEPTION_ATTRIBUTE =
         "javax.servlet.error.exception";
-
+    private static final String ORIGIN_ATTRIBUTE = "origin";
     private static final MediaType RDAP_MEDIA_TYPE =
         new MediaType("application", "rdap+json");
 
@@ -49,36 +50,54 @@ public class ZuulErrorController
         return ExceptionUtils.indexOfThrowable(th, clazz) != -1;
     }
 
-    private ResponseEntity<RDAPError> createErrorResponse(HttpStatus status)
+    public ResponseEntity<RDAPError> createErrorResponse(HttpStatus status,
+                                                         String context)
     {
-        return new ResponseEntity<RDAPError>(
-            rdapObjectFactory.createRDAPObject(RDAPError.class)
+        return createErrorResponse(status, null, context);
+    }
+
+    public ResponseEntity<RDAPError> createErrorResponse(HttpStatus status,
+                                                         String description,
+                                                         String context)
+    {
+        RDAPError error =
+            rdapObjectFactory.createRDAPObject(RDAPError.class, context)
                 .setErrorCode(status.value())
-                .setTitle(status.getReasonPhrase()),
-            responseHeaders,
-            status);
+                .setTitle(status.getReasonPhrase());
+
+        if(description != null)
+        {
+            error.addDescription(description);
+        }
+
+        return new ResponseEntity<RDAPError>(error, responseHeaders,
+                                             status);
     }
 
     @RequestMapping(value="${error.path:/error}")
     public ResponseEntity<RDAPError> error(HttpServletRequest request)
     {
         Throwable topCause = (Throwable)request.getAttribute(EXCEPTION_ATTRIBUTE);
+        String context = (String)request.getAttribute(ORIGIN_ATTRIBUTE);
+
         if(topCause == null)
         {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        System.out.println(topCause.getCause());
         if(causedBy(topCause, MalformedRequestException.class))
         {
-            return createErrorResponse(HttpStatus.BAD_REQUEST);
+            return createErrorResponse(HttpStatus.BAD_REQUEST,
+                "Request could not be understood, malformed syntax", context);
         }
         else if(causedBy(topCause, ResourceNotFoundException.class))
         {
-            return null; // 404 RDAP Response
+            return createErrorResponse(HttpStatus.NOT_FOUND, context);
         }
         else
         {
-            return null; // 500 RDAP Response
+            return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, context);
         }
     }
 
