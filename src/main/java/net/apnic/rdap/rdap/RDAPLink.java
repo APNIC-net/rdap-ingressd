@@ -3,6 +3,11 @@ package net.apnic.rdap.rdap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Class represents a link object in the RDAP protocl.
+ *
+ * @see https://tools.ietf.org/html/rfc7483
+ */
 public class RDAPLink
     implements Cloneable
 {
@@ -11,6 +16,9 @@ public class RDAPLink
     private String type = null;
     private String value = null;
 
+    /**
+     * {@inheritDocs}
+     */
     public RDAPLink clone()
     {
         RDAPLink link = new RDAPLink();
