@@ -69,7 +69,9 @@ public class RDAPObjectFactory
     {
         try
         {
-            return fillCommonObject(objectType.newInstance(), context);
+            T rdapObject = objectType.newInstance();
+            fillCommonObject(rdapObject, context);
+            return rdapObject;
         }
         catch(Exception ex)
         {
@@ -83,10 +85,9 @@ public class RDAPObjectFactory
      * @param rdapObject Child object to fill
      * @return Filled child object
      */
-    private <T extends RDAPObject> T fillCommonObject(T rdapObject,
-                                                      String context)
+    private void fillCommonObject(RDAPObject rdapObject, String context)
     {
-        return (T)rdapObject
+        rdapObject
             .addConformance(DEFAULT_CONFORMANCE)
             .setNotices(copyDefaultNoticesWithContext(context));
     }
