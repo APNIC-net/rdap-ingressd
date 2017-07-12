@@ -4,6 +4,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 import net.apnic.rdap.error.MalformedRequestException;
+import net.apnic.rdap.filter.config.RequestContextKeys;
 import net.apnic.rdap.rdap.RDAPError;
 import net.apnic.rdap.rdap.RDAPObjectFactory;
 import net.apnic.rdap.resource.ResourceNotFoundException;
@@ -42,7 +43,6 @@ public class ErrorController
 {
     private static final String EXCEPTION_ATTRIBUTE =
         "javax.servlet.error.exception";
-    private static final String ORIGIN_ATTRIBUTE = "origin";
     private static final MediaType RDAP_MEDIA_TYPE =
         new MediaType("application", "rdap+json");
 
@@ -132,7 +132,7 @@ public class ErrorController
     public ResponseEntity<RDAPError> error(HttpServletRequest request)
     {
         Throwable topCause = (Throwable)request.getAttribute(EXCEPTION_ATTRIBUTE);
-        String context = (String)request.getAttribute(ORIGIN_ATTRIBUTE);
+        String context = (String)request.getAttribute(RequestContextKeys.RDAP_ORIGIN_URL);
 
         if(topCause == null)
         {

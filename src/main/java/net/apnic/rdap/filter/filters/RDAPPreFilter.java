@@ -14,8 +14,6 @@ import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 public class RDAPPreFilter
     extends ZuulFilter
 {
-    private static final String ORIGIN_ATT_KEY = "origin";
-
     @Override
     public int filterOrder()
     {
@@ -42,7 +40,12 @@ public class RDAPPreFilter
         RDAPRequestPath path = RDAPRequestPath.createRequestPath(
                 context.getRequest().getRequestURI());
         context.put(RequestContextKeys.RDAP_REQUEST_PATH, path);
-        context.getRequest().setAttribute(ORIGIN_ATT_KEY,
+
+        // Place the origin url into the request attributes.
+        // We do this because Zuul and spring may route to other endpoints and
+        // this information will be lost.
+        // Information is needed to contextualise RDAP responses
+        context.getRequest().setAttribute(RequestContextKeys.RDAP_ORIGIN_URL,
             context.getRequest().getRequestURL().toString());
 
         return null;
