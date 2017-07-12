@@ -6,6 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class represents a notice object in the RDAP protocol.
+ *
+ * @see https://tools.ietf.org/html/rfc7483
+ */
 public class RDAPNotice
     implements Cloneable
 {

@@ -49,6 +49,26 @@ rdap:
         # above. All requests to this authority are proxied.
         defaultAuthority: null
 
+    # List of default notices that are sent with RDAP responses from this 
+    # server.
+    # Each notice in the list takes on the following form
+    # - title: Optional title for the notice
+    # - description: # Array of description lines
+    #     - description line 1
+    #     - description line 2
+    # - links: # Array of link object for the notice
+    #    - href: Non optional URL ref for the link
+    #      rel: Optional relation type
+    #      type: link type
+    notices:
+      - title: Terms and Conditions
+        description:
+          - This is the APNIC RDAP query service. The objects are in RDAP format.
+        links:
+          - href: http://www.apnic.net/db/dbcopyright.html
+            rel: terms-of-service
+            type: text/html
+
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
