@@ -4,58 +4,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Class represents a notice object in the RDAP protocol.
  *
  * @see https://tools.ietf.org/html/rfc7483
  */
-public class RDAPNotice
-    implements Cloneable
-{
-    private List<String> descriptions = null;
-    private List<RDAPLink> links = null;
-    private String title = null;
+public class RDAPNotice {
+    private final List<String> descriptions;
+    private final List<RDAPLink> links;
+    private final String title;
 
-    public RDAPNotice addDescription(String description)
-    {
-        if(descriptions == null)
-        {
-            descriptions = new ArrayList<String>();
-        }
-        descriptions.add(description);
-        return this;
+    public RDAPNotice(List<String> descriptions, List<RDAPLink> links, String title) {
+        this.descriptions = Collections.unmodifiableList(
+                new ArrayList<>(Optional.ofNullable(descriptions).orElse(Collections.emptyList())));
+        this.links = Collections.unmodifiableList(
+                new ArrayList<>(Optional.ofNullable(links).orElse(Collections.emptyList())));
+        this.title = title;
     }
 
-    public RDAPNotice addLink(RDAPLink link)
-    {
-        if(links == null)
-        {
-            links = new ArrayList<RDAPLink>();
-        }
-        links.add(link);
-        return this;
-    }
-
-    public RDAPNotice clone()
-    {
-        RDAPNotice notice = new RDAPNotice();
-        notice.setDescription(getDescriptions());
-        notice.setTitle(getTitle());
-
-        if(getLinks() != null)
-        {
-            List<RDAPLink> links = new ArrayList<RDAPLink>();
-            for(RDAPLink link: getLinks())
-            {
-                links.add(link.clone());
-            }
-            notice.setLinks(links);
-        }
-
-        return notice;
-    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("description")
@@ -78,35 +49,11 @@ public class RDAPNotice
         return title;
     }
 
-    public RDAPNotice setNoticeContext(String context)
+    public RDAPNotice withContext(String context)
     {
-        if(getLinks() == null)
-        {
-            return this;
-        }
-
-        for(RDAPLink link : getLinks())
-        {
-            link.setValue(context);
-        }
-        return this;
-    }
-
-    public RDAPNotice setDescription(List<String> descriptions)
-    {
-        this.descriptions = descriptions;
-        return this;
-    }
-
-    public RDAPNotice setLinks(List<RDAPLink> links)
-    {
-        this.links = links;
-        return this;
-    }
-
-    public RDAPNotice setTitle(String title)
-    {
-        this.title = title;
-        return this;
+        return new RDAPNotice(
+                descriptions,
+                getLinks().stream().map(rdapLink -> rdapLink.withValue(context)).collect(Collectors.toList()),
+                title);
     }
 }
