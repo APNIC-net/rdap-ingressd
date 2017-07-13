@@ -1,7 +1,7 @@
 package net.apnic.rdap.rdap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Factory helper class for constructing conformant RDAP objects for client
@@ -9,10 +9,15 @@ import java.util.List;
  */
 public class RDAPObjectFactory
 {
-    private static final RDAPConformance DEFAULT_CONFORMANCE =
-        RDAPConformance.LEVEL_0;
+    private static final Set<RDAPConformance> DEFAULT_CONFORMANCE = EnumSet.of(RDAPConformance.LEVEL_0);
 
-    private List<RDAPNotice> defaultNotices = null;
+    private final List<RDAPNotice> defaultNotices;
+
+    public RDAPObjectFactory(List<RDAPNotice> defaultNotices) {
+        this.defaultNotices = Collections.unmodifiableList(
+                new ArrayList<>(Optional.ofNullable(defaultNotices).orElse(Collections.emptyList()))
+        );
+    }
 
     /**
      * Provides the default notices that have been set for every created
@@ -25,34 +30,15 @@ public class RDAPObjectFactory
         return defaultNotices;
     }
 
-    /**
-     * Sets the default notices used by this factory from a list of pre
-     * constructed notices.
-     *
-     * @return Sets the default notices used by this factory
-     */
-    public void setDefaultNotices(List<RDAPNotice> notices)
-    {
-        defaultNotices = notices;
-    }
 
     /**
      * Deep copies the default notices
      */
     private List<RDAPNotice> copyDefaultNoticesWithContext(String context)
     {
-        if(getDefaultNotices() == null)
-        {
-            return getDefaultNotices();
-        }
-
-        List<RDAPNotice> noticesCopy = new ArrayList<RDAPNotice>();
-        for(RDAPNotice noticeToCopy : getDefaultNotices())
-        {
-            noticesCopy.add(noticeToCopy.clone().setNoticeContext(context));
-        }
-
-        return noticesCopy;
+        return getDefaultNotices().stream().map(rdapNotice -> {
+            return rdapNotice.withContext(context);
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -64,31 +50,16 @@ public class RDAPObjectFactory
      * @param object Child class of RDAPObject to construct and pre fill
      * @return Newly created object pre-filled
      */
-    public <T extends RDAPObject> T createRDAPObject(Class<T> objectType,
-                                                     String context)
+    public <T extends RDAPObject> T createRDAPObject(Class<T> objectType, String context, Object... args)
     {
-        try
-        {
-            T rdapObject = objectType.newInstance();
-            fillCommonObject(rdapObject, context);
-            return rdapObject;
+        //A bit silly. Imo if you can pass in an explicit class object, you may as well just call that class's constructor directly
+        if (objectType.isAssignableFrom(RDAPError.class)) {
+            List<String> description = (List<String>) args[0];
+            String errorCode = (String) args[1];
+            String title = (String) args[2];
+            return (T) new RDAPError(DEFAULT_CONFORMANCE, copyDefaultNoticesWithContext(context), description, errorCode, title);
         }
-        catch(Exception ex)
-        {
-            throw new RuntimeException(ex);
-        }
-    }
 
-    /**
-     * Fills a child RDAPObject with pre defined static information and context.
-     *
-     * @param rdapObject Child object to fill
-     * @return Filled child object
-     */
-    private void fillCommonObject(RDAPObject rdapObject, String context)
-    {
-        rdapObject
-            .addConformance(DEFAULT_CONFORMANCE)
-            .setNotices(copyDefaultNoticesWithContext(context));
+        throw new RuntimeException("Couldn't create object for type " + objectType);
     }
 }

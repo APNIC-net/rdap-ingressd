@@ -3,39 +3,18 @@ package net.apnic.rdap.rdap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 public abstract class RDAPObject
 {
-    private EnumSet<RDAPConformance> conformance = null;
-    private List<RDAPNotice> notices = null;
+    private final Set<RDAPConformance> conformance;
+    private final List<RDAPNotice> notices;
 
-    public RDAPObject addConformance(RDAPConformance conformance)
-    {
-        if(this.conformance == null)
-        {
-            this.conformance = EnumSet.of(conformance);
-        }
-        else
-        {
-            this.conformance.add(conformance);
-        }
-
-        return this;
-    }
-
-    public RDAPObject addNotice(RDAPNotice notice)
-    {
-        if(notices == null)
-        {
-            notices = new ArrayList<RDAPNotice>();
-        }
-        notices.add(notice);
-        return this;
+    protected RDAPObject(Set<RDAPConformance> conformance, List<RDAPNotice> notices) {
+        this.conformance = conformance;
+        this.notices = notices;
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -53,11 +32,5 @@ public abstract class RDAPObject
             return Collections.<RDAPConformance>emptySet();
         }
         return conformance;
-    }
-
-    public RDAPObject setNotices(List<RDAPNotice> notices)
-    {
-        this.notices = notices;
-        return this;
     }
 }

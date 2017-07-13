@@ -2,8 +2,8 @@ package net.apnic.rdap.rdap;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class represent an error response in the RDAP protocol.
@@ -13,24 +13,19 @@ import java.util.List;
 public class RDAPError
     extends RDAPObject
 {
-    private List<String> description = null;
-    private String errorCode = null;
-    private String title = null;
+    private final List<String> description;
+    private final String errorCode;
+    private final String title;
 
-    /**
-     * Adds another description line to this error.
-     *
-     * @param description Description line to add
-     * @return This object for chainable calls
-     */
-    public RDAPError addDescription(String description)
-    {
-        if(this.description == null)
-        {
-            this.description = new ArrayList<String>();
-        }
-        this.description.add(description);
-        return this;
+    public RDAPError(Set<RDAPConformance> conformance,
+                     List<RDAPNotice> notices,
+                     List<String> description,
+                     String errorCode,
+                     String title) {
+        super(conformance, notices);
+        this.description = description;
+        this.errorCode = errorCode;
+        this.title = title;
     }
 
     /**
@@ -69,30 +64,5 @@ public class RDAPError
     public String getTitle()
     {
         return title;
-    }
-
-    /**
-     * Sets the error code for this object and converts the supplied int to a
-     * string for RDAP.
-     *
-     * @param errorCode Error code to set
-     * @return This object for chainable calls
-     */
-    public RDAPError setErrorCode(int errorCode)
-    {
-        this.errorCode = Integer.toString(errorCode);
-        return this;
-    }
-
-    /**
-     * Sets the title for this RDAPError object.
-     *
-     * @param title Title to set
-     * @return This object for chainable calls
-     */
-    public RDAPError setTitle(String title)
-    {
-        this.title = title;
-        return this;
     }
 }
