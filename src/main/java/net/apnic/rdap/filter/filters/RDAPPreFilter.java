@@ -40,14 +40,6 @@ public class RDAPPreFilter
         RDAPRequestPath path = RDAPRequestPath.createRequestPath(
                 context.getRequest().getRequestURI());
         context.put(RequestContextKeys.RDAP_REQUEST_PATH, path);
-
-        // Place the origin url into the request attributes.
-        // We do this because Zuul and spring may route to other endpoints and
-        // this information will be lost.
-        // Information is needed to contextualise RDAP responses
-        context.getRequest().setAttribute(RequestContextKeys.RDAP_ORIGIN_URL,
-            context.getRequest().getRequestURL().toString());
-
         return null;
     }
 }
