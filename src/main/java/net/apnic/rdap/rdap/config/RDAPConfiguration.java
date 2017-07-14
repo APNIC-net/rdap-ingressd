@@ -23,8 +23,7 @@ public class RDAPConfiguration
     @Bean
     public RDAPObjectFactory rdapObjectFactory()
     {
-        RDAPObjectFactory factory = new RDAPObjectFactory();
-        factory.setDefaultNotices(notices);
+        RDAPObjectFactory factory = new RDAPObjectFactory(notices);
         return factory;
     }
 

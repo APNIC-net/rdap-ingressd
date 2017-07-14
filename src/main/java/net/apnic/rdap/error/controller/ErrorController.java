@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Error controller for spring errors.
  *
@@ -71,15 +75,11 @@ public class ErrorController
                                                          String description,
                                                          String context)
     {
-        RDAPError error =
-            rdapObjectFactory.createRDAPObject(RDAPError.class, context)
-                .setErrorCode(status.value())
-                .setTitle(status.getReasonPhrase());
-
-        if(description != null)
-        {
-            error.addDescription(description);
-        }
+        List<String> descriptions = Optional.ofNullable(description).map(Collections::singletonList).orElse(Collections.emptyList());
+        String errorCode = "" + status.value();
+        String title = status.getReasonPhrase();
+        RDAPError error = rdapObjectFactory.createRDAPObject(
+                    RDAPError.class, context, descriptions, errorCode, title);
 
         return new ResponseEntity<RDAPError>(error, responseHeaders,
                                              status);
