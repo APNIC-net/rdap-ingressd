@@ -42,24 +42,13 @@ public class RDAPObjectFactory
     }
 
     /**
-     * Constructs a child RDAPObject pre filled for the current context.
-     *
-     * Constructed objects used by this method must have a default constructor
-     * with no arguments.
-     *
-     * @param object Child class of RDAPObject to construct and pre fill
-     * @return Newly created object pre-filled
+     * Constructs a new RDAPError object for the provided context.
      */
-    public <T extends RDAPObject> T createRDAPObject(Class<T> objectType, String context, Object... args)
+    public RDAPError createErrorObject(String context, List<String> description,
+                                       String errorCode, String title)
     {
-        //A bit silly. Imo if you can pass in an explicit class object, you may as well just call that class's constructor directly
-        if (objectType.isAssignableFrom(RDAPError.class)) {
-            List<String> description = (List<String>) args[0];
-            String errorCode = (String) args[1];
-            String title = (String) args[2];
-            return (T) new RDAPError(DEFAULT_CONFORMANCE, copyDefaultNoticesWithContext(context), description, errorCode, title);
-        }
-
-        throw new RuntimeException("Couldn't create object for type " + objectType);
+        return new RDAPError(DEFAULT_CONFORMANCE,
+                             copyDefaultNoticesWithContext(context),
+                             description, errorCode, title);
     }
 }

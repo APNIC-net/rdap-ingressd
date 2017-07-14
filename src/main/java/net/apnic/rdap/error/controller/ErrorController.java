@@ -1,5 +1,8 @@
 package net.apnic.rdap.error.controller;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import net.apnic.rdap.rdap.http.RDAPConstants;
@@ -13,10 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Error controller for spring errors.
@@ -78,8 +77,8 @@ public class ErrorController
         List<String> descriptions = Optional.ofNullable(description).map(Collections::singletonList).orElse(Collections.emptyList());
         String errorCode = "" + status.value();
         String title = status.getReasonPhrase();
-        RDAPError error = rdapObjectFactory.createRDAPObject(
-                    RDAPError.class, context, descriptions, errorCode, title);
+        RDAPError error = rdapObjectFactory.createErrorObject(
+            context, descriptions, errorCode, title);
 
         return new ResponseEntity<RDAPError>(error, responseHeaders,
                                              status);

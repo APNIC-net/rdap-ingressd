@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.ZuulFilter;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.rdap.http.RDAPConstants;
 import net.apnic.rdap.rdap.RDAPError;
@@ -62,7 +66,6 @@ public class ZuulErrorFilter
     public boolean shouldFilter()
     {
         RequestContext context = RequestContext.getCurrentContext();
-
         return context.getThrowable() != null
             && context.getBoolean(SEND_ERROR_FILTER_RAN, false) == false;
     }
@@ -102,15 +105,12 @@ public class ZuulErrorFilter
                                    RequestContext context)
     {
         String originURL = context.getRequest().getRequestURL().toString();
-        RDAPError error =
-            rdapObjectFactory.createRDAPObject(RDAPError.class, originURL)
-                .setErrorCode(status.value())
-                .setTitle(status.getReasonPhrase());
+        List<String> descriptions = Optional.ofNullable(description).map(Collections::singletonList).orElse(Collections.emptyList());
 
-        if(description != null)
-        {
-            error.addDescription(description);
-        }
+        RDAPError error =
+            rdapObjectFactory.createErrorObject(originURL, descriptions,
+                                                status.toString(),
+                                                status.getReasonPhrase());
 
         context.setSendZuulResponse(false);
         context.setResponseStatusCode(status.value());
