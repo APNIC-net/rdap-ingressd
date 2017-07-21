@@ -3,10 +3,11 @@ package net.apnic.rdap.error.controller;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import com.jayway.jsonpath.matchers.JsonPathMatchers;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.hamcrest.collection.IsMapContaining;
 import org.hamcrest.Matcher;
-import static org.hamcrest.Matchers.*;
 import org.hamcrest.Matchers;
 import org.hamcrest.object.HasToString;
 
@@ -34,23 +35,23 @@ public class ErrorControllerITest
 
     private Matcher<ResponseEntity<String>> isValidRDAPResponse =
         Matchers.allOf(
-            hasProperty("headers", hasProperty("content-type", HasToString.hasToString("application/rdap+json"))),
-            hasProperty("body", Matchers.allOf(
+            Matchers.hasProperty("headers",
+                IsMapContaining.hasEntry("Content-Type",
+                                         Arrays.asList("application/rdap+json"))),
+            Matchers.hasProperty("body", Matchers.allOf(
                 JsonPathMatchers.isJson(),
-                JsonPathMatchers.hasJsonPath("$.description"),
                 JsonPathMatchers.hasJsonPath("$.errorCode"),
                 JsonPathMatchers.hasJsonPath("$.title"),
-                JsonPathMatchers.hasJsonPath("$.notices"),
-                JsonPathMatchers.hasJsonPath("$.rdapConformance", contains("rdap_level_0"))
+                JsonPathMatchers.hasJsonPath("$.rdapConformance", Matchers.contains("rdap_level_0"))
                 )
             )
         );
 
     private Matcher<ResponseEntity<String>> is400RDAPErrorResponse =
         Matchers.allOf(
-            hasProperty("statusCodeValue", Matchers.is(400)),
+            Matchers.hasProperty("statusCodeValue", Matchers.is(400)),
             isValidRDAPResponse,
-            hasProperty("body", Matchers.allOf(
+            Matchers.hasProperty("body", Matchers.allOf(
                 JsonPathMatchers.hasJsonPath("$.errorCode", Matchers.is("400")),
                 JsonPathMatchers.hasJsonPath("$.title", Matchers.is("Bad Request"))
                 )
@@ -59,9 +60,9 @@ public class ErrorControllerITest
 
     private Matcher<ResponseEntity<String>> is404RDAPErrorResponse =
         Matchers.allOf(
-            hasProperty("statusCodeValue", Matchers.is(404)),
+            Matchers.hasProperty("statusCodeValue", Matchers.is(404)),
             isValidRDAPResponse,
-            hasProperty("body", Matchers.allOf(
+            Matchers.hasProperty("body", Matchers.allOf(
                 JsonPathMatchers.hasJsonPath("$.errorCode", Matchers.is("404")),
                 JsonPathMatchers.hasJsonPath("$.title", Matchers.is("Not Found"))
                 )
