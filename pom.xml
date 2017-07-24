@@ -37,12 +37,12 @@
     </dependencyManagement>
 
     <dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency> 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -58,23 +58,23 @@
             <scope>test</scope>
         </dependency>
 
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path-assert</artifactId>
-			<version>2.2.0</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-zuul</artifactId>
         </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-		 	<artifactId>spring-boot-starter-test</artifactId>
-		  	<scope>test</scope>
-	  	</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>net.ripe.ipresource</groupId>
@@ -162,11 +162,11 @@
                         <artifactId>junit-jupiter-engine</artifactId>
                         <version>5.0.0-M4</version>
                     </dependency>
-					<dependency>
-						<groupId>org.junit.vintage</groupId>
-						<artifactId>junit-vintage-engine</artifactId>
-						<version>4.12.0-M5</version>
-					</dependency>
+                    <dependency>
+                        <groupId>org.junit.vintage</groupId>
+                        <artifactId>junit-vintage-engine</artifactId>
+                        <version>4.12.0-M5</version>
+                        </dependency>
                 </dependencies>
             </plugin>
         </plugins>
