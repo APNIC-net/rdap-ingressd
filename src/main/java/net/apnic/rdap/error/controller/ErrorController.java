@@ -20,7 +20,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 /**
  * Error controller for spring errors.
  *
- * This is used in conjunction with the error controller. Unfotunetly to the way
+ * This is used in conjunction with the error controller. Unfortunately to the way
  * errors are handled in Zuul any exception thrown is redirected to the error
  * path.
  *
