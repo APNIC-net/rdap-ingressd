@@ -98,7 +98,7 @@ public class ZuulErrorFilter
     }
 
     /**
-     * Constructs and sends a valid RDAP error reponse for a given http status
+     * Constructs and sends a valid RDAP error response for a given http status
      * code.
      */
     private void sendErrorResponse(HttpStatus status, String description,
