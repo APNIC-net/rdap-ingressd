@@ -75,6 +75,8 @@ public class ErrorControllerITest
     {
         Stream<String> badPaths = Stream.of("/ip/not a real ip address",
                                             "/ip/1.2.3", "/ip/1.2.3.4/99",
+                                            "/ip/101.0.0.0-101.0.0.255",
+                                            "/ip/2001::-2001::ffff",
                                             "/ip/ffff:ffff:ffff::/2",
                                             "/ip/ffff:");
 
