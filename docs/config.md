@@ -11,7 +11,10 @@ possible in *rdap-ingressd*.
 rdap:
     # A list of RDAP authorities may be configured ahead of time, if
     # required.  Each authority has a name, an optional list of
-    # aliases, and a list of RDAP servers.
+    # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+    # list based on first server found containing a https connection. If no
+    # server is available with https then the first available http server is
+    # choosen.
     authorities:
         - name: apnic
           servers:
