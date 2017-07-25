@@ -30,17 +30,6 @@ public class RDAPObjectFactory
         return defaultNotices;
     }
 
-
-    /**
-     * Deep copies the default notices
-     */
-    private List<RDAPNotice> copyDefaultNoticesWithContext(String context)
-    {
-        return getDefaultNotices().stream().map(rdapNotice -> {
-            return rdapNotice.withContext(context);
-        }).collect(Collectors.toList());
-    }
-
     /**
      * Constructs a new RDAPError object for the provided context.
      */
@@ -48,7 +37,7 @@ public class RDAPObjectFactory
                                        String errorCode, String title)
     {
         return new RDAPError(DEFAULT_CONFORMANCE,
-                             copyDefaultNoticesWithContext(context),
+                             defaultNotices,
                              description, errorCode, title);
     }
 }
