@@ -31,6 +31,8 @@ public class Application
                 "spring.mvc.throw-exception-if-no-handler-found", "true");
         defaultProps.setProperty("spring.resources.add-mappings", "false");
         defaultProps.setProperty("spring.mvc.favicon.enabled", "false");
+        defaultProps.setProperty("management.add-application-context-header", "false");
+        defaultProps.setProperty("zuul.SendErrorFilter.error.disable", "true");
         app.setDefaultProperties(defaultProps);
         app.run(args);
     }

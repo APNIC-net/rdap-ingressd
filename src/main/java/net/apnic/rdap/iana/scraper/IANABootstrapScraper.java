@@ -154,7 +154,7 @@ public class IANABootstrapScraper
     {
         HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
         CompletableFuture<ResponseEntity<JsonNode>> future =
-            new CompletableFuture();
+            new CompletableFuture<ResponseEntity<JsonNode>>();
 
         try
         {
