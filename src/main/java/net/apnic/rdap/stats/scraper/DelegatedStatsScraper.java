@@ -172,7 +172,8 @@ public abstract class DelegatedStatsScraper
     private CompletableFuture<InputStream> makeDelegatedHttpRequest()
     {
         HttpEntity<Resource> entity = new HttpEntity<Resource>(requestHeaders);
-        CompletableFuture<ResponseEntity<Resource>> future = new CompletableFuture();
+        CompletableFuture<ResponseEntity<Resource>> future =
+            new CompletableFuture<ResponseEntity<Resource>>();
 
         try
         {

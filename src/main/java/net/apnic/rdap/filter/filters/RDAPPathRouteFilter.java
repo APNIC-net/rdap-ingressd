@@ -86,10 +86,6 @@ public abstract class RDAPPathRouteFilter
                 context.setRouteHost(serverURI.toURL());
             }
         }
-        catch(ResourceNotFoundException ex)
-        {
-            //TODO
-        }
         catch(Exception ex)
         {
             throw new RuntimeException(ex);
