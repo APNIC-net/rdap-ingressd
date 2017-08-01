@@ -48,57 +48,34 @@ public class IANABootstrapScraper
         public void process(RDAPAuthority authority, BootstrapService service);
     }
 
-    public static final URI ASN_URI;
     public static final String BASE_URI_STR = "https://data.iana.org./rdap/";
-    public static final URI DOMAIN_URI;
-    public static final URI IPV4_URI;
-    public static final URI IPV6_URI;
     public static final List<String> SUPPORTED_VERSIONS = Arrays.asList("1.0");
 
     private static final Logger LOGGER =
         Logger.getLogger(IANABootstrapScraper.class.getName());
 
+    private URI asnURI = null;
+    private URI domainURI = null;
+    private URI ipv4URI = null;
+    private URI ipv6URI = null;
     private HttpHeaders requestHeaders = null;
     private RestTemplate restClient = null;
-
-    /*
-     * Static init of URI members. We cannot do them in the normal way as
-     * construction throws a checked error that needs to be caught.
-     */
-    static
-    {
-        URI asnURI = null;
-        URI domainURI = null;
-        URI ipv4URI = null;
-        URI ipv6URI = null;
-
-        try
-        {
-            asnURI = new URI(BASE_URI_STR + "asn.json");
-            domainURI = new URI(BASE_URI_STR + "dns.json");
-            ipv4URI = new URI(BASE_URI_STR + "ipv4.json");
-            ipv6URI = new URI(BASE_URI_STR + "ipv6.json");
-        }
-        catch(URISyntaxException ex)
-        {
-            LOGGER.log(Level.SEVERE, "Exception when generating IANA url's",
-                       ex);
-            throw new RuntimeException(ex);
-        }
-        finally
-        {
-            ASN_URI = asnURI;
-            DOMAIN_URI = domainURI;
-            IPV4_URI = ipv4URI;
-            IPV6_URI = ipv6URI;
-        }
-    }
 
     /**
      * Constructor for creating an IANA bootstrap scraper.
      */
     public IANABootstrapScraper()
     {
+        this(BASE_URI_STR);
+    }
+
+    /**
+     * Constructor for creating IANA bootstrap scraper with non default
+     * base URI.
+     */
+    public IANABootstrapScraper(String baseUri)
+    {
+        setupURIs(baseUri);
         restClient = new RestTemplate();
         setupRequestHeaders();
     }
@@ -232,6 +209,20 @@ public class IANABootstrapScraper
     }
 
     /**
+     * Init function responsible for configuring the URI's used for fetching
+     * IANA bootstrap data.
+     *
+     * @param baseURI Base URI to use for all specific endpoints created
+     */
+    private void setupURIs(String baseURI)
+    {
+        asnURI = URI.create(baseURI + "asn.json");
+        domainURI = URI.create(baseURI + "dns.json");
+        ipv4URI = URI.create(baseURI + "ipv4.json");
+        ipv6URI = URI.create(baseURI + "ipv6.json");
+    }
+
+    /**
      * Drives the main update cycle for asn bootstrap results.
      *
      * @return Promise that's complete when an IANA asn update has
@@ -240,7 +231,7 @@ public class IANABootstrapScraper
     private CompletableFuture<Void> updateASNData(ResourceStore store,
                                                   RDAPAuthorityStore authorityStore)
     {
-        return makeBootstrapRequest(ASN_URI)
+        return makeBootstrapRequest(asnURI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
                 parseBootstrapResults(entity.getBody(), authorityStore,
@@ -264,7 +255,7 @@ public class IANABootstrapScraper
     private CompletableFuture<Void> updateDomainData(ResourceStore store,
                                                      RDAPAuthorityStore authorityStore)
     {
-        return makeBootstrapRequest(DOMAIN_URI)
+        return makeBootstrapRequest(domainURI)
             .thenAccept((ResponseEntity<JsonNode> entity) ->
             {
                 parseBootstrapResults(entity.getBody(), authorityStore,
@@ -316,7 +307,7 @@ public class IANABootstrapScraper
     private CompletableFuture<Void> updateIPv4Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(IPV4_URI, store, authorityStore);
+        return updateIPAllData(ipv4URI, store, authorityStore);
     }
 
     /**
@@ -329,6 +320,6 @@ public class IANABootstrapScraper
     private CompletableFuture<Void> updateIPv6Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(IPV6_URI, store, authorityStore);
+        return updateIPAllData(ipv6URI, store, authorityStore);
     }
 }

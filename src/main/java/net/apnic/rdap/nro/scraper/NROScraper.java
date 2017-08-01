@@ -55,6 +55,11 @@ public class NROScraper
         super(NRO_STATS_URI);
     }
 
+    public NROScraper(String uri)
+    {
+        super(URI.create(uri));
+    }
+
     /**
      * {@inheritDocs}
      */
