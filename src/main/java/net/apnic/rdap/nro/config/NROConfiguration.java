@@ -25,7 +25,7 @@ public class NROConfiguration
     @Bean(value="nro")
     public NROScraper nroScraper()
     {
-        if(baseURI != null)
+        if(baseURI != null || baseURI.isEmpty() == false)
         {
             return new NROScraper(baseURI);
         }

@@ -26,7 +26,7 @@ public class IANAConfiguration
     @Bean(value="iana")
     public IANABootstrapScraper ianaScraper()
     {
-        if(baseURI != null)
+        if(baseURI != null || baseURI.isEmpty() == false)
         {
             return new IANABootstrapScraper(baseURI);
         }

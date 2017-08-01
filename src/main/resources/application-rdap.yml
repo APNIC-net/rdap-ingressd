@@ -58,7 +58,7 @@ rdap:
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
-            # disabled. It's also possible to speficify the property baseURI for
+            # disabled. It's also possible to specify the property baseURI for
             # each scraper to change the location where data is fetched from.
             iana:
                 enabled: true
