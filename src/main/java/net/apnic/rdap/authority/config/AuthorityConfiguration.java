@@ -100,7 +100,6 @@ public class AuthorityConfiguration
     }
 
     private List<AuthorityConfig> authorities;
-    //private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
     private RoutingConfig routing;
 
     /**
