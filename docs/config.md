@@ -14,7 +14,8 @@ rdap:
     # aliases, and a list of RDAP servers. RDAP servers are choosen from the
     # list based on first server found containing a https connection. If no
     # server is available with https then the first available http server is
-    # choosen.
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
     authorities:
         - name: apnic
           servers:
@@ -34,8 +35,8 @@ rdap:
 
         - name: arin
           servers:
-              - https://rdap.arin.net/registry
-              - http://rdap.arin.net/registry
+              - https://rdap.arin.net/registry/
+              - http://rdap.arin.net/registry/
 
         - name: lacnic
           servers:
@@ -48,7 +49,7 @@ rdap:
 
         # Allows rdap-ingressd to proxy unroutable requests to a
         # default authority. The name of the authority specificed here
-        # can be null or a name specified in the 'authorities' section 
+        # can be null or a name specified in the 'authorities' section
         # above. All requests to this authority are proxied.
         defaultAuthority: null
 
@@ -63,19 +64,13 @@ rdap:
     #    - href: Non optional URL ref for the link
     #      rel: Optional relation type
     #      type: link type
-    notices:
-      - title: Terms and Conditions
-        description:
-          - This is the APNIC RDAP query service. The objects are in RDAP format.
-        links:
-          - href: http://www.apnic.net/db/dbcopyright.html
-            rel: terms-of-service
-            type: text/html
+    notices: []
 
     scraping:
         scrapers:
             # Individual scrapers available in rdap-ingressd can be enabled and
-            # disabled.
+            # disabled. It's also possible to specify the property baseURI for
+            # each scraper to change the location where data is fetched from.
             iana:
                 enabled: true
             nro:
@@ -83,8 +78,8 @@ rdap:
         config:
             # Order in which scrapers are run.
             order:
-                - iana
-                - nro
+            - iana
+            - nro
 ```
 
 To configure *rdap-ingressd* at runtime, it's necessary to create a
