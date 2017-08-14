@@ -34,12 +34,18 @@ public class AuthorityConfiguration
     public static class AuthorityConfig
     {
         private List<String> aliases;
+        private String defaultServer;
         private String name;
         private List<String> servers;
 
         public List<String> getAliases()
         {
             return aliases;
+        }
+
+        public String getDefaultServer()
+        {
+            return defaultServer;
         }
 
         public String getName()
@@ -55,6 +61,11 @@ public class AuthorityConfiguration
         public void setAliases(List<String> aliases)
         {
             this.aliases = aliases;
+        }
+
+        public void setDefaultServer(String defaultServer)
+        {
+            this.defaultServer = defaultServer;
         }
 
         public void setName(String name)
@@ -100,7 +111,6 @@ public class AuthorityConfiguration
     }
 
     private List<AuthorityConfig> authorities;
-    //private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
     private RoutingConfig routing;
 
     /**
@@ -222,20 +232,15 @@ public class AuthorityConfiguration
 
             if(aConfig.getServers() != null)
             {
-                List<URI> servers = aConfig.getServers().stream()
-                    .map((String strURI) ->
-                    {
-                        try
-                        {
-                            return new URI(strURI);
-                        }
-                        catch(URISyntaxException ex)
-                        {
-                            throw new RuntimeException(ex);
-                        }
-                    })
-                    .collect(Collectors.toList());
-                authority.addServers(servers);
+                authority.addServers(
+                    aConfig.getServers().stream()
+                    .map(URI::create)
+                    .collect(Collectors.toList()));
+            }
+
+            if(aConfig.getDefaultServer() != null)
+            {
+                authority.setDefaultServer(URI.create(aConfig.getDefaultServer()));
             }
 
             authorityStore().addAuthority(authority);

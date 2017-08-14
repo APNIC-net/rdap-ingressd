@@ -214,7 +214,7 @@ public class RDAPAuthority
      *
      * @return Best URI for communicating with this server.
      */
-    public URI getDefaultServerURI()
+    public URI getDefaultServer()
     {
         if(defaultServerURI == null)
         {
@@ -277,6 +277,16 @@ public class RDAPAuthority
             server = URI.create(server.toASCIIString() + "/");
         }
         return server;
+    }
+
+    public void setDefaultServer(URI defaultServerURI)
+    {
+        if(defaultServerURI == null)
+        {
+            throw new IllegalArgumentException("default server uri cannot be null");
+        }
+
+        this.defaultServerURI = normalizeServerURI(defaultServerURI);
     }
 
     /**
