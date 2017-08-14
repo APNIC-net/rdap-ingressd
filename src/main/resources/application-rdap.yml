@@ -4,7 +4,8 @@ rdap:
     # aliases, and a list of RDAP servers. RDAP servers are choosen from the
     # list based on first server found containing a https connection. If no
     # server is available with https then the first available http server is
-    # choosen.
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
     authorities:
         - name: apnic
           servers:
@@ -24,8 +25,8 @@ rdap:
 
         - name: arin
           servers:
-              - https://rdap.arin.net/registry
-              - http://rdap.arin.net/registry
+              - https://rdap.arin.net/registry/
+              - http://rdap.arin.net/registry/
 
         - name: lacnic
           servers:
@@ -67,5 +68,5 @@ rdap:
         config:
             # Order in which scrapers are run.
             order:
-                - iana
-                - nro
+            - iana
+            - nro

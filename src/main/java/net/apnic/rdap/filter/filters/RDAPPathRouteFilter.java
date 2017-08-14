@@ -70,7 +70,7 @@ public abstract class RDAPPathRouteFilter
         {
             RDAPAuthority authority = runRDAPFilter(path);
 
-            URI serverURI = authority.getDefaultServerURI();
+            URI serverURI = authority.getDefaultServer();
             if(serverURI == null)
             {
                 throw new ResourceNotFoundException();
