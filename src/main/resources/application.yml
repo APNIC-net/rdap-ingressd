@@ -22,6 +22,9 @@ zuul:
         domain:
             path: /domain/**
             stripPrefix: false
+        entities:
+            path: /entities/**
+            stripPrefix: false
         entity:
             path: /entity/**
             stripPrefix: false
