@@ -1,36 +1,39 @@
-package net.apnic.rdap.entity.filters;
+package net.apnic.rdap.nameserver.filters;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.directory.Directory;
-import net.apnic.rdap.entity.Entity;
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.filters.RDAPPathRouteFilter;
 import net.apnic.rdap.filter.RDAPRequestPath;
 import net.apnic.rdap.filter.RDAPRequestType;
+import net.apnic.rdap.nameserver.NameServer;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
 /**
- * Filter for handling entity search path segments in RDAP requests
+ * Filter for handling nameservers path segments in RDAP requests
  */
-public class EntitiesRouteFilter
+public class NameServersRouteFilter
     extends RDAPPathRouteFilter
 {
     private static final int NO_REQUEST_PARAMS = 0;
 
     /**
-     * Main constructor which takes the Directory to use for locating entity
-     * authorities.
+     * Main constructor which takes the Directory to use for locating
+     * nameserver authorities.
+     *
+     * @param directory
+     * @see RDAPPathRouteFilter
      */
-    public EntitiesRouteFilter(Directory directory)
+    public NameServersRouteFilter(Directory directory)
     {
         super(directory);
     }
 
     /**
-     * Main run method for filter which takes the incoming request and finds an
-     * entity authority.
+     * Main run method for filter which takes the incoming request and finds a
+     * namerserver authority.
      *
-     * @see RDAPPathRouteFilter
+     * @see RDAPathRouteFilter
      */
     @Override
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
@@ -39,18 +42,18 @@ public class EntitiesRouteFilter
         if(path.getRequestParams().length != NO_REQUEST_PARAMS)
         {
             throw new MalformedRequestException(
-                "Not enough arguments for entities search path segment");
+                "Not enough arguments for nameserver search path segment");
         }
 
         return getDirectory().getSearchPathAuthority();
     }
 
     /**
-     * {@inheritDocs}
+     * @{inheritDocs}
      */
     @Override
     public RDAPRequestType supportedRequestType()
     {
-        return RDAPRequestType.ENTITIES;
+        return RDAPRequestType.NAMESERVERS;
     }
 }

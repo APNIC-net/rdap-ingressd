@@ -1,6 +1,7 @@
 package net.apnic.rdap.domain.config;
 
 import net.apnic.rdap.domain.filters.DomainRouteFilter;
+import net.apnic.rdap.domain.filters.DomainsRouteFilter;
 import net.apnic.rdap.directory.Directory;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,5 +16,12 @@ public class DomainConfiguration
     public DomainRouteFilter domainRouteFilter(Directory directory)
     {
         return new DomainRouteFilter(directory);
+    }
+
+    @Bean
+    @Autowired
+    public DomainsRouteFilter domainsRouteFilter(Directory directory)
+    {
+        return new DomainsRouteFilter(directory);
     }
 }

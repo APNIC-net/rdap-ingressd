@@ -1,8 +1,8 @@
-package net.apnic.rdap.entity.filters;
+package net.apnic.rdap.domain.filters;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.directory.Directory;
-import net.apnic.rdap.entity.Entity;
+import net.apnic.rdap.domain.Domain;
 import net.apnic.rdap.error.MalformedRequestException;
 import net.apnic.rdap.filter.filters.RDAPPathRouteFilter;
 import net.apnic.rdap.filter.RDAPRequestPath;
@@ -10,26 +10,28 @@ import net.apnic.rdap.filter.RDAPRequestType;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
 /**
- * Filter for handling entity path segments in RDAP requests
+ * Filter for handling domain search path segments in RDAP requests
  */
-public class EntityRouteFilter
+public class DomainsRouteFilter
     extends RDAPPathRouteFilter
 {
-    private static final int ENTITY_PARAM_INDEX = 0;
-    private static final int NO_REQUEST_PARAMS = 1;
+    private static final int NO_REQUEST_PARAMS = 0;
 
     /**
-     * Main constructor which takes the Directory to use for locating entity
+     * Main constructor which takes the Directory to use for locating domain
      * authorities.
+     *
+     * @param directory
+     * @see RDAPPathRouteFilter
      */
-    public EntityRouteFilter(Directory directory)
+    public DomainsRouteFilter(Directory directory)
     {
         super(directory);
     }
 
     /**
-     * Main run method for filter which takes the incoming request and finds an
-     * entity authority.
+     * Main run method for filter which takes the incoming request and
+     * finds a domain authority.
      *
      * @see RDAPPathRouteFilter
      */
@@ -37,16 +39,13 @@ public class EntityRouteFilter
     public RDAPAuthority runRDAPFilter(RDAPRequestPath path)
         throws ResourceNotFoundException, MalformedRequestException
     {
-        String[] args = path.getRequestParams();
-
-        if(args.length != NO_REQUEST_PARAMS)
+        if(path.getRequestParams().length != NO_REQUEST_PARAMS)
         {
             throw new MalformedRequestException(
-                "Not enough arguments for entity path segment");
+                "Not enough arguments for domain search path segment");
         }
 
-        return getDirectory()
-            .getEntityAuthority(new Entity(args[ENTITY_PARAM_INDEX]));
+        return getDirectory().getSearchPathAuthority();
     }
 
     /**
@@ -55,6 +54,6 @@ public class EntityRouteFilter
     @Override
     public RDAPRequestType supportedRequestType()
     {
-        return RDAPRequestType.ENTITY;
+        return RDAPRequestType.DOMAINS;
     }
 }
