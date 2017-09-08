@@ -44,8 +44,7 @@ public class EntitiesRouteFilter
                 "Not enough arguments for domain path segment");
         }
 
-        return getDirectory()
-            .getEntityAuthority(new Entity(null));
+        return getDirectory().getSearchPathAuthority();
     }
 
     /**
