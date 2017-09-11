@@ -1,38 +1,47 @@
 
 endpoints:
+  enabled: false
+  health:
+    enabled: true
+  pause:
     enabled: false
-    health:
-        enabled: true
-    pause:
-        enabled: false
-    restart:
-        enabled: false
-    resume:
-        enabled: false
-    env:
-        enabled: false
-        post:
-            enabled: false
+  restart:
+    enabled: false
+  resume:
+    enabled: false
+  env:
+    enabled: false
+    post:
+      enabled: false
 
 zuul:
-    routes:
-        autnum:
-            path: /autnum/**
-            stripPrefix: false
-        domain:
-            path: /domain/**
-            stripPrefix: false
-        entity:
-            path: /entity/**
-            stripPrefix: false
-        help:
-            path: /help
-            stripPrefix: false
-        ip:
-            path: /ip/**
-            stripPrefix: false
-        nameserver:
-            path: /nameserver/**
-            stripPrefix: false
+  routes:
+    autnum:
+      path: /autnum/**
+      stripPrefix: false
+    domain:
+      path: /domain/**
+      stripPrefix: false
+    domains:
+      path: /domains
+      stripPrefix: false
+    entities:
+      path: /entities
+      stripPrefix: false
+    entity:
+      path: /entity/**
+      stripPrefix: false
+    help:
+      path: /help
+      stripPrefix: false
+    ip:
+      path: /ip/**
+      stripPrefix: false
+    nameserver:
+      path: /nameserver/**
+      stripPrefix: false
+    nameservers:
+      path: /nameservers
+      stripPrefix: false
 
 spring.profiles.include: 'rdap'

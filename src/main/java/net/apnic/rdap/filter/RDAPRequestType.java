@@ -4,10 +4,13 @@ public enum RDAPRequestType
 {
     AUTNUM("autnum"),
     DOMAIN("domain"),
+    DOMAINS("domains"),
     ENTITY("entity"),
+    ENTITIES("entities"),
     HELP("help"),
     IP("ip"),
-    NAMESERVER("nameserver");
+    NAMESERVER("nameserver"),
+    NAMESERVERS("nameservers");
 
     private final String typeValue;
 
