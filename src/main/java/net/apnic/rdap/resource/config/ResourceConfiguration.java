@@ -90,4 +90,12 @@ public class ResourceConfiguration
     {
         return new StaticResourceLocator<NameServer>(defaultAuthority);
     }
+
+    @Bean
+    @Autowired
+    public ResourceLocator<Void> searchPathLocator(
+        @Qualifier("defaultAuthority") RDAPAuthority defaultAuthority)
+    {
+        return new StaticResourceLocator<Void>(defaultAuthority);
+    }
 }

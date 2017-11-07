@@ -11,6 +11,7 @@ import net.apnic.rdap.resource.ResourceNotFoundException;
 import net.ripe.ipresource.IpRange;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,14 +33,18 @@ public class Directory
     private ResourceLocator<Void> helpLocator;
     private ResourceLocator<IpRange> ipLocator;
     private ResourceLocator<NameServer> nsLocator;
+    private ResourceLocator<Void> searchPathLocator;
 
     @Autowired
     public Directory(ResourceLocator<AsnRange> asnLocator,
                      ResourceLocator<Domain> domainLocator,
                      ResourceLocator<Entity> entityLocator,
+                     @Qualifier("helpResourceLocator")
                      ResourceLocator<Void> helpLocator,
                      ResourceLocator<IpRange> ipLocator,
-                     ResourceLocator<NameServer> nsLocator)
+                     ResourceLocator<NameServer> nsLocator,
+                     @Qualifier("searchPathLocator")
+                     ResourceLocator<Void> searchPathLocator)
     {
         this.asnLocator = asnLocator;
         this.domainLocator = domainLocator;
@@ -47,6 +52,7 @@ public class Directory
         this.helpLocator = helpLocator;
         this.ipLocator = ipLocator;
         this.nsLocator = nsLocator;
+        this.searchPathLocator = searchPathLocator;
     }
 
     public RDAPAuthority getAutnumAuthority(AsnRange asn)
@@ -83,6 +89,12 @@ public class Directory
         throws ResourceNotFoundException
     {
         return locatorProxy(nameServer, nsLocator);
+    }
+
+    public RDAPAuthority getSearchPathAuthority()
+        throws ResourceNotFoundException
+    {
+        return locatorProxy(null, searchPathLocator);
     }
 
     private <Resource> RDAPAuthority locatorProxy(Resource resource,
