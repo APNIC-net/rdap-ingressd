@@ -48,7 +48,7 @@ public class IANABootstrapScraper
         public void process(RDAPAuthority authority, BootstrapService service);
     }
 
-    public static final String BASE_URI_STR = "https://data.iana.org./rdap/";
+    public static final String BASE_URI_STR = "https://data.iana.org/rdap/";
     public static final List<String> SUPPORTED_VERSIONS = Arrays.asList("1.0");
 
     private static final Logger LOGGER =
