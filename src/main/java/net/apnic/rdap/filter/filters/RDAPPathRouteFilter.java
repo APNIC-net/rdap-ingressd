@@ -5,6 +5,7 @@ import com.netflix.zuul.ZuulFilter;
 
 import java.net.URI;
 import java.net.URL;
+import javax.servlet.http.HttpServletResponse;
 
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.routing.RoutingAction;
@@ -79,7 +80,9 @@ public abstract class RDAPPathRouteFilter
             if(authority.getRoutingAction() == RoutingAction.REDIRECT)
             {
                 context.unset();
-                context.getResponse().sendRedirect(serverURI.resolve(path.getRequestPath()).toString());
+                context.getResponse().setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+                context.getResponse().setHeader("Location",
+                    serverURI.resolve(path.getRequestPath()).toString());
             }
             else
             {
