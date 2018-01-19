@@ -237,10 +237,28 @@ public class IANABootstrapScraper
                 parseBootstrapResults(entity.getBody(), authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
+                        AsnRange lastRange = null;
                         for(String strAsnRange : service.getResources())
                         {
                             AsnRange asnRange = AsnRange.parse(strAsnRange);
-                            store.putAutnumMapping(asnRange, authority);
+                            if(lastRange == null)
+                            {
+                                lastRange = asnRange;
+                            }
+                            else if(lastRange.isContiguousWith(asnRange))
+                            {
+                                lastRange = lastRange.makeContiguousWith(asnRange);
+                            }
+                            else
+                            {
+                                store.putAutnumMapping(lastRange, authority);
+                                lastRange = null;
+                            }
+                        }
+                        // Emplace the last value into the map
+                        if(lastRange != null)
+                        {
+                            store.putAutnumMapping(lastRange, authority);
                         }
                     });
             });
