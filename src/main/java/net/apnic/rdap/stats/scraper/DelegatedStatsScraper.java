@@ -6,6 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Scanner;
 
 import net.apnic.rdap.authority.RDAPAuthority;
@@ -59,6 +61,9 @@ public abstract class DelegatedStatsScraper
             return scheme;
         }
     }
+
+    private final Logger LOGGER =
+        Logger.getLogger(DelegatedStatsScraper.class.getName());
 
     private HttpHeaders requestHeaders = null;
     private RestTemplate restClient = null;
@@ -118,8 +123,17 @@ public abstract class DelegatedStatsScraper
     private void handleAutnumRecord(AsnRecord record, ResourceStore store,
                                     RDAPAuthorityStore authorityStore)
     {
-        store.putAutnumMapping(record.toAsnRange(),
-                               recordAuthority(record, authorityStore));
+        try
+        {
+            store.putAutnumMapping(record.toAsnRange(),
+                recordAuthority(record, authorityStore));
+        }
+        catch(Exception ex)
+        {
+            LOGGER.log(Level.WARNING,
+                "Exception when inserting delegated stats autnum record for "
+                + getName() + " ", ex);
+        }
     }
 
     /**
@@ -156,8 +170,17 @@ public abstract class DelegatedStatsScraper
     private void handleIPRecord(IPRecord record, ResourceStore store,
                                 RDAPAuthorityStore authorityStore)
     {
-        store.putIPMapping(record.toIPRange(),
-                           recordAuthority(record, authorityStore));
+        try
+        {
+            store.putIPMapping(record.toIPRange(),
+                               recordAuthority(record, authorityStore));
+        }
+        catch(Exception ex)
+        {
+            LOGGER.log(Level.WARNING,
+                "Exception when inserting delegated stats ip network record for "
+                + getName() + " ", ex);
+        }
     }
 
     /**
