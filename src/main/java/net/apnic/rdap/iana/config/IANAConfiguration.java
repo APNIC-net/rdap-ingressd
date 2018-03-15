@@ -1,6 +1,7 @@
 package net.apnic.rdap.iana.config;
 
 import net.apnic.rdap.authority.RDAPAuthorityStore;
+import net.apnic.rdap.iana.scraper.IANABootstrapFetcher;
 import net.apnic.rdap.iana.scraper.IANABootstrapScraper;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,7 +29,7 @@ public class IANAConfiguration
     {
         if(baseURI != null && baseURI.isEmpty() == false)
         {
-            return new IANABootstrapScraper(baseURI);
+            return new IANABootstrapScraper(new IANABootstrapFetcher(baseURI));
         }
         return new IANABootstrapScraper();
     }
