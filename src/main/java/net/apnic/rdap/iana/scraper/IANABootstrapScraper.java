@@ -139,6 +139,9 @@ public class IANABootstrapScraper
                 mapBootstrapResults(result, authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
+                        // We try to group IANA autnum delegations into large
+                        // blocks for contiguous intervals. This is to allow
+                        // smaller overlapping ranges from other scrapers.
                         AsnRange lastRange = null;
                         for(String strAsnRange : service.getResources())
                         {
