@@ -22,15 +22,6 @@ import net.apnic.rdap.scraper.Scraper;
 
 import net.ripe.ipresource.IpRange;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
 /**
  * Scraper for IANA bootstrap service.
  *
@@ -48,36 +39,22 @@ public class IANABootstrapScraper
         public void process(RDAPAuthority authority, BootstrapService service);
     }
 
-    public static final String BASE_URI_STR = "https://data.iana.org/rdap/";
-    public static final List<String> SUPPORTED_VERSIONS = Arrays.asList("1.0");
-
     private static final Logger LOGGER =
         Logger.getLogger(IANABootstrapScraper.class.getName());
 
-    private URI asnURI = null;
-    private URI domainURI = null;
-    private URI ipv4URI = null;
-    private URI ipv6URI = null;
-    private HttpHeaders requestHeaders = null;
-    private RestTemplate restClient = null;
+    private final IANABootstrapFetcher bootstrapFetcher;
 
     /**
      * Constructor for creating an IANA bootstrap scraper.
      */
     public IANABootstrapScraper()
     {
-        this(BASE_URI_STR);
+        this(new IANABootstrapFetcher());
     }
 
-    /**
-     * Constructor for creating IANA bootstrap scraper with non default
-     * base URI.
-     */
-    public IANABootstrapScraper(String baseUri)
+    public IANABootstrapScraper(IANABootstrapFetcher bootstrapFetcher)
     {
-        setupURIs(baseUri);
-        restClient = new RestTemplate();
-        setupRequestHeaders();
+        this.bootstrapFetcher = bootstrapFetcher;
     }
 
     /**
@@ -87,17 +64,6 @@ public class IANABootstrapScraper
     public String getName()
     {
         return "iana-bootstrap-scraper";
-    }
-
-    /**
-     * Sets up common HTTP headers used in every request to the IANA bootstrap
-     * service.
-     */
-    private void setupRequestHeaders()
-    {
-        requestHeaders = new HttpHeaders();
-        requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        requestHeaders.add(HttpHeaders.USER_AGENT, "");
     }
 
     /**
@@ -118,63 +84,13 @@ public class IANABootstrapScraper
     }
 
     /**
-     * Grunt work method that performs all bootstrap http requests and returns
-     * the server's http response.
-     *
-     * Assumes per the RFC that all requests are going to be GET.
-     *
-     * @param bootStrapURI The URI to call as a part of this request.
-     * @return Promise of the server response with a JSON body.
-     */
-    private CompletableFuture<ResponseEntity<JsonNode>>
-        makeBootstrapRequest(URI bootStrapURI)
-    {
-        HttpEntity<?> entity = new HttpEntity<>(requestHeaders);
-        CompletableFuture<ResponseEntity<JsonNode>> future =
-            new CompletableFuture<ResponseEntity<JsonNode>>();
-
-        try
-        {
-            ResponseEntity<JsonNode> rVal =
-                restClient.exchange(bootStrapURI, HttpMethod.GET,
-                                    entity, JsonNode.class);
-            future.complete(rVal);
-        }
-        catch(RestClientException ex)
-        {
-            future.completeExceptionally(ex);
-        }
-
-        return future;
-    }
-
-    /**
      * Parses the results from any bootstrap request calling the provided
      * mapping
      */
-    private void parseBootstrapResults(JsonNode bootstrapData,
-                                       RDAPAuthorityStore authorityStore,
-                                       ResourceMapper mapper)
+    private void mapBootstrapResults(BootstrapResult result,
+                                     RDAPAuthorityStore authorityStore,
+                                     ResourceMapper mapper)
     {
-        JsonNode version = bootstrapData.get("version");
-        if(version == null || SUPPORTED_VERSIONS.contains(version.asText()) == false)
-        {
-            throw new BootstrapVersionException(
-                version == null ? "null" : version.asText(), SUPPORTED_VERSIONS);
-        }
-
-        ObjectMapper oMapper = new ObjectMapper();
-        BootstrapResult result = null;
-
-        try
-        {
-            result = oMapper.treeToValue(bootstrapData, BootstrapResult.class);
-        }
-        catch(JsonProcessingException ex)
-        {
-            throw new RuntimeException(ex);
-        }
-
         for(BootstrapService service : result.getServices())
         {
             List<URI> serviceURIs = null;
@@ -209,38 +125,54 @@ public class IANABootstrapScraper
     }
 
     /**
-     * Init function responsible for configuring the URI's used for fetching
-     * IANA bootstrap data.
-     *
-     * @param baseURI Base URI to use for all specific endpoints created
-     */
-    private void setupURIs(String baseURI)
-    {
-        asnURI = URI.create(baseURI + "asn.json");
-        domainURI = URI.create(baseURI + "dns.json");
-        ipv4URI = URI.create(baseURI + "ipv4.json");
-        ipv6URI = URI.create(baseURI + "ipv6.json");
-    }
-
-    /**
      * Drives the main update cycle for asn bootstrap results.
      *
      * @return Promise that's complete when an IANA asn update has
      * completed.
      */
-    private CompletableFuture<Void> updateASNData(ResourceStore store,
+    public CompletableFuture<Void> updateASNData(ResourceStore store,
                                                   RDAPAuthorityStore authorityStore)
     {
-        return makeBootstrapRequest(asnURI)
-            .thenAccept((ResponseEntity<JsonNode> entity) ->
+        // IANA's ASN bootstrap file contains delegations from IANA to the
+        // RIRs. These delegations may be contiguous (i.e. unaggregated):
+        // e.g., APNIC has separate delegations for 131072-132095 and
+        // 132096-133119.  Other scrapers may aggregate these delegations
+        // together, and if those other scrapers are run after the IANA
+        // scraper, then they won't be able to add the delegation information
+        // to the ResourceLocator, because it will overlap (not be fully
+        // contained within) an existing delegation.  To avoid this,
+        // aggregate IANA ASN delegations where possible.
+        return bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.ASN)
+            .thenAccept((BootstrapResult result) ->
             {
-                parseBootstrapResults(entity.getBody(), authorityStore,
+                mapBootstrapResults(result, authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
+                        // We try to group IANA autnum delegations into large
+                        // blocks for contiguous intervals. This is to allow
+                        // smaller overlapping ranges from other scrapers.
+                        AsnRange lastRange = null;
                         for(String strAsnRange : service.getResources())
                         {
                             AsnRange asnRange = AsnRange.parse(strAsnRange);
-                            store.putAutnumMapping(asnRange, authority);
+                            if(lastRange == null)
+                            {
+                                lastRange = asnRange;
+                            }
+                            else if(lastRange.isContiguousWith(asnRange))
+                            {
+                                lastRange = lastRange.makeContiguousWith(asnRange);
+                            }
+                            else
+                            {
+                                store.putAutnumMapping(lastRange, authority);
+                                lastRange = asnRange;
+                            }
+                        }
+                        // Emplace the last value into the map
+                        if(lastRange != null)
+                        {
+                            store.putAutnumMapping(lastRange, authority);
                         }
                     });
             });
@@ -252,13 +184,13 @@ public class IANABootstrapScraper
      * @return Promise that's complete when an IANA domain update has
      * completed.
      */
-    private CompletableFuture<Void> updateDomainData(ResourceStore store,
+    public CompletableFuture<Void> updateDomainData(ResourceStore store,
                                                      RDAPAuthorityStore authorityStore)
     {
-        return makeBootstrapRequest(domainURI)
-            .thenAccept((ResponseEntity<JsonNode> entity) ->
+        return bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.DOMAIN)
+            .thenAccept((BootstrapResult result) ->
             {
-                parseBootstrapResults(entity.getBody(), authorityStore,
+                mapBootstrapResults(result, authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
                         for(String tldDomain : service.getResources())
@@ -278,14 +210,14 @@ public class IANABootstrapScraper
      * @return Promise that's complete when an IANA ip update has
      * completed
      */
-    private CompletableFuture<Void> updateIPAllData(URI ipBootstrapURI,
+    private CompletableFuture<Void> updateIPAllData(IANABootstrapFetcher.RequestType requestType,
                                                     ResourceStore store,
                                                     RDAPAuthorityStore authorityStore)
     {
-        return makeBootstrapRequest(ipBootstrapURI)
-            .thenAccept((ResponseEntity<JsonNode> entity) ->
+        return bootstrapFetcher.makeRequestForType(requestType)
+            .thenAccept((BootstrapResult result) ->
             {
-                parseBootstrapResults(entity.getBody(), authorityStore,
+                mapBootstrapResults(result, authorityStore,
                     (RDAPAuthority authority, BootstrapService service) ->
                     {
                         for(String strIpRange : service.getResources())
@@ -304,10 +236,10 @@ public class IANABootstrapScraper
      * @return Promise that's complete when an IANA ipv4 update has
      * complete.
      */
-    private CompletableFuture<Void> updateIPv4Data(ResourceStore store,
+    public CompletableFuture<Void> updateIPv4Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(ipv4URI, store, authorityStore);
+        return updateIPAllData(IANABootstrapFetcher.RequestType.IPv4, store, authorityStore);
     }
 
     /**
@@ -317,9 +249,9 @@ public class IANABootstrapScraper
      * @return Promise that's complete when an IANA ipv6 update has
      * complete.
      */
-    private CompletableFuture<Void> updateIPv6Data(ResourceStore store,
+    public CompletableFuture<Void> updateIPv6Data(ResourceStore store,
                                                    RDAPAuthorityStore authorityStore)
     {
-        return updateIPAllData(ipv6URI, store, authorityStore);
+        return updateIPAllData(IANABootstrapFetcher.RequestType.IPv6, store, authorityStore);
     }
 }

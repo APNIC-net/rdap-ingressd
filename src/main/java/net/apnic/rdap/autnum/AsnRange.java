@@ -20,6 +20,18 @@ public class AsnRange
         super(start, end);
     }
 
+    public boolean isContiguousWith(AsnRange asnRange)
+    {
+        return getEnd().successor().equals(asnRange.getStart());
+    }
+
+    public AsnRange makeContiguousWith(AsnRange asnRange)
+    {
+        if(isContiguousWith(asnRange) == false)
+            throw new RuntimeException("AsnRange's are not alligned");
+        return new AsnRange((Asn)getStart(), (Asn)asnRange.getEnd());
+    }
+
     /**
      * Passes an autnum range or a single autnum
      * 
