@@ -133,6 +133,15 @@ public class IANABootstrapScraper
     public CompletableFuture<Void> updateASNData(ResourceStore store,
                                                   RDAPAuthorityStore authorityStore)
     {
+        // IANA's ASN bootstrap file contains delegations from IANA to the
+        // RIRs. These delegations may be contiguous (i.e. unaggregated):
+        // e.g., APNIC has separate delegations for 131072-132095 and
+        // 132096-133119.  Other scrapers may aggregate these delegations
+        // together, and if those other scrapers are run after the IANA
+        // scraper, then they won't be able to add the delegation information
+        // to the ResourceLocator, because it will overlap (not be fully
+        // contained within) an existing delegation.  To avoid this,
+        // aggregate IANA ASN delegations where possible.
         return bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.ASN)
             .thenAccept((BootstrapResult result) ->
             {

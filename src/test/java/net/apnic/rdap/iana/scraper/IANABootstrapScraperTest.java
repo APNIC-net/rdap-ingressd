@@ -26,6 +26,12 @@ public class IANABootstrapScraperTest
         return CompletableFuture.completedFuture(bsr);
     }
 
+    /* Method tests joining of autnums during scraping of IANA data. We expect
+     * that autnum blocks that follow each other are joined together in one
+     * larger block. The first entry in scraping that breaks the larger block
+     * creation starts a new block. For an explanation of this behaviour please
+     * see IANABootstrapScraper::updateAsnData
+     */
     @Test
     public void testAutnumJoining()
     {
