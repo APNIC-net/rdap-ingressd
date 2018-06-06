@@ -14,7 +14,13 @@ endpoints:
     post:
       enabled: false
 
+server:
+  use-forward-headers: true
+  port: 8080
+
 zuul:
+  ignored-headers: Access-Control-Allow-Origin
+  add-proxy-headers: true
   routes:
     autnum:
       path: /autnum/**
