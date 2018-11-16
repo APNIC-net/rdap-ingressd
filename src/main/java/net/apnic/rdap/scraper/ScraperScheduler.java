@@ -1,19 +1,21 @@
 package net.apnic.rdap.scraper;
 
-import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.resource.store.ResourceStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Scheduler is responsible for running one or more scraping tasks one after the
@@ -22,19 +24,18 @@ import org.springframework.stereotype.Service;
  * Class is to only be used by the creating thread.
  */
 @Service
-public class ScraperScheduler
-{
+public class ScraperScheduler implements HealthIndicator {
     private static final int SCHEDULER_PERIOD = 12;
     private static final TimeUnit SCHEDULER_PERIOD_UNIT = TimeUnit.HOURS;
 
     private final Logger LOGGER =
         Logger.getLogger(ScraperScheduler.class.getName());
 
-    private RDAPAuthorityStore authorityStore = null;
     private ScheduledExecutorService executor = null;
     private List<Scraper> scrapers = new ArrayList<Scraper>();
     private ResourceStore resourceStore = null;
     private boolean started = false;
+    private Map<String, ScraperStatus> scraperStatuses = new HashMap<>();
 
     /**
      * Takes the ResourceStore this scheduler is to work on as well as an
@@ -49,11 +50,8 @@ public class ScraperScheduler
      *                        resources to authorities.
      */
     @Autowired
-    public ScraperScheduler(ResourceStore resourceStore,
-                            RDAPAuthorityStore authorityStore)
-    {
+    public ScraperScheduler(ResourceStore resourceStore) {
         this.resourceStore = resourceStore;
-        this.authorityStore = authorityStore;
         executor = Executors.newScheduledThreadPool(1);
     }
 
@@ -67,16 +65,9 @@ public class ScraperScheduler
     public void addScraper(Scraper scraper)
     {
         scrapers.add(scraper);
-    }
-
-    /**
-     * Indicates if this scheduler has been started.
-     *
-     * @return Scheduler has been started
-     */
-    public boolean hasStarted()
-    {
-        return started;
+        ScraperStatus scraperStatus = new ScraperStatus();
+        scraperStatus.status = Status.PENDING;
+        scraperStatuses.put(scraper.getName(), scraperStatus);
     }
 
     /**
@@ -85,34 +76,45 @@ public class ScraperScheduler
      * If this scheduler has already been started previously calls to this
      * method will return immediately.
      */
-    public void start()
-    {
-        if(hasStarted())
-        {
-            return;
-        }
-        started = true;
+    public void start() {
+        synchronized (this) {
+            if (started) {
+                return;
+            }
 
-        executor.scheduleAtFixedRate(() ->
-        {
+            started = true;
+        }
+
+        executor.scheduleAtFixedRate(() -> {
             ResourceStore newResourceStore = resourceStore.initialiseNew();
 
-            for(Scraper scraper : scrapers)
-            {
-                try
-                {
+            for (Scraper scraper : scrapers) {
+                try {
                     LOGGER.log(Level.INFO, "Running scraper " +
                                scraper.getName());
 
-                    scraper.start(newResourceStore, authorityStore).join();
+                    ScraperResult result = scraper.fetchData();
+                    newResourceStore.addScraperResult(result);
+
+                    ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
+                    scraperStatus.status = Status.SUCCESS;
+                    scraperStatus.lastSuccessfulResult = result;
+                    scraperStatus.lastSuccessfulDateTime = LocalDateTime.now();
 
                     LOGGER.log(Level.INFO, "Finished scraper " +
                                scraper.getName());
-                }
-                catch(Exception ex)
-                {
+                } catch(ScraperException ex) {
                     LOGGER.log(Level.SEVERE, "Exception when running scraper " +
                                scraper.getName(), ex);
+
+                    ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
+                    scraperStatus.status = Status.FAILURE;
+
+                    // uses the last successfully fetched data if available
+                    if (scraperStatus.lastSuccessfulResult != null) {
+                        newResourceStore.addScraperResult(scraperStatus.lastSuccessfulResult);
+                    }
+
                 }
             }
 
@@ -120,4 +122,29 @@ public class ScraperScheduler
 
         }, 0, SCHEDULER_PERIOD, SCHEDULER_PERIOD_UNIT);
     }
+
+    public Map<String, ScraperStatus> getScraperStatuses() {
+        return scraperStatuses;
+    }
+
+    @Override
+    public Health health() {
+        return Health.up().withDetail("ScraperStatus:", getScraperStatuses().toString()).build();
+    }
+
+    private class ScraperStatus {
+        ScraperResult lastSuccessfulResult;
+        LocalDateTime lastSuccessfulDateTime;
+        Status status;
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "lastSuccessfulDateTime=" + lastSuccessfulDateTime +
+                    ", status=" + status +
+                    '}';
+        }
+    }
+
+    private enum Status { SUCCESS, FAILURE, PENDING }
 }

@@ -1,15 +1,16 @@
 package net.apnic.rdap.resource.store;
 
-import java.util.HashMap;
-
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.domain.Domain;
-
+import net.apnic.rdap.resource.ResourceMapping;
+import net.apnic.rdap.scraper.ScraperResult;
 import net.ripe.ipresource.IpRange;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Centralised resource store service for adding authority to resource mappings
@@ -43,7 +44,6 @@ public class ResourceStore
      * Method is designed to be used in conjunction with moveStore()
      *
      * @return ResourceStore New ResourceStore modeled from this object.
-     * @see moveStore()
      */
     public ResourceStore initialiseNew()
     {
@@ -98,10 +98,28 @@ public class ResourceStore
         ipStorage.moveStorage(store.ipStorage);
     }
 
+    /**
+     * Adds all the results of a {@link net.apnic.rdap.scraper.Scraper} encapsulated in an {@link ScraperResult} to the
+     * store.
+     * @param result a {@link ScraperResult} encapsulating the data to be added
+     */
+    public void addScraperResult(ScraperResult result) {
+        result.getIpMappings().ifPresent(resourceMappings -> putMapping(resourceMappings, this::putIPMapping));
+        result.getAsnMappings().ifPresent(resourceMappings -> putMapping(resourceMappings, this::putAutnumMapping));
+        result.getDomainMappings().ifPresent(resourceMappings -> putMapping(resourceMappings, this::putDomainMapping));
+    }
+
     private <Resource> void storageProxy(ResourceStorage<Resource> storage,
                                          Resource resource,
                                          RDAPAuthority authority)
     {
         storage.putResourceMapping(resource, authority);
+    }
+
+    private <Resource> void putMapping(List<ResourceMapping<Resource>> resourceMappings,
+                                       BiConsumer<Resource, RDAPAuthority> putFunction) {
+        for (ResourceMapping<Resource> resourceMapping : resourceMappings) {
+            putFunction.accept(resourceMapping.getResource(), resourceMapping.getAuthority());
+        }
     }
 }
