@@ -118,7 +118,7 @@ public abstract class DelegatedStatsScraper implements Scraper {
      * Function is async and returns a future with a stream of the data returned
      * from the request.
      *
-     * @return Future containing a stream of the data recieved from the server
+     * @return a stream of the data received from the server
      */
     private InputStream makeDelegatedHttpRequest() {
         HttpEntity<Resource> entity = new HttpEntity<>(requestHeaders);
