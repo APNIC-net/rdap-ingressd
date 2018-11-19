@@ -122,4 +122,16 @@ public class ResourceStore
             putFunction.accept(resourceMapping.getResource(), resourceMapping.getAuthority());
         }
     }
+
+    public ResourceStorage<AsnRange> getAsnStorage() {
+        return asnStorage;
+    }
+
+    public ResourceStorage<Domain> getDomainStorage() {
+        return domainStorage;
+    }
+
+    public ResourceStorage<IpRange> getIpStorage() {
+        return ipStorage;
+    }
 }

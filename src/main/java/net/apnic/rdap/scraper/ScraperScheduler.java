@@ -85,13 +85,16 @@ public class ScraperScheduler implements HealthIndicator {
             started = true;
         }
 
-        executor.scheduleAtFixedRate(() -> {
+        executor.scheduleAtFixedRate(processDataUpdate(), 0, SCHEDULER_PERIOD, SCHEDULER_PERIOD_UNIT);
+    }
+
+    Runnable processDataUpdate() {
+        return () -> {
             ResourceStore newResourceStore = resourceStore.initialiseNew();
 
             for (Scraper scraper : scrapers) {
                 try {
-                    LOGGER.log(Level.INFO, "Running scraper " +
-                               scraper.getName());
+                    LOGGER.log(Level.INFO, "Running scraper " + scraper.getName());
 
                     ScraperResult result = scraper.fetchData();
                     newResourceStore.addScraperResult(result);
@@ -101,11 +104,9 @@ public class ScraperScheduler implements HealthIndicator {
                     scraperStatus.lastSuccessfulResult = result;
                     scraperStatus.lastSuccessfulDateTime = LocalDateTime.now();
 
-                    LOGGER.log(Level.INFO, "Finished scraper " +
-                               scraper.getName());
+                    LOGGER.log(Level.INFO, "Finished scraper " + scraper.getName());
                 } catch(ScraperException ex) {
-                    LOGGER.log(Level.SEVERE, "Exception when running scraper " +
-                               scraper.getName(), ex);
+                    LOGGER.log(Level.SEVERE, "Exception when running scraper " + scraper.getName(), ex);
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
                     scraperStatus.status = Status.FAILURE;
@@ -114,13 +115,11 @@ public class ScraperScheduler implements HealthIndicator {
                     if (scraperStatus.lastSuccessfulResult != null) {
                         newResourceStore.addScraperResult(scraperStatus.lastSuccessfulResult);
                     }
-
                 }
             }
 
             resourceStore.moveStore(newResourceStore);
-
-        }, 0, SCHEDULER_PERIOD, SCHEDULER_PERIOD_UNIT);
+        };
     }
 
     public Map<String, ScraperStatus> getScraperStatuses() {
