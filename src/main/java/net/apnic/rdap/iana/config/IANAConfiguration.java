@@ -4,6 +4,7 @@ import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.iana.scraper.IANABootstrapFetcher;
 import net.apnic.rdap.iana.scraper.IANABootstrapScraper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,13 +26,14 @@ public class IANAConfiguration
 
     @ConditionalOnProperty(value="rdap.scraping.scrapers.iana.enabled")
     @Bean(value="iana")
-    public IANABootstrapScraper ianaScraper()
+    @Autowired
+    public IANABootstrapScraper ianaScraper(RDAPAuthorityStore rdapAuthorityStore)
     {
         if(baseURI != null && baseURI.isEmpty() == false)
         {
-            return new IANABootstrapScraper(new IANABootstrapFetcher(baseURI));
+            return new IANABootstrapScraper(rdapAuthorityStore, new IANABootstrapFetcher(baseURI));
         }
-        return new IANABootstrapScraper();
+        return new IANABootstrapScraper(rdapAuthorityStore);
     }
 
     public void setBaseURI(String baseURI)

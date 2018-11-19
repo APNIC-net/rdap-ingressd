@@ -1,31 +1,26 @@
 package net.apnic.rdap.iana.scraper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.autnum.AsnRange;
 import net.apnic.rdap.domain.Domain;
-import net.apnic.rdap.resource.store.ResourceStore;
+import net.apnic.rdap.resource.ResourceMapping;
 import net.apnic.rdap.scraper.Scraper;
-
+import net.apnic.rdap.scraper.ScraperException;
+import net.apnic.rdap.scraper.ScraperResult;
 import net.ripe.ipresource.IpRange;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Scraper for IANA bootstrap service.
  *
- * @see RFC 7484
+ * See details on RFC 7484.
  */
 public class IANABootstrapScraper
     implements Scraper
@@ -36,51 +31,40 @@ public class IANABootstrapScraper
      */
     private interface ResourceMapper
     {
-        public void process(RDAPAuthority authority, BootstrapService service);
+        void process(RDAPAuthority authority, BootstrapService service);
     }
 
-    private static final Logger LOGGER =
-        Logger.getLogger(IANABootstrapScraper.class.getName());
-
+    private final RDAPAuthorityStore rdapAuthorityStore;
     private final IANABootstrapFetcher bootstrapFetcher;
 
     /**
      * Constructor for creating an IANA bootstrap scraper.
+     * @param rdapAuthorityStore instance of {@link RDAPAuthorityStore} to retrieve {@link RDAPAuthority} data
      */
-    public IANABootstrapScraper()
+    public IANABootstrapScraper(RDAPAuthorityStore rdapAuthorityStore)
     {
-        this(new IANABootstrapFetcher());
+        this(rdapAuthorityStore, new IANABootstrapFetcher());
     }
 
-    public IANABootstrapScraper(IANABootstrapFetcher bootstrapFetcher)
+    public IANABootstrapScraper(RDAPAuthorityStore rdapAuthorityStore, IANABootstrapFetcher bootstrapFetcher)
     {
+        this.rdapAuthorityStore = rdapAuthorityStore;
         this.bootstrapFetcher = bootstrapFetcher;
     }
 
-    /**
-     * {@inheritDocs}
-     */
     @Override
     public String getName()
     {
         return "iana-bootstrap-scraper";
     }
 
-    /**
-     * Main scraper method that dispatches a one-time scrape of IANA.
-     *
-     * This method is triggered by a scraper scheduler.
-     *
-     * @see net.apnic.rdap.scraper.ScraperScheduler
-     */
     @Override
-    public CompletableFuture<Void> start(ResourceStore store,
-                                         RDAPAuthorityStore authorityStore)
-    {
-        return CompletableFuture.allOf(updateASNData(store, authorityStore),
-                                       updateDomainData(store, authorityStore),
-                                       updateIPv4Data(store, authorityStore), 
-                                       updateIPv6Data(store, authorityStore));
+    public ScraperResult fetchData() throws ScraperException {
+        try {
+            return new ScraperResult(fetchIPData(), fetchASNData(), fetchDomainData());
+        } catch (Exception e) {
+            throw new ScraperException("Error retrieving IANA data.", e);
+        }
     }
 
     /**
@@ -124,15 +108,7 @@ public class IANABootstrapScraper
         }
     }
 
-    /**
-     * Drives the main update cycle for asn bootstrap results.
-     *
-     * @return Promise that's complete when an IANA asn update has
-     * completed.
-     */
-    public CompletableFuture<Void> updateASNData(ResourceStore store,
-                                                  RDAPAuthorityStore authorityStore)
-    {
+    private List<ResourceMapping<AsnRange>> fetchASNData() {
         // IANA's ASN bootstrap file contains delegations from IANA to the
         // RIRs. These delegations may be contiguous (i.e. unaggregated):
         // e.g., APNIC has separate delegations for 131072-132095 and
@@ -142,116 +118,61 @@ public class IANABootstrapScraper
         // to the ResourceLocator, because it will overlap (not be fully
         // contained within) an existing delegation.  To avoid this,
         // aggregate IANA ASN delegations where possible.
-        return bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.ASN)
-            .thenAccept((BootstrapResult result) ->
-            {
-                mapBootstrapResults(result, authorityStore,
-                    (RDAPAuthority authority, BootstrapService service) ->
-                    {
-                        // We try to group IANA autnum delegations into large
-                        // blocks for contiguous intervals. This is to allow
-                        // smaller overlapping ranges from other scrapers.
-                        AsnRange lastRange = null;
-                        for(String strAsnRange : service.getResources())
-                        {
-                            AsnRange asnRange = AsnRange.parse(strAsnRange);
-                            if(lastRange == null)
-                            {
-                                lastRange = asnRange;
-                            }
-                            else if(lastRange.isContiguousWith(asnRange))
-                            {
-                                lastRange = lastRange.makeContiguousWith(asnRange);
-                            }
-                            else
-                            {
-                                store.putAutnumMapping(lastRange, authority);
-                                lastRange = asnRange;
-                            }
-                        }
-                        // Emplace the last value into the map
-                        if(lastRange != null)
-                        {
-                            store.putAutnumMapping(lastRange, authority);
-                        }
-                    });
-            });
+        List<ResourceMapping<AsnRange>> mappings = new ArrayList<>();
+        BootstrapResult result =  bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.ASN);
+        mapBootstrapResults(result, rdapAuthorityStore, (RDAPAuthority authority, BootstrapService service) -> {
+                // We try to group IANA autnum delegations into large
+                // blocks for contiguous intervals. This is to allow
+                // smaller overlapping ranges from other scrapers.
+                AsnRange lastRange = null;
+                for (String strAsnRange : service.getResources()) {
+                    AsnRange asnRange = AsnRange.parse(strAsnRange);
+                    if (lastRange == null) {
+                        lastRange = asnRange;
+                    } else if (lastRange.isContiguousWith(asnRange)) {
+                        lastRange = lastRange.makeContiguousWith(asnRange);
+                    } else {
+                        mappings.add(new ResourceMapping<>(lastRange, authority));
+                        lastRange = asnRange;
+                    }
+                }
+                // Insert the last value into the map
+                if (lastRange != null) {
+                    mappings.add(new ResourceMapping<>(lastRange, authority));
+                }
+        });
+
+        return mappings;
     }
 
-    /**
-     * Drives the main update cycle for domain bootstrap results
-     *
-     * @return Promise that's complete when an IANA domain update has
-     * completed.
-     */
-    public CompletableFuture<Void> updateDomainData(ResourceStore store,
-                                                     RDAPAuthorityStore authorityStore)
-    {
-        return bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.DOMAIN)
-            .thenAccept((BootstrapResult result) ->
-            {
-                mapBootstrapResults(result, authorityStore,
-                    (RDAPAuthority authority, BootstrapService service) ->
-                    {
-                        for(String tldDomain : service.getResources())
-                        {
-                            Domain domain = new Domain(tldDomain);
-                            store.putDomainMapping(domain, authority);
-                        }
-                    });
-            });
+    private List<ResourceMapping<Domain>> fetchDomainData() {
+        List<ResourceMapping<Domain>> mappings = new ArrayList<>();
+        BootstrapResult result =  bootstrapFetcher.makeRequestForType(IANABootstrapFetcher.RequestType.DOMAIN);
+        mapBootstrapResults(result, rdapAuthorityStore, (RDAPAuthority authority, BootstrapService service) -> {
+            for (String tldDomain : service.getResources()) {
+                Domain domain = new Domain(tldDomain);
+                mappings.add(new ResourceMapping<>(domain, authority));
+            }
+        });
+
+        return mappings;
     }
 
-    /**
-     * Utility method that shares the same logic for driving all ip address
-     * updates.
-     *
-     * @param ipBootstrapURI The URI for the ip bootstrap data to process
-     * @return Promise that's complete when an IANA ip update has
-     * completed
-     */
-    private CompletableFuture<Void> updateIPAllData(IANABootstrapFetcher.RequestType requestType,
-                                                    ResourceStore store,
-                                                    RDAPAuthorityStore authorityStore)
-    {
-        return bootstrapFetcher.makeRequestForType(requestType)
-            .thenAccept((BootstrapResult result) ->
-            {
-                mapBootstrapResults(result, authorityStore,
-                    (RDAPAuthority authority, BootstrapService service) ->
-                    {
-                        for(String strIpRange : service.getResources())
-                        {
-                            IpRange ipRange = IpRange.parse(strIpRange);
-                            store.putIPMapping(ipRange, authority);
-                        }
-                    });
-            });
+    private List<ResourceMapping<IpRange>> fetchIPDataPerType(IANABootstrapFetcher.RequestType requestType) {
+        List<ResourceMapping<IpRange>> mappings = new ArrayList<>();
+        BootstrapResult result = bootstrapFetcher.makeRequestForType(requestType);
+        mapBootstrapResults(result, rdapAuthorityStore, (RDAPAuthority authority, BootstrapService service) -> {
+            for(String strIpRange : service.getResources()) {
+                mappings.add(new ResourceMapping<>(IpRange.parse(strIpRange), authority));
+            }
+        });
+        return mappings;
     }
 
-    /**
-     * Drives the main update cycle for ipv4 bootstrap results.
-     *
-     * Proxies through to updateIPAllData()
-     * @return Promise that's complete when an IANA ipv4 update has
-     * complete.
-     */
-    public CompletableFuture<Void> updateIPv4Data(ResourceStore store,
-                                                   RDAPAuthorityStore authorityStore)
-    {
-        return updateIPAllData(IANABootstrapFetcher.RequestType.IPv4, store, authorityStore);
-    }
-
-    /**
-     * Drives the main update cycle for ipv6 bootstrap results.
-     *
-     * Proxies through to updateIPAllData()
-     * @return Promise that's complete when an IANA ipv6 update has
-     * complete.
-     */
-    public CompletableFuture<Void> updateIPv6Data(ResourceStore store,
-                                                   RDAPAuthorityStore authorityStore)
-    {
-        return updateIPAllData(IANABootstrapFetcher.RequestType.IPv6, store, authorityStore);
+    private List<ResourceMapping<IpRange>> fetchIPData() {
+        return Stream.concat(
+                fetchIPDataPerType(IANABootstrapFetcher.RequestType.IPv4).stream(),
+                fetchIPDataPerType(IANABootstrapFetcher.RequestType.IPv6).stream()
+        ).collect(Collectors.toList());
     }
 }

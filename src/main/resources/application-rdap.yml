@@ -65,6 +65,7 @@ rdap:
                 enabled: true
             nro:
                 enabled: true
+                baseURI: https://labs.apnic.net/delegated-nro-extended
         config:
             # Order in which scrapers are run.
             order:

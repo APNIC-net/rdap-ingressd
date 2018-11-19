@@ -1,29 +1,33 @@
 package net.apnic.rdap.iana.scraper;
 
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.List;
-
+import net.apnic.rdap.authority.RDAPAuthority;
 import net.apnic.rdap.authority.RDAPAuthorityStore;
-import net.apnic.rdap.resource.store.ResourceStore;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import net.apnic.rdap.autnum.AsnRange;
+import net.apnic.rdap.resource.ResourceMapping;
+import net.apnic.rdap.scraper.ScraperException;
+import net.apnic.rdap.scraper.ScraperResult;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class IANABootstrapScraperTest
 {
     private RDAPAuthorityStore authorityStore = new RDAPAuthorityStore();
 
-    private static CompletableFuture<BootstrapResult>
-        makeTestBootstrapResult(List<String> uris, List<String> resources)
-    {
+    private static BootstrapResult makeTestBootstrapResult(List<String> uris, List<String> resources) {
         BootstrapResult bsr = new BootstrapResult();
         bsr.setServices(Arrays.asList(new BootstrapService(Arrays.asList(resources, uris))));
-
-        return CompletableFuture.completedFuture(bsr);
+        return bsr;
     }
 
     /* Method tests joining of autnums during scraping of IANA data. We expect
@@ -33,25 +37,31 @@ public class IANABootstrapScraperTest
      * see IANABootstrapScraper::updateAsnData
      */
     @Test
-    public void testAutnumJoining()
-    {
+    void testAutnumJoining() throws ScraperException {
+        final String AUTHORITY_URI = "https://test.test";
         IANABootstrapFetcher fetcher = mock(IANABootstrapFetcher.class);
-        when(fetcher.makeRequestForType(any(IANABootstrapFetcher.RequestType.class)))
+        when(fetcher.makeRequestForType(any()))
+                .thenReturn(makeTestBootstrapResult(
+                        Collections.singletonList(AUTHORITY_URI),
+                        Collections.emptyList()));
+        when(fetcher.makeRequestForType(IANABootstrapFetcher.RequestType.ASN))
             .thenReturn(makeTestBootstrapResult(
-                Arrays.asList("http://test.test"),
+                Collections.singletonList(AUTHORITY_URI),
                 Arrays.asList("1-4", "6-8", "9-10", "11-20", "22-25")));
 
-        ResourceStore store = mock(ResourceStore.class);
+        IANABootstrapScraper scraper = new IANABootstrapScraper(authorityStore, fetcher);
 
-        IANABootstrapScraper scraper = new IANABootstrapScraper(fetcher);
+        ScraperResult scraperResult = scraper.fetchData();
+        Optional<List<ResourceMapping<AsnRange>>> asnMappings = scraperResult.getAsnMappings();
+        RDAPAuthority rdapAuthority = authorityStore.findAuthorityByURI(URI.create(AUTHORITY_URI));
 
-        scraper.updateASNData(store, authorityStore);
-
-        verify(store).putAutnumMapping(
-            argThat(asnRange -> asnRange.toString().equals("AS1-AS4")), any());
-        verify(store).putAutnumMapping(
-            argThat(asnRange -> asnRange.toString().equals("AS6-AS20")), any());
-        verify(store).putAutnumMapping(
-            argThat(asnRange -> asnRange.toString().equals("AS22-AS25")), any());
+        Assert.assertTrue(asnMappings.isPresent());
+        Assert.assertThat(asnMappings.get().size(), Matchers.is(3));
+        Assert.assertThat(asnMappings.get(),
+                Matchers.hasItem(new ResourceMapping<>(AsnRange.parse("AS1-AS4"), rdapAuthority)));
+        Assert.assertThat(asnMappings.get(),
+                Matchers.hasItem(new ResourceMapping<>(AsnRange.parse("AS6-AS20"), rdapAuthority)));
+        Assert.assertThat(asnMappings.get(),
+                Matchers.hasItem(new ResourceMapping<>(AsnRange.parse("AS22-AS25"), rdapAuthority)));
     }
 }

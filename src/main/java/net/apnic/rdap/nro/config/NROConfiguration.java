@@ -1,7 +1,9 @@
 package net.apnic.rdap.nro.config;
 
+import net.apnic.rdap.authority.RDAPAuthorityStore;
 import net.apnic.rdap.nro.scraper.NROScraper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,13 +25,14 @@ public class NROConfiguration
 
     @ConditionalOnProperty(value="rdap.scraping.scrapers.nro.enabled")
     @Bean(value="nro")
-    public NROScraper nroScraper()
+    @Autowired
+    public NROScraper nroScraper(RDAPAuthorityStore rdapAuthorityStore)
     {
         if(baseURI != null && baseURI.isEmpty() == false)
         {
-            return new NROScraper(baseURI);
+            return new NROScraper(rdapAuthorityStore, baseURI);
         }
-        return new NROScraper();
+        return new NROScraper(rdapAuthorityStore);
     }
 
     public void setBaseURI(String baseURI)

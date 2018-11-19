@@ -1,18 +1,11 @@
 package net.apnic.rdap.iana.scraper;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.concurrent.CompletableFuture;
 import java.net.URI;
 import java.util.Arrays;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 public class IANABootstrapFetcher
 {
@@ -54,21 +47,11 @@ public class IANABootstrapFetcher
         this.useBaseURI = baseURI;
     }
 
-    public CompletableFuture<BootstrapResult> makeRequestForType(RequestType requestType) {
+    public BootstrapResult makeRequestForType(RequestType requestType) {
         HttpEntity<?> entity = new HttpEntity<>(REQUEST_HEADERS);
-        CompletableFuture<BootstrapResult> future =
-            new CompletableFuture<BootstrapResult>();
-
-        try {
-            ResponseEntity<JsonNode> rEntity =
-                restClient.exchange(requestType.getRequestURI(useBaseURI),
-                    HttpMethod.GET, entity, JsonNode.class);
-
-            future.complete(BootstrapResultParser.parse(rEntity.getBody()));
-        } catch(Exception ex) {
-            future.completeExceptionally(ex);
-        } finally {
-            return future;
-        }
+        ResponseEntity<JsonNode> rEntity =
+            restClient.exchange(requestType.getRequestURI(useBaseURI),
+                HttpMethod.GET, entity, JsonNode.class);
+        return BootstrapResultParser.parse(rEntity.getBody());
     }
 }
