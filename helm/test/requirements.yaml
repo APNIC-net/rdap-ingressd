@@ -1,0 +1,4 @@
+dependencies:
+  - name: rdapd
+    version: x
+    repository: https://charts.xyz.apnic.net/prd

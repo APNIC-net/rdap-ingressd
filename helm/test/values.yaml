@@ -1,0 +1,41 @@
+ingress:
+  enabled: true
+
+database:
+  image: "acr2.apnic.net/mysql/mysql-server"
+  tag: "5.6"
+
+  imagePullPolicy: IfNotPresent
+
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+
+#Overwriting the rdapd chart values
+rdapd:
+  rdapd:
+    whoisDB:
+      host: null #defined in pipeline
+      db: whoisdb
+      username: root
+      password: password
+  image:
+    repository: acr2.apnic.net/sw/rdap/rdapd/master
+    tag: 4227_a8262f92d155367b10b674be6c3051719359ea36
+  ingress:
+      host: rdapd.tst.xyz.apnic.net
+      enabled: true
+      class: traefik
+  service:
+    type: NodePort
+    port: 8080

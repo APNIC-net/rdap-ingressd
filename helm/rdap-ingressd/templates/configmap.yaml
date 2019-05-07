@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "application.fullname" . }}
+  labels:
+    chart: {{ template "application.chart" . }}
+    app: {{ template "application.fullname" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+  application-rdap.yml: |2
+{{- with .Values.application_rdap }}
+{{ toYaml . | indent 4 }}
+{{- end }}

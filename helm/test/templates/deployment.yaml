@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "application.fullname" . }}
+  labels:
+    app: {{ template "application.fullname" . }}
+    chart: {{ template "application.chart" . }}
+    chart: {{ template "application.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "application.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "application.fullname" . }}
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: scraper
+          containerPort: 80
+        volumeMounts:
+        - name: scrapers
+          mountPath: /usr/local/apache2/htdocs/
+      - name: database
+        image: {{ .Values.database.image }}:{{ .Values.database.tag }}
+        imagePullPolicy: {{ .Values.database.imagePullPolicy | quote }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: {{ .Values.rdapd.rdapd.whoisDB.db }}
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          value: password
+        ports:
+        - name: mysql
+          containerPort: 3306
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+          initialDelaySeconds: {{ .Values.database.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.database.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.database.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.database.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.database.livenessProbe.failureThreshold }}
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+          initialDelaySeconds: {{ .Values.database.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.database.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.database.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.database.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.database.readinessProbe.failureThreshold }}
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: {{ template "application.fullname" . }}
+      - name: scrapers
+        configMap:
+          name: {{ template "application.fullname" . }}-scrapers

@@ -1,0 +1,6 @@
+service:
+  type: NodePort
+  port: 8080
+ingress:
+  enabled: true
+  hostname: null #defined in pipeline

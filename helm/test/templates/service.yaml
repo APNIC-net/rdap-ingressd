@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "application.fullname" . }}
+  labels:
+    app: {{ template "application.fullname" . }}
+    chart: {{ template "application.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: NodePort
+  ports:
+  - port: 3306
+    targetPort: mysql
+    protocol: TCP
+    name: mysql
+  - port: 80
+    targetPort: scraper
+    protocol: TCP
+    name: scraper
+  selector:
+    app: {{ template "application.fullname" . }}
