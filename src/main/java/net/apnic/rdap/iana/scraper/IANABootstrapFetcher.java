@@ -47,6 +47,10 @@ public class IANABootstrapFetcher
         this.useBaseURI = baseURI;
     }
 
+
+    public String getBaseUrl(){
+        return this.useBaseURI;
+    }
     public BootstrapResult makeRequestForType(RequestType requestType) {
         HttpEntity<?> entity = new HttpEntity<>(REQUEST_HEADERS);
         ResponseEntity<JsonNode> rEntity =

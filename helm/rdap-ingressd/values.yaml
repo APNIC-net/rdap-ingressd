@@ -1,0 +1,76 @@
+replicaCount: 1
+
+image:
+  repository: null
+  tag: null
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+ingress:
+  enabled: false
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+application_rdap:
+    # See https://gitlab.xyz.apnic.net/sw/rdap/rdap-ingressd for documentation over
+    # config file.
+    rdap:
+      # A list of RDAP authorities may be configured ahead of time, if
+      # required.  Each authority has a name, an optional list of
+      # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+      # list based on first server found containing a https connection. If no
+      # server is available with https then the first available http server is
+      # choosen. Alternatively a defaultServer attribute can be specified giving
+      # the URI of the default server to use.
+      authorities:
+        - name: apnic
+          defaultServer:
+          servers:
+          - https://rdap.apnic.net
+          - http://rdap.apnic.net
+        - name: ripe
+          aliases:
+          - ripencc
+          servers:
+          - https://rdap.db.ripe.net/
+        - name: afrinic
+          servers:
+          - https://rdap.afrinic.net/rdap/
+          - http://rdap.afrinic.net/rdap/
+        - name: arin
+          servers:
+          - https://rdap.arin.net/registry
+          - http://rdap.arin.net/registry
+        - name: lacnic
+          servers:
+          - https://rdap.lacnic.net/rdap/
+      routing:
+        # Default routing action for authorities
+        defaultAction: redirect
+        # Default authority for non routable requests
+        defaultAuthority: apnic
+      notices:
+      - title: Terms and Conditions
+        description:
+        - This is the APNIC RDAP query service. The objects are in RDAP format.
+        links:
+        - href: http://www.apnic.net/db/dbcopyright.html
+          rel: terms-of-service
+          type: text/html
+      scraping:
+        scrapers:
+          iana:
+            enabled: true
+          nro:
+            enabled: true
+        config:
+          order:
+          - iana
+          - nro

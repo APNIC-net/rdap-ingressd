@@ -1,0 +1,194 @@
+image: alpine:latest
+
+variables:
+  HTTP_PROXY: ${HTTP_PROXY}
+  HTTPS_PROXY: ${HTTPS_PROXY}
+  NO_PROXY: ${NO_PROXY}
+
+stages:
+  - test
+  - docker_image
+  - publish_to_test
+  - review
+  - stage
+  - stop
+  - production
+
+package_and_tests:
+  stage: test
+  image: $CI_PROD_REGISTRY/ci/alpine-jdk-maven:1.0.0
+  script:
+    - mvn package
+  artifacts:
+    paths: ["target/*.jar", "target/Dockerfile", "target/entrypoint.sh"]
+  only:
+    refs:
+      - branches
+  except:
+    refs:
+      - tags
+
+docker_image:
+  image: $CI_TOOLS_IMAGE
+  stage: docker_image
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: $CI_PROD_REGISTRY/ci/dind:1.0.0
+  script:
+    - setup_docker
+    - cd target
+    - build
+  only:
+    - branches
+  except:
+    refs:
+      - master
+      - tags
+
+docker_prod_image:
+  image: $CI_TOOLS_IMAGE
+  stage: docker_image
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: $CI_PROD_REGISTRY/ci/dind:1.0.0
+  script:
+    - setup_docker
+    - cd target
+    - build ${CI_PROD_REGISTRY}
+  only:
+    - master
+  except:
+    refs:
+      - tags
+
+
+review_test_env:
+  stage: review
+  image: $CI_TOOLS_IMAGE
+  script:
+    - run_test_environment
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    url: $CI_ENVIRONMENT_SLUG.${CI_PROJECT_NAME}.tst.xyz.apnic.net
+    on_stop: stop_environment
+  only:
+    refs:
+      - branches
+  except:
+    refs:
+      - tags
+      - master
+    variables:
+      - $DISABLED_REVIEW
+
+review_prod_env:
+  stage: review
+  image: $CI_TOOLS_IMAGE
+  script:
+    - configure_helm
+    - staging_environment_deploy
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    url: ${CI_PROJECT_NAME}.tst.xyz.apnic.net
+    on_stop: stop_environment
+  only:
+    refs:
+      - master
+  except:
+    refs:
+      - tags
+    variables:
+      - $DISABLED_REVIEW
+
+publish_chart_to_test_repo:
+  stage: test
+  image: $CI_TOOLS_IMAGE
+  script:
+    - publish_chart tst
+  only:
+    refs:
+      - branches
+  except:
+    refs:
+    - tags
+    variables:
+    - $DISABLED_PUBLISH
+
+publish_chart_to_prod_repo:
+  stage: production
+  image: $CI_TOOLS_IMAGE
+  script:
+    - publish_chart prd
+  only:
+    refs:
+      - master
+  except:
+      variables:
+        - $DISABLED_PUBLISH
+
+git_tag:
+  stage: production
+  image: $CI_TOOLS_IMAGE
+  script:
+    - git_tag
+  only:
+    refs:
+      - master
+  except:
+      variables:
+        - $DISABLED_PUBLISH
+
+stop_environment:
+  stage: stop
+  image: $CI_TOOLS_IMAGE
+  allow_failure: false
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - clear_test_environment
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    action: stop
+  when: manual
+  only:
+    refs:
+      - branches
+  except:
+    refs:
+      - tags
+    variables:
+      - $DISABLED_STOP_ENV
+
+# ---------------------------------------------------------------------------
+
+.auto_devops: &auto_devops |
+  [[ "$TRACE" ]] && set -x
+  [[ "$DEBUG_SLEEP" ]] && sleep $DEBUG_SLEEP
+  source /ci-utils.sh || true
+
+  function run_test_environment(){
+
+    configure_helm
+
+    local release_name=${CI_COMMIT_REF_SLUG}-tst-env
+
+    for file in asn dns ipv4 ipv6
+    do
+      sed -i "s/https:\/\/rdap.apnic.net\//http:\/\/rdapd.${TEST_ENV_HOSTNAME}\//g" helm/test/scrapers/${file}.json
+    done
+
+    deploy_test_chart ${release_name} test \
+    rdapd.ingress.host=rdapd.${TEST_ENV_HOSTNAME} \
+    rdapd.rdapd.whoisDB.host=${release_name}-test
+
+    APP_CHART_ARGS="application_rdap.rdap.authorities[0].servers[0]=http://rdapd.${TEST_ENV_HOSTNAME} \
+    application_rdap.rdap.authorities[0].defaultServer=http://rdapd.${TEST_ENV_HOSTNAME} \
+    application_rdap.rdap.scraping.scrapers.iana.baseURI=http://${release_name}-test/"
+
+    test_environment_deploy
+  }
+
+before_script:
+  - *auto_devops

@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,10 @@ public class IANABootstrapScraper
 
     private final RDAPAuthorityStore rdapAuthorityStore;
     private final IANABootstrapFetcher bootstrapFetcher;
+
+    private final Logger LOGGER =
+            Logger.getLogger(IANABootstrapScraper.class.getName());
+
 
     /**
      * Constructor for creating an IANA bootstrap scraper.
@@ -61,6 +66,7 @@ public class IANABootstrapScraper
     @Override
     public ScraperResult fetchData() throws ScraperException {
         try {
+            LOGGER.info("IANA base url: " + bootstrapFetcher.getBaseUrl());
             return new ScraperResult(fetchIPData(), fetchASNData(), fetchDomainData());
         } catch (Exception e) {
             throw new ScraperException("Error retrieving IANA data.", e);

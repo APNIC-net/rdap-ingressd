@@ -1,0 +1,21 @@
+service:
+  type: NodePort
+  port: 8080
+ingress:
+  enabled: true
+  hostname: null #defined in pipeline
+
+application_rdap:
+    rdap:
+      authorities:
+        - name: apnic
+          defaultServer:
+          servers:
+          - null #defined in pipeline
+      scraping:
+        scrapers:
+          iana:
+            enabled: true
+            baseURI: null #defined in pipeline
+          nro:
+            enabled: false
