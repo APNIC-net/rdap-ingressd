@@ -1,6 +1,12 @@
 ingress:
   enabled: true
-
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "100m"
 database:
   image: "acr2.apnic.net/mysql/mysql-server"
   tag: "5.6"
@@ -39,3 +45,10 @@ rdapd:
   service:
     type: NodePort
     port: 8080
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "100m"

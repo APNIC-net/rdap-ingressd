@@ -3,9 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ template "application.fullname" . }}
   labels:
-    app: {{ template "application.fullname" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    helm.sh/chart: {{ template "application.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
  {{ range $path, $_ :=  .Files.Glob  "**.sql" }}
   {{ $path }}: |

@@ -4,18 +4,11 @@ service:
 ingress:
   enabled: true
   hostname: null #defined in pipeline
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "100m"
 
-application_rdap:
-    rdap:
-      authorities:
-        - name: apnic
-          defaultServer:
-          servers:
-          - null #defined in pipeline
-      scraping:
-        scrapers:
-          iana:
-            enabled: true
-            baseURI: null #defined in pipeline
-          nro:
-            enabled: false

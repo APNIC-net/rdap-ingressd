@@ -1,0 +1,6 @@
+dependencies:
+- name: rdapd
+  repository: https://charts.xyz.apnic.net/prd
+  version: 1.0.1+5895
+digest: sha256:2ae286fd19688203d7edd12a6865b31ff5204e20e26ceeb0e91801b699fc13e9
+generated: 2019-06-06T13:09:26.703049354+10:00

@@ -3,17 +3,17 @@ kind: Service
 metadata:
   name: {{ template "application.fullname" . }}
   labels:
-    chart: {{ template "application.chart" . }}
-    app: {{ template "application.fullname" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ template "application.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   selector:
-    app: {{ template "application.fullname" . }}
-    chart: {{ template "application.chart" . }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http
       protocol: TCP
-      port: 8080
+      port: {{ .Values.service.port }}
       targetPort: http
   type: {{ .Values.service.type }}
