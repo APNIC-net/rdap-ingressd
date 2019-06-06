@@ -3,9 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ template "application.fullname" . }}-scrapers
   labels:
-    app: {{ template "application.fullname" . }}-scrapers
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    helm.sh/chart: {{ template "application.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
  {{ range $path, $_ :=  .Files.Glob  "scrapers/**.json" }}
    {{ base $path }}: |

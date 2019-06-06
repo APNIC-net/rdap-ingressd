@@ -3,19 +3,20 @@ kind: Deployment
 metadata:
   name: {{ template "application.fullname" . }}
   labels:
-    app: {{ template "application.fullname" . }}
-    chart: {{ template "application.chart" . }}
-    chart: {{ template "application.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    helm.sh/chart: {{ template "application.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "application.fullname" . }}
+      app.kubernetes.io/name: {{ template "application.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "application.fullname" . }}
+        app.kubernetes.io/name: {{ template "application.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
       - name: httpd
@@ -64,6 +65,7 @@ spec:
           timeoutSeconds: {{ .Values.database.readinessProbe.timeoutSeconds }}
           successThreshold: {{ .Values.database.readinessProbe.successThreshold }}
           failureThreshold: {{ .Values.database.readinessProbe.failureThreshold }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
         volumeMounts:
         - name: init-scripts
           mountPath: /docker-entrypoint-initdb.d

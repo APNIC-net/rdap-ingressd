@@ -1,32 +1,48 @@
+{{- define "java-opts" -}}
+{{- if .Values.proxy.enabled -}}
+-Dhttp.proxyHost='{{ .Values.proxy.httpHost }}' -Dhttp.proxyPort='{{ .Values.proxy.httpPort }}' -Dhttps.proxyHost='{{ .Values.proxy.httpsHost }}' -Dhttps.proxyPort='{{ .Values.proxy.httpsPort }}' -Dhttp.nonProxyHosts='{{ join "|" .Values.proxy.noProxy }}'  {{ .Values.java.opts }}
+{{- else -}}
+{{ .Values.java.opts }}
+{{- end -}}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "application.fullname" . }}
   labels:
-    chart: {{ template "application.chart" . }}
-    app: {{ template "application.fullname" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    helm.sh/chart: {{ include "application.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
-    matchlabels:
-      chart: {{ template "application.chart" . }}
-      app: {{ template "application.fullname" . }}
-      heritage: {{ .Release.Service }}
-      release: {{ .Release.Name }}
+    matchLabels:
+      app.kubernetes.io/name: {{ template "application.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- with .Values.strategy }}
+    strategy:
+      {{- . | toYaml | nindent 6 }}
+    {{- end }}
   template:
     metadata:
       labels:
-        chart: {{ template "application.chart" . }}
-        app: {{ template "application.fullname" . }}
-        heritage: {{ .Release.Service }}
-        release: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "application.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       containers:
-        - name: {{ template "application.fullname" . }}
+        - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ default "latest" .Values.image.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: JAVA_OPTS
+            value: {{ include "java-opts" . | quote }}
+          - name: JVM_INIT_MEM
+            value: {{ .Values.java.mem.init}}
+          - name: JVM_MAX_MEM
+            value: {{ .Values.java.mem.max }}
           ports:
             - name: http
               containerPort: 8080
@@ -35,6 +51,40 @@ spec:
             - mountPath: /app/config/application-rdap.yml
               name: rdapd-config
               subPath: application-rdap.yml
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            timeoutSeconds: {{.Values.livenessProbe.timeoutSeconds }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          resources:
+            {{ toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: rdapd-config
           configMap:

@@ -172,23 +172,24 @@ stop_environment:
 
     configure_helm
 
-    local release_name=${CI_COMMIT_REF_SLUG}-tst-env
+    #local release_name=${CI_COMMIT_REF_SLUG}-tst-env
 
-    for file in asn dns ipv4 ipv6
-    do
-      sed -i "s/https:\/\/rdap.apnic.net\//http:\/\/rdapd.${TEST_ENV_HOSTNAME}\//g" helm/test/scrapers/${file}.json
-    done
+    #for file in asn dns ipv4 ipv6
+    #do
+    #  sed -i "s/https:\/\/rdap.apnic.net\//http:\/\/rdapd.${TEST_ENV_HOSTNAME}\//g" helm/test/scrapers/${file}.json
+    #done
 
-    deploy_test_chart ${release_name} test \
-    rdapd.ingress.host=rdapd.${TEST_ENV_HOSTNAME} \
-    rdapd.rdapd.whoisDB.host=${release_name}-test
+    #deploy_test_chart ${release_name} test \
+    #rdapd.ingress.host=rdapd.${TEST_ENV_HOSTNAME} \
+    #rdapd.rdapd.whoisDB.host=${release_name}-test
 
-    APP_CHART_ARGS="application_rdap.rdap.authorities[0].servers[0]=http://rdapd.${TEST_ENV_HOSTNAME} \
-    application_rdap.rdap.authorities[0].defaultServer=http://rdapd.${TEST_ENV_HOSTNAME} \
-    application_rdap.rdap.scraping.scrapers.iana.baseURI=http://${release_name}-test/"
+    #APP_CHART_ARGS="application_rdap.rdap.authorities[0].servers[0]=http://rdapd.${TEST_ENV_HOSTNAME} \
+    #application_rdap.rdap.authorities[0].defaultServer=http://rdapd.${TEST_ENV_HOSTNAME} \
+    #application_rdap.rdap.scraping.scrapers.iana.baseURI=http://${release_name}-test/"
 
     test_environment_deploy
   }
 
 before_script:
   - *auto_devops
+

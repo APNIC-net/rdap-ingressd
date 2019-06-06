@@ -4,3 +4,10 @@ service:
 ingress:
   enabled: true
   hostname: null #defined in pipeline
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "100m"

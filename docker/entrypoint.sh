@@ -1,10 +1,9 @@
 #!/bin/sh
 
 echo "Launching with arguments: $@"
-
-JVM_INIT_MEM="${JVM_INIT_MEM:-4G}"
-JVM_MAX_MEM="${JVM_MAX_MEM:-8G}"
-
 set -e
+JAVA_OPTS="${JAVA_OPTS}"
+JVM_INIT_MEM="${JVM_INIT_MEM:-128M}"
+JVM_MAX_MEM="${JVM_MAX_MEM:-256M}"
 echo "Starting application"
-exec java -jar @project.artifactId@-@project.version@.@project.packaging@ "$@"
+exec java -jar ${JAVA_OPTS} @project.artifactId@-@project.version@.@project.packaging@ "$@"
