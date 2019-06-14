@@ -1,14 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "application.fullname" . }}
+  name: {{ include "rdap-ingressd.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "application.fullname" . }}
-    helm.sh/chart: {{ include "application.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "rdap-ingressd.labels" . | nindent 4 }}
 data:
   application-rdap.yml: |2
-{{- with .Values.application_rdap }}
-{{ toYaml . | indent 4 }}
-{{- end }}
+    {{- with .Values.application_rdap }}
+    {{- toYaml . | trim | nindent 4 }}
+    {{- end }}

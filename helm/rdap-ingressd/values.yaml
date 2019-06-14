@@ -24,10 +24,9 @@ strategy: {}
   #   maxSurge: 0
   #   maxUnavailable: 1
 
-podDisruptionBudget:
-  enabled: false
-  minAvailable: 1
-# maxUnavailable: 1
+podDisruptionBudget: {}
+  #minAvailable: 0
+  #maxUnavailable: 0
 
 proxy:
   enabled: false
@@ -37,11 +36,8 @@ proxy:
   httpsPort: ""
   noProxy: []
 
-java:
-  opts: ""
-  mem:
-    init: null
-    max: null
+# Allow extra JVM options to be set
+javaOpts: ~
 
 service:
   port: 8080
@@ -52,9 +48,9 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  paths: []
   hosts:
-    - chart-example.local
+    - host: chart-example.local
+      paths: []
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -78,6 +74,7 @@ tolerations: []
 
 affinity: {}
 
+# Additional YAML put into the application's `rdap` profile configuration file as-is.
 application_rdap:
     # See https://gitlab.xyz.apnic.net/sw/rdap/rdap-ingressd for documentation over
     # config file.

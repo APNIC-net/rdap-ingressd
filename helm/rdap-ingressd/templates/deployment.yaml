@@ -1,33 +1,23 @@
-{{- define "java-opts" -}}
-{{- if .Values.proxy.enabled -}}
--Dhttp.proxyHost='{{ .Values.proxy.httpHost }}' -Dhttp.proxyPort='{{ .Values.proxy.httpPort }}' -Dhttps.proxyHost='{{ .Values.proxy.httpsHost }}' -Dhttps.proxyPort='{{ .Values.proxy.httpsPort }}' -Dhttp.nonProxyHosts='{{ join "|" .Values.proxy.noProxy }}'  {{ .Values.java.opts }}
-{{- else -}}
-{{ .Values.java.opts }}
-{{- end -}}
-{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "application.fullname" . }}
+  name: {{ include "rdap-ingressd.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "application.fullname" . }}
-    helm.sh/chart: {{ include "application.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "rdap-ingressd.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "application.fullname" . }}
+      app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-    {{- with .Values.strategy }}
-    strategy:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- . | toYaml | trim | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "application.fullname" . }}
+        app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -36,13 +26,21 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ default "latest" .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if (or .Values.javaOpts .Values.proxy.enabled) }}
           env:
-          - name: JAVA_OPTS
-            value: {{ include "java-opts" . | quote }}
-          - name: JVM_INIT_MEM
-            value: {{ .Values.java.mem.init}}
-          - name: JVM_MAX_MEM
-            value: {{ .Values.java.mem.max }}
+            - name: JAVA_OPTS
+              value: >-2
+                {{- if .Values.proxy.enabled }}
+                -Dhttp.proxyHost='{{ .Values.proxy.httpHost }}'
+                -Dhttp.proxyPort='{{ .Values.proxy.httpPort }}'
+                -Dhttps.proxyHost='{{ .Values.proxy.httpsHost }}'
+                -Dhttps.proxyPort='{{ .Values.proxy.httpsPort }}'
+                -Dhttps.nonProxyHosts='{{ join "|" .Values.proxy.noProxy }}'
+                {{- end }}
+                {{- with .Values.javaOpts }}
+                {{ . }}
+                {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -64,7 +62,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: http
               scheme: HTTP
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
@@ -88,4 +86,4 @@ spec:
       volumes:
         - name: rdapd-config
           configMap:
-            name: {{ template "application.fullname" . }}
+            name: {{ include "rdap-ingressd.fullname" . }}

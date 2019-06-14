@@ -1,22 +1,14 @@
-{{- if .Values.podDisruptionBudget.enabled }}
+{{- if .Values.podDisruptionBudget }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ template "application.fullname" . }}
+  name: {{ include "rdap-ingressd.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "application.fullname" . }}
-    helm.sh/chart: {{ include "application.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "rdap-ingressd.labels" . | nindent 4 }}
 spec:
-{{- if .Values.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
-{{- end }}
-{{- if .Values.podDisruptionBudget.maxUnavailable }}
-  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
-{{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "application.fullname" . }}
+      app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- toYaml .Values.podDisruptionBudget | trim | nindent 2 }}
 {{- end }}

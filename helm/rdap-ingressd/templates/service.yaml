@@ -1,15 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "application.fullname" . }}
+  name: {{ include "rdap-ingressd.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "application.fullname" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ template "application.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "rdap-ingressd.labels" . | nindent 4 }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ template "application.fullname" . }}
+    app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http
