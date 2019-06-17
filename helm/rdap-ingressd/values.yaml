@@ -9,12 +9,12 @@ livenessProbe:
   failureThreshold: 3
   successThreshold: 1
   periodSeconds: 5
-  initialDelaySeconds: 1000
+  initialDelaySeconds: 60
   timeoutSeconds: 5
 readinessProbe:
   failureThreshold: 3
   periodSeconds: 10
-  initialDelaySeconds: 1000
+  initialDelaySeconds: 60
   timeoutSeconds: 5
   successThreshold: 1
 

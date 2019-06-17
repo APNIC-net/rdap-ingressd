@@ -50,10 +50,8 @@ spec:
               name: rdapd-config
               subPath: application-rdap.yml
           livenessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
-              scheme: HTTP
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
