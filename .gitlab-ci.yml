@@ -67,10 +67,9 @@ docker_prod_image:
 review_test_env:
   stage: review
   image: $CI_TOOLS_IMAGE
-  variables:
-    APPLICATION_URL: ${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME,,}.svc.tst.apnic.int
   script:
     - configure_helm
+    - export APPLICATION_URL=${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME,,}.svc.tst.apnic.int
     - set_app_chart_args
     - test_environment_deploy
   environment:
@@ -90,10 +89,9 @@ review_test_env:
 review_prod_env:
   stage: review
   image: $CI_TOOLS_IMAGE
-  variables:
-    APPLICATION_URL: ${CI_PROJECT_NAME,,}.svc.tst.apnic.int
   script:
     - configure_helm
+    - export APPLICATION_URL=${CI_PROJECT_NAME,,}.svc.tst.apnic.int
     - set_app_chart_args
     - staging_environment_deploy
   environment:
