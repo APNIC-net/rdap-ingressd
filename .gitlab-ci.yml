@@ -68,7 +68,9 @@ review_test_env:
   stage: review
   image: $CI_TOOLS_IMAGE
   script:
-    - run_test_environment
+    - configure_helm
+    - set_app_chart_args
+    - test_environment_deploy
   environment:
     name: $CI_COMMIT_REF_SLUG
     url: $CI_ENVIRONMENT_SLUG.${CI_PROJECT_NAME}.tst.xyz.apnic.net
@@ -88,6 +90,7 @@ review_prod_env:
   image: $CI_TOOLS_IMAGE
   script:
     - configure_helm
+    - set_app_chart_args
     - staging_environment_deploy
   environment:
     name: $CI_COMMIT_REF_SLUG
@@ -168,11 +171,7 @@ stop_environment:
   [[ "$DEBUG_SLEEP" ]] && sleep $DEBUG_SLEEP
   source /ci-utils.sh || true
 
-  function run_test_environment(){
-
-    configure_helm
-
-    #hack
+  function set_app_chart_args() {
     APPLICATION_URL=${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME,,}.svc.tst.apnic.int
     TEMP_ARG_LIST=()
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls={}")
@@ -182,10 +181,7 @@ stop_environment:
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.hosts[0].host=${APPLICATION_URL}")
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.hosts[0].paths={/}")
     APP_CHART_ARGS="${TEMP_ARG_LIST[@]}"
-
-    test_environment_deploy
   }
 
 before_script:
   - *auto_devops
-
