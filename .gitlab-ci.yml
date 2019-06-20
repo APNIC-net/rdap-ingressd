@@ -67,6 +67,8 @@ docker_prod_image:
 review_test_env:
   stage: review
   image: $CI_TOOLS_IMAGE
+  variables:
+    APPLICATION_URL: ${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME,,}.svc.tst.apnic.int
   script:
     - configure_helm
     - set_app_chart_args
@@ -88,6 +90,8 @@ review_test_env:
 review_prod_env:
   stage: review
   image: $CI_TOOLS_IMAGE
+  variables:
+    APPLICATION_URL: ${CI_PROJECT_NAME,,}.svc.tst.apnic.int
   script:
     - configure_helm
     - set_app_chart_args
@@ -172,7 +176,6 @@ stop_environment:
   source /ci-utils.sh || true
 
   function set_app_chart_args() {
-    APPLICATION_URL=${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME,,}.svc.tst.apnic.int
     TEMP_ARG_LIST=()
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls={}")
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls[0].hosts={${APPLICATION_URL}}")
