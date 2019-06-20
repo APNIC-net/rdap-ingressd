@@ -3,12 +3,11 @@ service:
   port: 8080
 ingress:
   enabled: true
-  hostname: null #defined in pipeline
+  hosts: [] #defined in pipeline
 resources:
   requests:
     memory: "128Mi"
     cpu: "100m"
   limits:
     memory: "256Mi"
-    cpu: "100m"
-
+    cpu: "2"
