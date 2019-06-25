@@ -31,11 +31,11 @@ spec:
             - name: JAVA_OPTS
               value: >-2
                 {{- if .Values.proxy.enabled }}
-                -Dhttp.proxyHost='{{ .Values.proxy.httpHost }}'
-                -Dhttp.proxyPort='{{ .Values.proxy.httpPort }}'
-                -Dhttps.proxyHost='{{ .Values.proxy.httpsHost }}'
-                -Dhttps.proxyPort='{{ .Values.proxy.httpsPort }}'
-                -Dhttps.nonProxyHosts='{{ join "|" .Values.proxy.noProxy }}'
+                -Dhttp.proxyHost={{ .Values.proxy.httpHost }}
+                -Dhttp.proxyPort={{ .Values.proxy.httpPort }}
+                -Dhttps.proxyHost={{ .Values.proxy.httpsHost }}
+                -Dhttps.proxyPort={{ .Values.proxy.httpsPort }}
+                -Dhttps.nonProxyHosts={{ join "|" .Values.proxy.noProxy }}
                 {{- end }}
                 {{- with .Values.javaOpts }}
                 {{ . }}
