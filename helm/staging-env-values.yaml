@@ -11,3 +11,10 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "2"
+proxy:
+  enabled: true
+  httpHost: squid-proxy.apnic.net
+  httpPort: 3128
+  httpsHost: squid-proxy.apnic.net
+  httpsPort: 3128
+  noProxy: []
