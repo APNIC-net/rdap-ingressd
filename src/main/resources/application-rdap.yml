@@ -38,7 +38,7 @@ rdap:
         defaultAction: redirect
 
         # Allows rdap-ingressd to proxy unroutable requests to a
-        # default authority. The name of the authority specificed here
+        # default authority. The name of the authority specified here
         # can be null or a name specified in the 'authorities' section
         # above. All requests to this authority are proxied.
         defaultAuthority: null
