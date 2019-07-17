@@ -17,26 +17,26 @@ import java.util.stream.Collectors;
  * A {@link Scraper} implementation that allows to configure multiple delegated stats sources. It may be used, for
  * instance, to load NIR stats.
  */
-public class CustomStatsScrapper implements Scraper {
+public class CustomStatsScraper implements Scraper {
 
     private final RDAPAuthorityStore rdapAuthorityStore;
     private final List<DelegatedStatsScraper> customScrapers;
 
 
-    public CustomStatsScrapper(RDAPAuthorityStore rdapAuthorityStore, List<CustomEntry> customEntries) {
+    public CustomStatsScraper(RDAPAuthorityStore rdapAuthorityStore, List<CustomEntry> customEntries) {
         this.rdapAuthorityStore = rdapAuthorityStore;
         this.customScrapers = initialiseCustomScrapers(customEntries);
     }
 
     private List<DelegatedStatsScraper> initialiseCustomScrapers(List<CustomEntry> customEntries) {
         return customEntries.stream()
-                .map(e -> new InternalCustomScrapper(rdapAuthorityStore, e.getUri(), e.getName()))
+                .map(e -> new InternalCustomScraper(rdapAuthorityStore, e.getUri(), e.getName()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public String getName() {
-        return "custom-scrapper";
+        return "custom-scraper";
     }
 
     @Override
@@ -68,11 +68,11 @@ public class CustomStatsScrapper implements Scraper {
         return result;
     }
 
-    private static class InternalCustomScrapper extends DelegatedStatsScraper {
+    private static class InternalCustomScraper extends DelegatedStatsScraper {
 
         private String name;
 
-        InternalCustomScrapper(RDAPAuthorityStore rdapAuthorityStore, String statsURI, String name) {
+        InternalCustomScraper(RDAPAuthorityStore rdapAuthorityStore, String statsURI, String name) {
             super(rdapAuthorityStore, URI.create(statsURI));
             this.name = name;
         }

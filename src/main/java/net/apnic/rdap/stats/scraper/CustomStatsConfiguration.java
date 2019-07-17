@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * Configuration for {@link CustomStatsScrapper}.
+ * Configuration for {@link CustomStatsScraper}.
  */
 @Configuration
 @ConfigurationProperties(prefix = "rdap.scraping.scrapers.custom")
@@ -21,8 +21,8 @@ public class CustomStatsConfiguration {
     @ConditionalOnProperty("rdap.scraping.scrapers.custom.enabled")
     @Bean("custom")
     @Autowired
-    public CustomStatsScrapper getCustomStatsScrapper(RDAPAuthorityStore rdapAuthorityStore) {
-        return new CustomStatsScrapper(rdapAuthorityStore, entries);
+    public CustomStatsScraper getCustomStatsScraper(RDAPAuthorityStore rdapAuthorityStore) {
+        return new CustomStatsScraper(rdapAuthorityStore, entries);
     }
 
     public List<CustomEntry> getEntries() {
