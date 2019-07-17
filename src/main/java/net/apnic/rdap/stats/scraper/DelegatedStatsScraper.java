@@ -162,7 +162,7 @@ public abstract class DelegatedStatsScraper implements Scraper {
                         ipRecord -> ipMappings.add(new ResourceMapping<>(ipRecord.toIPRange(),
                                 recordAuthority(ipRecord))));
             } catch (Exception ex) {
-                throw new ScraperException("Error running delegated stats scrapper: ", ex);
+                throw new ScraperException("Error running delegated stats scraper: ", ex);
             }
 
             return new ScraperResult(ipMappings, asnMappings, null);
