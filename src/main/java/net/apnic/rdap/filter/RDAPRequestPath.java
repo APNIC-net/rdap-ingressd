@@ -58,6 +58,7 @@ public class RDAPRequestPath
      * @param requestPath Request path to use for the new RDAPRequestPath
      * @see RDAPRequestPath()
      */
+    // TODO: WHY THIS?
     public static RDAPRequestPath createRequestPath(String requestPath)
     {
         return new RDAPRequestPath(requestPath);

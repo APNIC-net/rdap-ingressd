@@ -41,7 +41,7 @@ rdap:
         # default authority. The name of the authority specified here
         # can be null or a name specified in the 'authorities' section
         # above. All requests to this authority are proxied.
-        defaultAuthority: null
+        defaultAuthority: apnic
 
     # List of default notices that are sent with RDAP responses from this 
     # server.

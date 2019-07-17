@@ -48,6 +48,8 @@ public class RDAPPreFilter
         RDAPRequestPath path = RDAPRequestPath.createRequestPath(
                 context.getRequest().getRequestURI());
         context.put(RequestContextKeys.RDAP_REQUEST_PATH, path);
+
+        // TODO: ADD AUTHORITY HERE
         return null;
     }
 }

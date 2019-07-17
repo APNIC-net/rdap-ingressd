@@ -22,10 +22,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties(prefix="rdap")
-public class AuthorityConfiguration
-{
-    private static final Logger LOGGER =
-        Logger.getLogger(AuthorityConfiguration.class.getName());
+public class AuthorityConfiguration {
+    private static final Logger LOGGER = Logger.getLogger(AuthorityConfiguration.class.getName());
+
+    private List<AuthorityConfig> authorities;
+    private RoutingConfig routing;
 
     /**
      * Class represents a single authority definition under rdap.authorities
@@ -109,9 +110,6 @@ public class AuthorityConfiguration
             this.defaultAuthority = defaultAuthority;
         }
     }
-
-    private List<AuthorityConfig> authorities;
-    private RoutingConfig routing;
 
     /**
      * RDAPAuthorityStore bean used through the application

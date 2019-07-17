@@ -81,7 +81,7 @@ application_rdap:
     rdap:
       # A list of RDAP authorities may be configured ahead of time, if
       # required.  Each authority has a name, an optional list of
-      # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+      # aliases, and a list of RDAP servers. RDAP servers are chosen from the
       # list based on first server found containing a https connection. If no
       # server is available with https then the first available http server is
       # choosen. Alternatively a defaultServer attribute can be specified giving

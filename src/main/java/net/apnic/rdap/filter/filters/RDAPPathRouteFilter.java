@@ -97,6 +97,7 @@ public abstract class RDAPPathRouteFilter
         return null;
     }
 
+    // TODO: rename this method to something like "resolveRdapAuthority"
     public abstract RDAPAuthority runRDAPFilter(RDAPRequestPath path)
         throws ResourceNotFoundException, MalformedRequestException;
 

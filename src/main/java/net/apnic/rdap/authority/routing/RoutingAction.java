@@ -3,8 +3,7 @@ package net.apnic.rdap.authority.routing;
 public enum RoutingAction
 {
     PROXY("proxy"),
-    REDIRECT("redirect"),
-    REDIRECT_WITH_FALLBACK("redirect_with_fallback");
+    REDIRECT("redirect");
 
     private String value = null;
 
