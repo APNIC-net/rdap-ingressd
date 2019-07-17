@@ -71,15 +71,25 @@ rdap:
             # Individual scrapers available in rdap-ingressd can be enabled and
             # disabled. It's also possible to specify the property baseURI for
             # each scraper to change the location where data is fetched from.
+            # The special "custom" scraper may be used to fetch multiple sources 
+            # of delegated stats data.
             iana:
                 enabled: true
             nro:
                 enabled: true
+            custom:
+                enabled: true
+                entries:
+                    - name: idnic
+                      uri: https://repository.example/idnic-delegated-stat
+                    - name: jpnic
+                      uri: https://repository.example/jpnic-delegated-stat
         config:
             # Order in which scrapers are run.
             order:
             - iana
             - nro
+            - custom
 ```
 
 To configure *rdap-ingressd* at runtime, it's necessary to create a
