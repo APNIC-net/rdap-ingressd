@@ -1,22 +1,11 @@
-# Overview
-The following documentation depicts the external configuration that is
-possible in *rdap-ingressd*.
-
-# Configuration File
-*rdap-ingressd* is configured through a YAML file by the name of
-*application-rdap.yml*.  The static path of the file is
-```src/main/resource/application-rdap.yml```.  Its syntax is like so:
-
-```
 rdap:
-
     # A list of RDAP authorities may be configured ahead of time, if
     # required.  Each authority has a name, an optional list of
-    # aliases, a list of RDAP servers used as reference in the IANA bootstrap
-    # file and a routing section. The routing section have an optional action 
-    # (if no action is defined the defaultAction value will be used), a routing
-    # target and a optional fallback authority for queries resulting in 404 
-    # responses (not found).
+    # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+    # list based on first server found containing a https connection. If no
+    # server is available with https then the first available http server is
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
     authorities:
         - name: apnic
           routing:
@@ -57,13 +46,14 @@ rdap:
             notFoundFallbackAuthority: apnic
           ianaBootstrapRefServers:
               - https://rdap.lacnic.net/rdap/
+
     routing:
         # The default routing action to take for authorities. Accepts either
         # redirect or proxy.
         defaultAction: redirect
 
         # Allows rdap-ingressd to proxy unroutable requests to a
-        # default authority. The name of the authority specificed here
+        # default authority. The name of the authority specified here
         # can be null or a name specified in the 'authorities' section
         # above. All requests to this authority are proxied.
         defaultAuthority: null
@@ -86,27 +76,21 @@ rdap:
             # Individual scrapers available in rdap-ingressd can be enabled and
             # disabled. It's also possible to specify the property baseURI for
             # each scraper to change the location where data is fetched from.
-            # The special "custom" scraper may be used to fetch multiple sources 
+            # The special "custom" scraper may be used to fetch multiple sources
             # of delegated stats data.
             iana:
                 enabled: true
             nro:
                 enabled: true
+                baseURI: https://labs.apnic.net/delegated-nro-extended
             custom:
-                enabled: true
+                enabled: false
                 entries:
-                    - name: idnic
-                      uri: https://repository.example/idnic-delegated-stat
-                    - name: jpnic
-                      uri: https://repository.example/jpnic-delegated-stat
+                    - name: nir
+                      uri:
         config:
             # Order in which scrapers are run.
             order:
             - iana
             - nro
-            - custom
-```
-
-To configure *rdap-ingressd* at runtime, it's necessary to create a
-configuration file that can be given to the application. See
-[deploy](deploy.md) documentation.
+            #- custom

@@ -1,20 +1,18 @@
-package net.apnic.rdap.authority.config;
+package net.apnic.rdap.authority;
 
+import lombok.Data;
+import net.apnic.rdap.authority.routing.RoutingAction;
+import org.apache.commons.lang.Validate;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-
-import net.apnic.rdap.authority.RDAPAuthority;
-import net.apnic.rdap.authority.RDAPAuthorityStore;
-import net.apnic.rdap.authority.routing.RoutingAction;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Main configuration class for all authority related config properties and
@@ -32,52 +30,12 @@ public class AuthorityConfiguration {
      * Class represents a single authority definition under rdap.authorities
      * in the application-rdap.yml config file.
      */
-    public static class AuthorityConfig
-    {
+    @Data
+    public static class AuthorityConfig {
         private List<String> aliases;
-        private String defaultServer;
         private String name;
-        private List<String> servers;
-
-        public List<String> getAliases()
-        {
-            return aliases;
-        }
-
-        public String getDefaultServer()
-        {
-            return defaultServer;
-        }
-
-        public String getName()
-        {
-            return name;
-        }
-
-        public List<String> getServers()
-        {
-            return servers;
-        }
-
-        public void setAliases(List<String> aliases)
-        {
-            this.aliases = aliases;
-        }
-
-        public void setDefaultServer(String defaultServer)
-        {
-            this.defaultServer = defaultServer;
-        }
-
-        public void setName(String name)
-        {
-            this.name = name;
-        }
-
-        public void setServers(List<String> servers)
-        {
-            this.servers = servers;
-        }
+        private AuthorityRoutingConfig routing;
+        private List<String> ianaBootstrapRefServers;
     }
 
     /**
@@ -103,12 +61,20 @@ public class AuthorityConfiguration {
         {
             this.defaultAction =
                 RoutingAction.getEnum(defaultAction);
+            RDAPAuthority.setDefaultRoutingAction(this.defaultAction);
         }
 
         public void setDefaultAuthority(String defaultAuthority)
         {
             this.defaultAuthority = defaultAuthority;
         }
+    }
+
+    @Data
+    public static class AuthorityRoutingConfig {
+        private RoutingAction action;
+        private String target;
+        private String notFoundFallbackAuthority;
     }
 
     /**
@@ -204,45 +170,44 @@ public class AuthorityConfiguration {
      */
     private void setupAuthorityStore()
     {
-        if(routing.getDefaultAction() != null)
-        {
-            authorityStore().setDefaultRoutingAction(routing.getDefaultAction());
-        }
-
         for(AuthorityConfig aConfig : authorities)
         {
-            RDAPAuthority authority = null;
+            Validate.notNull(aConfig.getRouting());
 
-            if(aConfig.getName().equals(routing.getDefaultAuthority()))
-            {
-                authority = authorityStore().createAuthority(aConfig.getName(),
-                                                             RoutingAction.PROXY);
-            }
-            else
-            {
-                authority = authorityStore().createAuthority(aConfig.getName());
-            }
+            RDAPAuthority authority = aConfig.getRouting().getAction() == null
+                    ? new RDAPAuthority(aConfig.getName())
+                    : new RDAPAuthority(aConfig.getName(), aConfig.getRouting().getAction());
+
+            authority.setRoutingTarget(URI.create(aConfig.getRouting().getTarget()));
 
             if(aConfig.getAliases() != null)
             {
-                authority.addAliases(aConfig.getAliases());
+                authority.setAliases(aConfig.getAliases());
             }
 
-            if(aConfig.getServers() != null)
-            {
-                authority.addServers(
-                    aConfig.getServers().stream()
-                    .map(URI::create)
-                    .collect(Collectors.toList()));
-            }
-
-            if(aConfig.getDefaultServer() != null)
-            {
-                authority.setDefaultServer(URI.create(aConfig.getDefaultServer()));
+            if(aConfig.getIanaBootstrapRefServers() != null) {
+                authority.setIanaBootstrapRefServers(
+                        aConfig.getIanaBootstrapRefServers().stream()
+                            .map(URI::create)
+                            .collect(Collectors.toList()));
             }
 
             authorityStore().addAuthority(authority);
         }
-    }
 
+        // sets fallback authorities
+        authorities.stream()
+                .filter(c -> c.getRouting().getNotFoundFallbackAuthority() != null)
+                .forEach(c -> {
+                    RDAPAuthority fallback =
+                            authorityStore().findAuthority(c.getRouting().getNotFoundFallbackAuthority());
+                    if (fallback == null) {
+                        LOGGER.severe(String.format(
+                                "Not found fallback authority \"%s\" configured for authority \"%s\" couldn't be found.",
+                                c.getRouting().getNotFoundFallbackAuthority(), c.getName()));
+                    }
+
+                    authorityStore().findAuthority(c.getName()).setNotFoundFallback(fallback);
+                });
+    }
 }

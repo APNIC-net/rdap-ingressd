@@ -16,7 +16,7 @@ import net.apnic.rdap.rdap.RDAPError;
 import net.apnic.rdap.rdap.RDAPObjectFactory;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.http.HttpStatus;

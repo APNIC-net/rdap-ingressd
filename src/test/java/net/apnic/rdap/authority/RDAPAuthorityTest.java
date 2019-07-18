@@ -2,7 +2,6 @@ package net.apnic.rdap.authority;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -60,15 +59,13 @@ public class RDAPAuthorityTest
     void checkAliasAdding(String name, List<String> aliases, List<URI> servers)
     {
         RDAPAuthority authority = new RDAPAuthority(name);
-        authority.addAliases(aliases);
+        authority.setAliases(aliases);
 
         assertEquals(authority.getAliases(), aliases);
 
         authority = new RDAPAuthority(name);
-        for(String alias : aliases)
-        {
-            authority.addAlias(alias);
-        }
+
+        authority.setAliases(aliases);
 
         assertEquals(authority.getAliases(), aliases);
     }
@@ -81,16 +78,8 @@ public class RDAPAuthorityTest
 
         assertThrows(IllegalArgumentException.class, () ->
         {
-            authority.addAliases(aliases);
+            authority.setAliases(aliases);
         });
-
-        for(String alias : aliases)
-        {
-            assertThrows(IllegalArgumentException.class, () ->
-            {
-                authority.addAlias(alias);
-            });
-        }
     }
 
     @ParameterizedTest
@@ -98,17 +87,9 @@ public class RDAPAuthorityTest
     void checkServerAdding(String name, List<String> aliases, List<URI> servers)
     {
         RDAPAuthority authority = new RDAPAuthority(name);
-        authority.addServers(servers);
+        authority.setIanaBootstrapRefServers(servers);
 
-        assertEquals(authority.getServers(), servers);
-
-        authority = new RDAPAuthority(name);
-        for(URI server : servers)
-        {
-            authority.addServer(server);
-        }
-
-        assertEquals(authority.getServers(), servers);
+        assertEquals(authority.getIanaBootstrapRefServers(), servers);
     }
 
     @Test
@@ -118,12 +99,7 @@ public class RDAPAuthorityTest
 
         assertThrows(IllegalArgumentException.class, () ->
         {
-            authority.addServer(null);
-        });
-
-        assertThrows(IllegalArgumentException.class, () ->
-        {
-            authority.addServers(null);
+            authority.setIanaBootstrapRefServers(null);
         });
     }
 
@@ -135,10 +111,10 @@ public class RDAPAuthorityTest
         RDAPAuthority authority2 = new RDAPAuthority(name);
         RDAPAuthority authority3 = new RDAPAuthority("doesnotexist");
 
-        authority1.addAliases(aliases);
-        authority1.addServers(servers);
-        authority2.addAliases(aliases);
-        authority2.addServers(servers);
+        authority1.setAliases(aliases);
+        authority1.setIanaBootstrapRefServers(servers);
+        authority2.setAliases(aliases);
+        authority2.setIanaBootstrapRefServers(servers);
 
         assertEquals(authority1, authority1);
         assertNotEquals(authority1, null);

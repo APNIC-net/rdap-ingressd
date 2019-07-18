@@ -3,6 +3,9 @@ package net.apnic.rdap.authority;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 public class RDAPAuthorityStoreTest
 {
     @Test
@@ -41,7 +44,7 @@ public class RDAPAuthorityStoreTest
         RDAPAuthority authority = new RDAPAuthority("apnic");
         RDAPAuthorityStore store = new RDAPAuthorityStore();
 
-        authority.addAlias("apnic1");
+        authority.setAliases(Collections.singletonList("apnic1"));
         store.addAuthority(authority);
 
         assertEquals(store.findAuthority("apnic1"), authority);

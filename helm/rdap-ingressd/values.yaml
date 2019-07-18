@@ -81,33 +81,51 @@ application_rdap:
     rdap:
       # A list of RDAP authorities may be configured ahead of time, if
       # required.  Each authority has a name, an optional list of
-      # aliases, and a list of RDAP servers. RDAP servers are chosen from the
-      # list based on first server found containing a https connection. If no
-      # server is available with https then the first available http server is
-      # choosen. Alternatively a defaultServer attribute can be specified giving
-      # the URI of the default server to use.
+      # aliases, a list of RDAP servers used as reference in the IANA bootstrap
+      # file and a routing section. The routing section have an optional action
+      # (if no action is defined the defaultAction value will be used), a routing
+      # target and a optional fallback authority for queries resulting in 404
+      # responses (not found).
       authorities:
         - name: apnic
-          defaultServer: http://rdapd:8080/
-          servers:
-          - https://rdap.apnic.net
-          - http://rdap.apnic.net
+          routing:
+            action: proxy
+            target: http://rdapd:8080/
+          ianaBootstrapRefServers:
+            - https://rdap.apnic.net
+            - http://rdap.apnic.net
+
         - name: ripe
           aliases:
-          - ripencc
-          servers:
-          - https://rdap.db.ripe.net/
+            - ripencc
+          routing:
+            action: redirect
+            target: https://rdap.db.ripe.net
+          ianaBootstrapRefServers:
+            - https://rdap.db.ripe.net/
+
         - name: afrinic
-          servers:
-          - https://rdap.afrinic.net/rdap/
-          - http://rdap.afrinic.net/rdap/
+          routing:
+            action: redirect
+            target: https://rdap.afrinic.net/rdap/
+          ianaBootstrapRefServers:
+            - https://rdap.afrinic.net/rdap/
+            - http://rdap.afrinic.net/rdap/
+
         - name: arin
-          servers:
-          - https://rdap.arin.net/registry
-          - http://rdap.arin.net/registry
+          routing:
+            action: redirect
+            target: https://rdap.arin.net/registry/
+          ianaBootstrapRefServers:
+            - https://rdap.arin.net/registry/
+            - http://rdap.arin.net/registry/
+
         - name: lacnic
-          servers:
-          - https://rdap.lacnic.net/rdap/
+          routing:
+            action: proxy
+            target: https://rdap.lacnic.net/rdap/
+          ianaBootstrapRefServers:
+            - https://rdap.lacnic.net/rdap/
       routing:
         # Default routing action for authorities
         defaultAction: redirect
