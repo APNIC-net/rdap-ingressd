@@ -1,14 +1,10 @@
 package net.apnic.rdap.filter.config;
 
-// TODO: REFACTOR TO ENUM
-public class RequestContextKeys
-{
-    public static final String RDAP_REQUEST_PATH = "rdap.request_path";
+public enum RequestContextKeys {
+    RDAP_REQUEST_PATH,
+    RDAP_AUTHORITY;
 
-    /*
-     * Class is non constructable.
-     */
-    private RequestContextKeys()
-    {
+    public String getKey() {
+        return toString();
     }
 }

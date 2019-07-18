@@ -48,10 +48,4 @@ public class FilterConfiguration
         });
         return filter;
     }
-
-    @Bean
-    public RDAPPreFilter rdapPreFilter()
-    {
-        return new RDAPPreFilter();
-    }
 }

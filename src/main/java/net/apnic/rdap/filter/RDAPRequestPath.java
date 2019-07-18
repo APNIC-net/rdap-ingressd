@@ -25,9 +25,8 @@ public class RDAPRequestPath
      * @throws IllegalArgumentException If the supplied requestPath does not
      *                                  basically conform to an RDAP path
      *                                  segment
-     * @see createRequestPath()
      */
-    private RDAPRequestPath(String requestPath)
+    public RDAPRequestPath(String requestPath)
     {
         if(requestPath == null || requestPath.isEmpty())
         {
@@ -48,20 +47,6 @@ public class RDAPRequestPath
             throw new IllegalArgumentException(
                 "requestPath does not have enough fields");
         }
-
-        requestType = RDAPRequestType.getEnum(pathParts[0]);
-    }
-
-    /**
-     * Static construction method for making new RDAPRequestPath objects.
-     *
-     * @param requestPath Request path to use for the new RDAPRequestPath
-     * @see RDAPRequestPath()
-     */
-    // TODO: WHY THIS?
-    public static RDAPRequestPath createRequestPath(String requestPath)
-    {
-        return new RDAPRequestPath(requestPath);
     }
 
     /**
@@ -90,8 +75,24 @@ public class RDAPRequestPath
      * @return Request type for the supplied path segment
      * @see RDAPRequestType
      */
-    public RDAPRequestType getRequestType()
-    {
+    public RDAPRequestType getRequestType() {
+        if (requestType == null) {
+            synchronized (this) {
+                if (requestType == null) {
+                    requestType = RDAPRequestType.fromPathValue(pathParts[0]);
+                }
+            }
+        }
+
         return requestType;
+    }
+
+    /**
+     * Gets the request type value as {@link String} (e.g. "ip", "domain")
+     *
+     * @return a <pre>String</pre> for the request type value
+     */
+    public String getRequestTypeValue() {
+        return pathParts[0];
     }
 }
