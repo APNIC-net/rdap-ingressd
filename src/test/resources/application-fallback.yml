@@ -1,51 +1,33 @@
 rdap:
     # A list of RDAP authorities may be configured ahead of time, if
     # required.  Each authority has a name, an optional list of
-    # aliases, a list of RDAP servers used as reference in the IANA bootstrap
-    # file and a routing section. The routing section have an optional action
-    # (if no action is defined the defaultAction value will be used), a routing
-    # target and a optional fallback authority for queries resulting in 404
-    # responses (not found).
+    # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+    # list based on first server found containing a https connection. If no
+    # server is available with https then the first available http server is
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
     authorities:
-        - name: apnic
-          routing:
-              action: proxy
-              target: https://rdap.apnic.net/
-          ianaBootstrapRefServers:
-              - https://rdap.apnic.net
-              - http://rdap.apnic.net
-
-        - name: ripe
-          aliases:
-              - ripencc
+        - name: redirect
           routing:
             action: redirect
-            target: https://rdap.db.ripe.net
-          ianaBootstrapRefServers:
-              - https://rdap.db.ripe.net/
+            target: http://localhost:${404_port}
+            notFoundFallbackAuthority: fallback_redirect
 
-        - name: afrinic
+        - name: proxy
+          routing:
+            action: proxy
+            target: http://localhost:${404_port}
+            notFoundFallbackAuthority: fallback_proxy
+
+        - name: fallback_redirect
           routing:
             action: redirect
-            target: https://rdap.afrinic.net/rdap/
-          ianaBootstrapRefServers:
-              - http://rdap.afrinic.net/rdap/
+            target: http://fallback_redirect/
 
-        - name: arin
+        - name: fallback_proxy
           routing:
-            action: redirect
-            target: https://rdap.arin.net/registry/
-          ianaBootstrapRefServers:
-              - https://rdap.arin.net/registry/
-              - http://rdap.arin.net/registry/
-
-        - name: lacnic
-          routing:
-            action: redirect
-            target: https://rdap.lacnic.net/rdap/
-            notFoundFallbackAuthority: apnic
-          ianaBootstrapRefServers:
-              - https://rdap.lacnic.net/rdap/
+            action: proxy
+            target: http://localhost:${fallback_proxy_port}
 
     routing:
         # The default routing action to take for authorities. Accepts either
@@ -79,18 +61,18 @@ rdap:
             # The special "custom" scraper may be used to fetch multiple sources
             # of delegated stats data.
             iana:
-                enabled: true
+                enabled: false
             nro:
-                enabled: true
+                enabled: false
                 baseURI: https://labs.apnic.net/delegated-nro-extended
             custom:
-                enabled: false
+                enabled: true
                 entries:
-                    - name: nir
-                      uri:
+                    - name: fallback
+                      uri: http://localhost:${custom_scraper_port}
         config:
             # Order in which scrapers are run.
             order:
-            - iana
-            - nro
-            #- custom
+            #- iana
+            #- nro
+            - custom

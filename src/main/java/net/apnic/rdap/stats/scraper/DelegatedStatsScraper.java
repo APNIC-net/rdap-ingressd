@@ -105,8 +105,8 @@ public abstract class DelegatedStatsScraper implements Scraper {
 
         if(authority == null)
         {
-            authority = rdapAuthorityStore.createAuthority(
-                resourceRecord.getRegistry());
+            authority = new RDAPAuthority(resourceRecord.getRegistry());
+            rdapAuthorityStore.addAuthority(authority);
         }
         return authority;
     }

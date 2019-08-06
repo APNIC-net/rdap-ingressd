@@ -1,7 +1,10 @@
 package net.apnic.rdap.filter;
 
-public enum RDAPRequestType
-{
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+public enum RDAPRequestType {
     AUTNUM("autnum"),
     DOMAIN("domain"),
     DOMAINS("domains"),
@@ -12,33 +15,30 @@ public enum RDAPRequestType
     NAMESERVER("nameserver"),
     NAMESERVERS("nameservers");
 
-    private final String typeValue;
+    private static final Map<String, RDAPRequestType> valueToTypeMap = new HashMap<>(RDAPRequestType.values().length);
+    private final String pathValue;
 
-    private RDAPRequestType(String typeValue)
-    {
-        this.typeValue = typeValue;
+    static {    // initialise map
+        Arrays.stream(RDAPRequestType.values()).forEach(t -> valueToTypeMap.put(t.pathValue, t));
     }
 
-    public static RDAPRequestType getEnum(String valueStr)
-    {
-        for(RDAPRequestType type : values())
-        {
-            if(type.getValue().equals(valueStr))
-            {
-                return type;
-            }
+    RDAPRequestType(String pathValue) {
+        this.pathValue = pathValue;
+    }
+
+    public static RDAPRequestType fromPathValue(String pathValue) throws IllegalArgumentException {
+        RDAPRequestType type = valueToTypeMap.get(pathValue);
+
+        if (type == null) {
+            throw new IllegalArgumentException("No RDAPRequestType for value: " + pathValue);
         }
-        throw new IllegalArgumentException("No RDAPRequestType for value");
+
+        return type;
     }
 
-    public String getValue()
+    public String getPathValue()
     {
-        return typeValue;
+        return pathValue;
     }
 
-    @Override
-    public String toString()
-    {
-        return getValue();
-    }
 }

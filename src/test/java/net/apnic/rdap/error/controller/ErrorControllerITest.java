@@ -1,33 +1,27 @@
 package net.apnic.rdap.error.controller;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import com.jayway.jsonpath.matchers.JsonPathMatchers;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-import org.hamcrest.collection.IsMapContaining;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.hamcrest.object.HasToString;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.RunWith;
+import org.hamcrest.collection.IsMapContaining;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class ErrorControllerITest
 {
     @LocalServerPort

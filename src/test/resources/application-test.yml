@@ -1,11 +1,11 @@
 rdap:
     # A list of RDAP authorities may be configured ahead of time, if
     # required.  Each authority has a name, an optional list of
-    # aliases, a list of RDAP servers used as reference in the IANA bootstrap
-    # file and a routing section. The routing section have an optional action
-    # (if no action is defined the defaultAction value will be used), a routing
-    # target and a optional fallback authority for queries resulting in 404
-    # responses (not found).
+    # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+    # list based on first server found containing a https connection. If no
+    # server is available with https then the first available http server is
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
     authorities:
         - name: apnic
           routing:
