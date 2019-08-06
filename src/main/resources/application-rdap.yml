@@ -41,7 +41,7 @@ rdap:
 
         - name: lacnic
           routing:
-            action: proxy
+            action: redirect
             target: https://rdap.lacnic.net/rdap/
             notFoundFallbackAuthority: apnic
           ianaBootstrapRefServers:
