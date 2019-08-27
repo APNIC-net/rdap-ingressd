@@ -149,11 +149,11 @@ public abstract class DelegatedStatsScraper implements Scraper {
         if(statsScheme == SupportedScheme.HTTP ||
            statsScheme == SupportedScheme.HTTPS)
         {
-            InputStream response = makeDelegatedHttpRequest();
             List<ResourceMapping<IpRange>> ipMappings = new ArrayList<>();
             List<ResourceMapping<AsnRange>> asnMappings = new ArrayList<>();
 
             try {
+                InputStream response = makeDelegatedHttpRequest();
                 DelegatedStatsParser.parse(response,
                         asnRecord -> asnMappings.add(new ResourceMapping<AsnRange>(asnRecord.toAsnRange(),
                                 recordAuthority(asnRecord))),
