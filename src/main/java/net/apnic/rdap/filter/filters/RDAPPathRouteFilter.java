@@ -15,9 +15,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.logging.Logger;
 
 @Component
 public class RDAPPathRouteFilter extends ZuulFilter {
+
+    private static final Logger LOGGER = Logger.getLogger(RDAPPathRouteFilter.class.getName());
 
     @Override
     public int filterOrder() {
@@ -78,6 +81,7 @@ public class RDAPPathRouteFilter extends ZuulFilter {
         }
         catch(Exception ex)
         {
+            LOGGER.warning(ex.getMessage());
             throw new RuntimeException(ex);
         }
 
