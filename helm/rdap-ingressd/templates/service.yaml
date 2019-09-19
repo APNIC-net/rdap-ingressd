@@ -4,6 +4,10 @@ metadata:
   name: {{ include "rdap-ingressd.fullname" . }}
   labels:
     {{- include "rdap-ingressd.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{ toYaml .Values.service.annotations | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
