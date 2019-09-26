@@ -38,6 +38,7 @@ Common labels
 app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
 helm.sh/chart: {{ include "rdap-ingressd.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+apnic.net/team: pt-registry
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}

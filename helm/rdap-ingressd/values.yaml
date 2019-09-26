@@ -28,6 +28,17 @@ podDisruptionBudget: {}
   #minAvailable: 0
   #maxUnavailable: 0
 
+# Controls the autoscaling behaviour of ingressd, disabled by default
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+
 proxy:
   enabled: false
   httpHost: ""
