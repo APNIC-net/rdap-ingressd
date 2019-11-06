@@ -178,9 +178,6 @@ stop_environment:
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls={}")
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls[0].hosts={${APPLICATION_URL}}")
     TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.tls[0].secretName=rdap-ingressd-tls")
-    TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.hosts={}")
-    TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.hosts[0].host=${APPLICATION_URL}")
-    TEMP_ARG_LIST=("${TEMP_ARG_LIST[@]}" "ingress.hosts[0].paths={/}")
     APP_CHART_ARGS="${TEMP_ARG_LIST[@]}"
   }
 
