@@ -36,7 +36,8 @@ public class CustomStatsScraper implements Scraper {
 
     @Override
     public String getName() {
-        return "custom-scraper";
+        String scraperNames = customScrapers.stream().map(Scraper::getName).collect(Collectors.joining(","));
+        return "custom-scraper(" + scraperNames + ")";
     }
 
     @Override
