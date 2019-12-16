@@ -58,7 +58,7 @@ rdap:
         # above. All requests to this authority are proxied.
         defaultAuthority: null
 
-    # List of default notices that are sent with RDAP responses from this 
+    # List of default notices that are sent with RDAP responses from this
     # server.
     # Each notice in the list takes on the following form
     # - title: Optional title for the notice
@@ -82,7 +82,6 @@ rdap:
                 enabled: true
             nro:
                 enabled: true
-                baseURI: https://labs.apnic.net/delegated-nro-extended
             custom:
                 enabled: false
                 entries:

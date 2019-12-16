@@ -21,6 +21,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/prometheus'
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -58,10 +61,11 @@ spec:
             successThreshold: {{ .Values.livenessProbe.successThreshold }}
             timeoutSeconds: {{.Values.livenessProbe.timeoutSeconds }}
           readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-              scheme: HTTP
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - '! ( curl localhost:8080/prometheus | grep ^rdap_ingressd_scraper_status | cut -d " " -f 2 | grep "2\.0\|3\.0" )'
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}

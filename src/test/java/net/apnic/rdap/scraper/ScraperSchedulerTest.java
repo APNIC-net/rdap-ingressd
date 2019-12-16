@@ -7,6 +7,7 @@ import net.apnic.rdap.ip.IPStatsResourceLocator;
 import net.apnic.rdap.resource.ResourceMapping;
 import net.apnic.rdap.resource.ResourceNotFoundException;
 import net.apnic.rdap.resource.store.ResourceStore;
+import net.apnic.rdap.scraper.ScraperScheduler.StatusHealthEntry;
 import net.ripe.ipresource.IpRange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static net.apnic.rdap.scraper.ScraperScheduler.Status.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,7 +57,8 @@ class ScraperSchedulerTest {
         // before fetching data
         assertThrows(ResourceNotFoundException.class,
                 () -> ((IPStatsResourceLocator) resourceStore.getIpStorage()).authorityForResource(IP_RANGE));
-        assertThat(scraperScheduler.health().toString(), containsString("status=PENDING"));
+        assertThat(((StatusHealthEntry) scraperScheduler.health().getDetails().get(SCRAPER_NAME)).getStatus(),
+                is(INITIALISING.toString()));
 
         // fetch data
         when(scraper.fetchData()).thenReturn(result);
@@ -66,7 +69,8 @@ class ScraperSchedulerTest {
                 ((IPStatsResourceLocator) resourceStore.getIpStorage()).authorityForResource(IP_RANGE);
         assertThat(rdapAuthorityReturned, not(nullValue()));
         assertThat(rdapAuthorityReturned, equalTo(RDAP_AUTHORITY));
-        assertThat(scraperScheduler.health().toString(), containsString("status=SUCCESS"));
+        assertThat(((StatusHealthEntry) scraperScheduler.health().getDetails().get(SCRAPER_NAME)).getStatus(),
+                is(UP_TO_DATE.toString()));
 
         // fail data fetching
         when(scraper.fetchData()).thenThrow(ScraperException.class);
@@ -77,7 +81,8 @@ class ScraperSchedulerTest {
                 ((IPStatsResourceLocator) resourceStore.getIpStorage()).authorityForResource(IP_RANGE);
         assertThat(rdapAuthorityReturned, not(nullValue()));
         assertThat(rdapAuthorityReturned, equalTo(RDAP_AUTHORITY));
-        assertThat(scraperScheduler.health().toString(), containsString("status=FAILURE"));
+        assertThat(((StatusHealthEntry) scraperScheduler.health().getDetails().get(SCRAPER_NAME)).getStatus(),
+                is(OUT_OF_DATE.toString()));
 
         // subsequent successful data fetching
         ipMappings = Collections.singletonList(new ResourceMapping<>(IP_RANGE, RDAP_AUTHORITY2));
@@ -91,6 +96,7 @@ class ScraperSchedulerTest {
         rdapAuthorityReturned = ((IPStatsResourceLocator) resourceStore.getIpStorage()).authorityForResource(IP_RANGE);
         assertThat(rdapAuthorityReturned, not(nullValue()));
         assertThat(rdapAuthorityReturned, equalTo(RDAP_AUTHORITY2));
-        assertThat(scraperScheduler.health().toString(), containsString("status=SUCCESS"));
+        assertThat(((StatusHealthEntry) scraperScheduler.health().getDetails().get(SCRAPER_NAME)).getStatus(),
+                is(UP_TO_DATE.toString()));
     }
 }

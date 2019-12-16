@@ -1,5 +1,9 @@
 package net.apnic.rdap.scraper;
 
+import io.prometheus.client.Gauge;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import net.apnic.rdap.resource.store.ResourceStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
@@ -7,6 +11,8 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +33,18 @@ import java.util.logging.Logger;
 public class ScraperScheduler implements HealthIndicator {
     private static final int SCHEDULER_PERIOD = 12;
     private static final TimeUnit SCHEDULER_PERIOD_UNIT = TimeUnit.HOURS;
+    private static final Gauge PROMETHEUS_SCRAPER_STATUS =
+            Gauge.build()
+                    .name("rdap_ingressd_scraper_status")
+                    .help("rdap-ingressd scraper status (" + getScraperStatusHelpString() + ")")
+                    .labelNames("scraper")
+                    .register();
+    private static final Gauge PROMETHEUS_SCRAPER_LAST_SUCCESSFUL_UPDATE_DATETIME =
+            Gauge.build()
+                    .name("rdap_ingressd_scraper_last_successful_update_datetime")
+                    .help("rdap-ingressd scraper last successful update")
+                    .labelNames("scraper")
+                    .register();
 
     private final Logger LOGGER =
         Logger.getLogger(ScraperScheduler.class.getName());
@@ -65,8 +83,8 @@ public class ScraperScheduler implements HealthIndicator {
     public void addScraper(Scraper scraper)
     {
         scrapers.add(scraper);
-        ScraperStatus scraperStatus = new ScraperStatus();
-        scraperStatus.status = Status.PENDING;
+        ScraperStatus scraperStatus = new ScraperStatus(scraper.getName());
+        scraperStatus.setStatus(Status.INITIALISING);
         scraperStatuses.put(scraper.getName(), scraperStatus);
     }
 
@@ -100,20 +118,22 @@ public class ScraperScheduler implements HealthIndicator {
                     newResourceStore.addScraperResult(result);
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
-                    scraperStatus.status = Status.SUCCESS;
-                    scraperStatus.lastSuccessfulResult = result;
-                    scraperStatus.lastSuccessfulDateTime = LocalDateTime.now();
+                    scraperStatus.setStatus(Status.UP_TO_DATE);
+                    scraperStatus.setLastSuccessfulResult(result);
+                    scraperStatus.setLastSuccessfulDateTime(LocalDateTime.now());
 
                     LOGGER.log(Level.INFO, "Finished scraper " + scraper.getName());
                 } catch(ScraperException ex) {
                     LOGGER.log(Level.SEVERE, "Exception when running scraper " + scraper.getName(), ex);
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
-                    scraperStatus.status = Status.FAILURE;
+                    scraperStatus.setStatus(scraperStatus.status.equals(Status.INITIALISING)
+                            ? Status.INITIALISATION_FAILED
+                            : Status.OUT_OF_DATE);
 
                     // uses the last successfully fetched data if available
-                    if (scraperStatus.lastSuccessfulResult != null) {
-                        newResourceStore.addScraperResult(scraperStatus.lastSuccessfulResult);
+                    if (scraperStatus.getLastSuccessfulResult() != null) {
+                        newResourceStore.addScraperResult(scraperStatus.getLastSuccessfulResult());
                     }
                 }
             }
@@ -128,22 +148,60 @@ public class ScraperScheduler implements HealthIndicator {
 
     @Override
     public Health health() {
-        return Health.up().withDetail("ScraperStatus:", getScraperStatuses().toString()).build();
+        Health.Builder builder = Health.up();
+
+        for (Map.Entry<String, ScraperStatus> entry : scraperStatuses.entrySet()) {
+            LocalDateTime lastSuccessfulDateTime = entry.getValue().lastSuccessfulDateTime;
+            builder.withDetail(entry.getKey() ,
+                    new StatusHealthEntry(entry.getValue().status.toString(),
+                            lastSuccessfulDateTime == null
+                                    ? "never"
+                                    : DateTimeFormatter.ISO_DATE_TIME.format(lastSuccessfulDateTime)));
+        }
+
+        return builder.build();
     }
 
-    private class ScraperStatus {
-        ScraperResult lastSuccessfulResult;
-        LocalDateTime lastSuccessfulDateTime;
-        Status status;
+    private static String getScraperStatusHelpString() {
+        Status[] statuses = Status.values();
+        String[] strings = new String[statuses.length];
 
-        @Override
-        public String toString() {
-            return "{" +
-                    "lastSuccessfulDateTime=" + lastSuccessfulDateTime +
-                    ", status=" + status +
-                    '}';
+        for (int counter = 0; counter < statuses.length; counter++) {
+            strings[counter] = counter + ": " + statuses[counter];
+        }
+
+        return String.join(", ", strings);
+    }
+
+    @Getter
+    static class ScraperStatus {
+        private final String scraperName;
+        @Setter private ScraperResult lastSuccessfulResult;
+        private LocalDateTime lastSuccessfulDateTime;
+        private Status status;
+
+        private ScraperStatus(String scraperName) {
+            this.scraperName = scraperName;
+        }
+
+        public void setLastSuccessfulDateTime(LocalDateTime lastSuccessfulDateTime) {
+            this.lastSuccessfulDateTime = lastSuccessfulDateTime;
+            PROMETHEUS_SCRAPER_LAST_SUCCESSFUL_UPDATE_DATETIME.labels(scraperName).set(
+                    lastSuccessfulDateTime.toEpochSecond(ZoneOffset.UTC));
+        }
+
+        public void setStatus(Status status) {
+            this.status = status;
+            PROMETHEUS_SCRAPER_STATUS.labels(scraperName).set(status.ordinal());
         }
     }
 
-    private enum Status { SUCCESS, FAILURE, PENDING }
+    @AllArgsConstructor
+    @Getter
+    static class StatusHealthEntry {
+        private String status;
+        private String lastSuccessfulDateTime;
+    }
+
+    enum Status {UP_TO_DATE, OUT_OF_DATE, INITIALISING, INITIALISATION_FAILED}
 }

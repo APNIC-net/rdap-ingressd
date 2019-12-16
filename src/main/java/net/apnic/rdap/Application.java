@@ -2,6 +2,8 @@ package net.apnic.rdap;
 
 import java.util.Properties;
 
+import io.prometheus.client.hotspot.DefaultExports;
+import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
 import net.apnic.rdap.directory.Directory;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -19,6 +21,7 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 @EnableZuulProxy
 @SpringBootApplication
 @EnableAutoConfiguration(exclude={ErrorMvcAutoConfiguration.class})
+@EnablePrometheusEndpoint
 public class Application
 {
     public static void main(String[] args)
@@ -35,5 +38,7 @@ public class Application
         defaultProps.setProperty("zuul.SendErrorFilter.error.disable", "true");
         app.setDefaultProperties(defaultProps);
         app.run(args);
+        // initialise prometheus hotspot metrics
+        DefaultExports.initialize();
     }
 }
