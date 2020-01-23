@@ -43,7 +43,10 @@ public class AuthorityFallbackTest {
     private static final String FALLBACK_PROXY_RETURN_MSG = "It works";
     private static final String REDIRECT_AUTHORITY_IPV4 = "1.0.0.0";
     private static final String PROXY_AUTHORITY_IPV4 = "2.0.0.0";
+    private static final String REDIRECT_INTERNAL_TARGET_AUTHORITY_IPV4 = "3.0.0.0";
     private static final String FALLBACK_REDIRECT_AUTHORITY = "fallback_redirect";
+    private static final String FALLBACK_REDIRECT_INTERNAL_TARGET_AUTHORITY =
+            "fallback_redirect_with_internal_target";
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -99,6 +102,27 @@ public class AuthorityFallbackTest {
         assertThat(response.getStatusCode(), is(org.springframework.http.HttpStatus.MOVED_PERMANENTLY));
         assertThat(response.getHeaders().get("Location").get(0),
                 is(fallbackRedirectAuthority.getRoutingTarget().resolve("ip/" + REDIRECT_AUTHORITY_IPV4).toString()));
+    }
+
+    @Test
+    public void redirectWithInternalTargetFallbackTest() {
+        // given the fallback configuration defined on "src/test/stats/fallback" and the mock servers
+        // defined in setup()
+        RDAPAuthority fallbackRedirectInternalRedirectAuthority =
+                rdapAuthorityStore.findAuthority(FALLBACK_REDIRECT_INTERNAL_TARGET_AUTHORITY);
+
+        // when we query for redirected authority that returns 404
+        ResponseEntity<String> response = testRestTemplate.exchange(
+                "http://localhost:" + port + "/ip/" + REDIRECT_INTERNAL_TARGET_AUTHORITY_IPV4,
+                HttpMethod.GET,
+                null,
+                String.class);
+
+        // then
+        assertThat(response.getStatusCode(), is(org.springframework.http.HttpStatus.MOVED_PERMANENTLY));
+        assertThat(response.getHeaders().get("Location").get(0),
+                is(fallbackRedirectInternalRedirectAuthority.getRoutingTarget()
+                        .resolve("ip/" + REDIRECT_INTERNAL_TARGET_AUTHORITY_IPV4).toString()));
     }
 
     @Test
