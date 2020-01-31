@@ -3,6 +3,7 @@ package net.apnic.rdap.authority;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,8 @@ public class RDAPAuthority {
     private String name;
     private RoutingAction routingAction;
     private URI routingTarget;
+    /** Target URL meant to be used for internal direct queries (e.g. inside the same cluster). */
+    private Optional<URI> routingInternalTarget;
     private RDAPAuthority notFoundFallback;
     private List<URI> ianaBootstrapRefServers = Collections.emptyList();
 
@@ -138,6 +141,11 @@ public class RDAPAuthority {
     public void setRoutingTarget(URI routingTarget) {
         Validate.notNull(routingTarget);
         this.routingTarget = normalizeServerURI(routingTarget);
+    }
+
+    public void setRoutingInternalTarget(Optional<URI> internalTarget) {
+        Validate.notNull(internalTarget);
+        this.routingInternalTarget = internalTarget.map(RDAPAuthority::normalizeServerURI);
     }
 
     public void setIanaBootstrapRefServers(List<URI> servers) {

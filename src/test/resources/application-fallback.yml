@@ -13,6 +13,13 @@ rdap:
             target: http://localhost:${404_port}
             notFoundFallbackAuthority: fallback_redirect
 
+        - name: redirect_with_internal_target
+          routing:
+            action: redirect
+            target: http://some-external-target.net
+            internalTarget: http://localhost:${404_port}
+            notFoundFallbackAuthority: fallback_redirect_with_internal_target
+
         - name: proxy
           routing:
             action: proxy
@@ -23,6 +30,11 @@ rdap:
           routing:
             action: redirect
             target: http://fallback_redirect/
+
+        - name: fallback_redirect_with_internal_target
+          routing:
+            action: redirect
+            target: http://fallback_redirect_with_internal_target/
 
         - name: fallback_proxy
           routing:

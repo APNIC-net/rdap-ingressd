@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,6 +75,8 @@ public class AuthorityConfiguration {
     public static class AuthorityRoutingConfig {
         private RoutingAction action;
         private String target;
+        /** Target URL meant to be used for internal direct queries (e.g. inside the same cluster). */
+        private String internalTarget;
         private String notFoundFallbackAuthority;
     }
 
@@ -179,6 +182,8 @@ public class AuthorityConfiguration {
                     : new RDAPAuthority(aConfig.getName(), aConfig.getRouting().getAction());
 
             authority.setRoutingTarget(URI.create(aConfig.getRouting().getTarget()));
+            authority.setRoutingInternalTarget(
+                    Optional.ofNullable(aConfig.getRouting().getInternalTarget()).map(URI::create));
 
             if(aConfig.getAliases() != null)
             {

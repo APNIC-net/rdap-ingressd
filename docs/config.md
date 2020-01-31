@@ -15,8 +15,9 @@ rdap:
     # aliases, a list of RDAP servers used as reference in the IANA bootstrap
     # file and a routing section. The routing section have an optional action 
     # (if no action is defined the defaultAction value will be used), a routing
-    # target and a optional fallback authority for queries resulting in 404 
-    # responses (not found).
+    # target, an optional internal target (intended for internal direct queries 
+    # (e.g. inside the same cluster)) and a optional fallback authority for queries 
+    # resulting in 404 responses (not found).
     authorities:
         - name: apnic
           routing:
@@ -32,6 +33,7 @@ rdap:
           routing:
             action: redirect
             target: https://rdap.db.ripe.net
+            internalTarget: http://ripe-rdap-mirror:8080/
           ianaBootstrapRefServers:
               - https://rdap.db.ripe.net/
 

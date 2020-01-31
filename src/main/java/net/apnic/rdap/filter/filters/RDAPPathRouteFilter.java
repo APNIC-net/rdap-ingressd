@@ -55,7 +55,13 @@ public class RDAPPathRouteFilter extends ZuulFilter {
 
                 if (fallbackAuthority != null) {
                     // check if server won't return 404
-                    HttpURLConnection connection = (HttpURLConnection) new URL(requestPath).openConnection();
+                    // use internal target if defined
+                    String notFoundVerificationRequestPath =
+                            authority.getRoutingInternalTarget()
+                                     .map(uri -> uri.resolve(path.getRequestPath()).toString())
+                                     .orElse(requestPath);
+                    HttpURLConnection connection =
+                            (HttpURLConnection) new URL(notFoundVerificationRequestPath).openConnection();
                     connection.setRequestMethod("HEAD");
                     connection.setInstanceFollowRedirects(false);
 
