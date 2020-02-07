@@ -85,6 +85,16 @@ tolerations: []
 
 affinity: {}
 
+# Allow configuring the prometheus rule for monitoring scrapers. Disabled by default.
+scraperOutdatedPrometheusRule:
+  enabled: false
+  message: RDAP Ingressd scraper outdated
+  description: The scraper {{ $labels.scraper }} in the pod {{ $labels.kubernetes_pod_name }} is outdated.
+  labels:
+    channel: email
+    team: registry
+    severity: warning
+
 # Additional YAML put into the application's `rdap` profile configuration file as-is.
 application_rdap:
     # See https://gitlab.xyz.apnic.net/sw/rdap/rdap-ingressd for documentation over

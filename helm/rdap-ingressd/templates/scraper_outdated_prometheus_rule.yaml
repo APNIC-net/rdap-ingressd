@@ -1,0 +1,21 @@
+{{- if .Values.scraperOutdatedPrometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: prometheus-operator
+    release: prometheus-operator
+    role: alert-rules
+  name: rdap-ingressd-scraper-outdated
+spec:
+  groups:
+    - name: registry
+      rules:
+        - alert: RdapIngressdScraperOutdated
+          annotations:
+            message: {{ .Values.scraperOutdatedPrometheusRule.message }}
+            description: {{ .Values.scraperOutdatedPrometheusRule.description }}
+          expr: rdap_ingressd_scraper_status==1
+          labels:
+            {{- toYaml .Values.scraperOutdatedPrometheusRule.labels | nindent 12 }}
+{{- end }}
