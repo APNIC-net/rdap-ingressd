@@ -1,9 +1,11 @@
 service:
   type: NodePort
   port: 8080
+
 ingress:
   enabled: true
   hosts: [] #defined in pipeline
+
 resources:
   requests:
     memory: "1024Mi"
@@ -11,5 +13,10 @@ resources:
   limits:
     memory: "1024Mi"
     cpu: "2"
+
 proxy:
   enabled: false
+
+scraperOutdatedPrometheusRule:
+  enabled: true
+  message: TEST - RDAP Ingressd scraper outdated
