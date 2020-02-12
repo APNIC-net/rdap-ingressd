@@ -126,6 +126,7 @@ public class ScraperScheduler implements HealthIndicator {
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
                     scraperStatus.setStatus(scraperStatus.status.equals(Status.INITIALISING)
+                            || scraperStatus.status.equals(Status.INITIALISATION_FAILED)
                             ? Status.INITIALISATION_FAILED
                             : Status.OUT_OF_DATE);
 

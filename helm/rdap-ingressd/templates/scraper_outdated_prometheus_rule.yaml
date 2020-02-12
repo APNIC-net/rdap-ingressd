@@ -6,7 +6,7 @@ metadata:
     app: prometheus-operator
     release: prometheus-operator
     role: alert-rules
-  name: rdap-ingressd-scraper-outdated
+  name: {{ include "rdap-ingressd.name" . }}-scraper-outdated
 spec:
   groups:
     - name: registry
@@ -15,7 +15,7 @@ spec:
           annotations:
             message: {{ .Values.scraperOutdatedPrometheusRule.message }}
             description: {{ .Values.scraperOutdatedPrometheusRule.description }}
-          expr: rdap_ingressd_scraper_status{app_kubernetes_io_instance={{ .Release.Name | quote }}}==1
+          expr: rdap_ingressd_scraper_status{job={{ .Release.Name | quote }}}==1
           labels:
             {{- toYaml .Values.scraperOutdatedPrometheusRule.labels | nindent 12 }}
 {{- end }}
