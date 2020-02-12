@@ -178,6 +178,8 @@ application_rdap:
           nro:
             enabled: true
         config:
+          # Scraping rate (in minutes)
+          scrapingRateMin: 720
           order:
           - iana
           - nro

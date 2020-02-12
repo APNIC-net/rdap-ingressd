@@ -11,7 +11,6 @@ import net.apnic.rdap.scraper.ScraperScheduler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,6 +29,7 @@ public class ScraperConfiguration
     private ApplicationContext applicationContext = null;
     private boolean initialised = false;
     private List<String> order = null;
+    private int scrapingRateMin = 720;  // default: 12h
     @Autowired
     private ScraperScheduler scraperScheduler;
 
@@ -58,7 +58,7 @@ public class ScraperConfiguration
         initScraper();
 
         LOGGER.log(Level.INFO, "Starting scraper scheduler");
-        scraperScheduler.start();
+        scraperScheduler.start(scrapingRateMin);
         initialised = true;
     }
 
@@ -103,5 +103,13 @@ public class ScraperConfiguration
     public void setOrder(List<String> order)
     {
         this.order = order;
+    }
+
+    /**
+     * Sets the scraping rate in minutes.
+     * @param scrapingRateMin scraping rate in minutes
+     */
+    public void setScrapingRateMin(int scrapingRateMin) {
+        this.scrapingRateMin = scrapingRateMin;
     }
 }
