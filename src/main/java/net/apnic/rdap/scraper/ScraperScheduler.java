@@ -99,19 +99,23 @@ public class ScraperScheduler implements HealthIndicator {
             started = true;
         }
 
-        boolean interrupted = false;
+        final Runnable executorRunnable = () -> {
+            boolean interrupted = false;
 
-        do {
-            try {
-                executor.scheduleAtFixedRate(processDataUpdate(), 0, scrapingRate, TimeUnit.MINUTES).get();
-            } catch (ExecutionException e) {
-                LOGGER.log(Level.SEVERE, "The scraper update failed for unexpected reasons.", e.getCause());
-                scraperStatuses.values().forEach(ScraperScheduler::setFailedScraperStatus);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                interrupted = true;
-            }
-        } while (!interrupted);
+            do {
+                try {
+                    executor.scheduleAtFixedRate(processDataUpdate(), 0, scrapingRate, TimeUnit.MINUTES).get();
+                } catch (ExecutionException e) {
+                    LOGGER.log(Level.SEVERE, "The scraper update failed for unexpected reasons.", e.getCause());
+                    scraperStatuses.values().forEach(ScraperScheduler::setFailedScraperStatus);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    interrupted = true;
+                }
+            } while (!interrupted);
+        };
+
+        new Thread(executorRunnable, "ExecutorRunnableThread").start();
     }
 
     Runnable processDataUpdate() {
