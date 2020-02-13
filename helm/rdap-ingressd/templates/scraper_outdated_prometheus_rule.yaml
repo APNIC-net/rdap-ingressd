@@ -15,7 +15,7 @@ spec:
           annotations:
             message: {{ .Values.scraperOutdatedPrometheusRule.message }}
             description: {{ .Values.scraperOutdatedPrometheusRule.description }}
-          expr: rdap_ingressd_scraper_status{job={{ .Release.Name | quote }}}==1 or time() - rdap_ingressd_scraper_last_successful_update_datetime > 60 * 60 * 24
+          expr: rdap_ingressd_scraper_status{job={{ .Release.Name | quote }}}==1 or time() - rdap_ingressd_scraper_last_successful_update_datetime{job={{ .Release.Name | quote }}} > 60 * 60 * 24
           labels:
             {{- toYaml .Values.scraperOutdatedPrometheusRule.labels | nindent 12 }}
 {{- end }}
