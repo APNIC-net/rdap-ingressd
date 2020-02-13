@@ -135,9 +135,7 @@ public class ScraperScheduler implements HealthIndicator {
                     scraperStatus.setLastSuccessfulDateTime(LocalDateTime.now());
 
                     LOGGER.log(Level.INFO, "Finished scraper " + scraper.getName());
-                } catch (Exception ex) {
-                    // we need to catch all exceptions since this runnable should never die, otherwise the executor
-                    // service won't run the updates anymore
+                } catch (Exception ex) {    // we need to catch all exceptions since this runnable should never die
                     LOGGER.log(Level.SEVERE, "Exception when running scraper " + scraper.getName(), ex);
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
