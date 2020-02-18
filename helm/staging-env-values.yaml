@@ -1,15 +1,20 @@
 service:
   type: NodePort
   port: 8080
+
 ingress:
   enabled: true
   hosts: [] #defined in pipeline
+
 resources:
   requests:
-    memory: "1024Mi"
+    memory: "2048Mi"
     cpu: "1"
   limits:
-    memory: "1024Mi"
+    memory: "2048Mi"
     cpu: "2"
+
+javaOpts: -Xms1000m -Xmx1800m
+
 proxy:
   enabled: false

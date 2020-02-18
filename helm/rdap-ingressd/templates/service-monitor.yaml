@@ -1,0 +1,24 @@
+{{- if .Values.prometheus.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rdap-ingressd.fullname" . }}
+  {{- if .Values.prometheus.serviceMonitor.namespace }}
+  namespace: {{ .Values.prometheus.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+    {{- include "rdap-ingressd.labels" . | nindent 4 }}
+spec:
+  endpoints:
+  - port: http
+    interval: {{ default "30s" .Values.prometheus.serviceMonitor.interval }}
+    path: {{ default "/metrics" .Values.prometheus.serviceMonitor.path }}
+  jobLabel: {{ include "rdap-ingressd.fullname" . }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rdap-ingressd.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}

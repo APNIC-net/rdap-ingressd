@@ -88,6 +88,8 @@ rdap:
                     - name: nir
                       uri:
         config:
+            # Scraping rate (in minutes)
+            scrapingRateMin: 720
             # Order in which scrapers are run.
             order:
             - iana

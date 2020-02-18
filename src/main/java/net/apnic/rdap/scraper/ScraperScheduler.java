@@ -17,9 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,8 +29,6 @@ import java.util.logging.Logger;
  */
 @Service
 public class ScraperScheduler implements HealthIndicator {
-    private static final int SCHEDULER_PERIOD = 12;
-    private static final TimeUnit SCHEDULER_PERIOD_UNIT = TimeUnit.HOURS;
     private static final Gauge PROMETHEUS_SCRAPER_STATUS =
             Gauge.build()
                     .name("rdap_ingressd_scraper_status")
@@ -63,9 +59,7 @@ public class ScraperScheduler implements HealthIndicator {
      * this scheduler runs. This is to make sure a consitent view of the data is
      * always available and never in a non-authoritative state.
      *
-     * @params resourceStore The ResourceStore to rebuild with this scheduler.
-     * @params authorityStore The RDAPAuthorityStore to use for associating
-     *                        resources to authorities.
+     * @param resourceStore The ResourceStore to rebuild with this scheduler.
      */
     @Autowired
     public ScraperScheduler(ResourceStore resourceStore) {
@@ -93,8 +87,10 @@ public class ScraperScheduler implements HealthIndicator {
      *
      * If this scheduler has already been started previously calls to this
      * method will return immediately.
+     *
+     * @param scrapingRate scraping rate in minutes
      */
-    public void start() {
+    public void start(final int scrapingRate) {
         synchronized (this) {
             if (started) {
                 return;
@@ -103,7 +99,23 @@ public class ScraperScheduler implements HealthIndicator {
             started = true;
         }
 
-        executor.scheduleAtFixedRate(processDataUpdate(), 0, SCHEDULER_PERIOD, SCHEDULER_PERIOD_UNIT);
+        final Runnable executorRunnable = () -> {
+            boolean interrupted = false;
+
+            do {
+                try {
+                    executor.scheduleAtFixedRate(processDataUpdate(), 0, scrapingRate, TimeUnit.MINUTES).get();
+                } catch (ExecutionException e) {
+                    LOGGER.log(Level.SEVERE, "The scraper update failed for unexpected reasons.", e.getCause());
+                    scraperStatuses.values().forEach(ScraperScheduler::setFailedScraperStatus);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    interrupted = true;
+                }
+            } while (!interrupted);
+        };
+
+        new Thread(executorRunnable, "ExecutorRunnableThread").start();
     }
 
     Runnable processDataUpdate() {
@@ -123,13 +135,11 @@ public class ScraperScheduler implements HealthIndicator {
                     scraperStatus.setLastSuccessfulDateTime(LocalDateTime.now());
 
                     LOGGER.log(Level.INFO, "Finished scraper " + scraper.getName());
-                } catch(ScraperException ex) {
+                } catch (Exception ex) {    // we need to catch all exceptions since this runnable should never die
                     LOGGER.log(Level.SEVERE, "Exception when running scraper " + scraper.getName(), ex);
 
                     ScraperStatus scraperStatus = scraperStatuses.get(scraper.getName());
-                    scraperStatus.setStatus(scraperStatus.status.equals(Status.INITIALISING)
-                            ? Status.INITIALISATION_FAILED
-                            : Status.OUT_OF_DATE);
+                    setFailedScraperStatus(scraperStatus);
 
                     // uses the last successfully fetched data if available
                     if (scraperStatus.getLastSuccessfulResult() != null) {
@@ -144,6 +154,13 @@ public class ScraperScheduler implements HealthIndicator {
 
     public Map<String, ScraperStatus> getScraperStatuses() {
         return scraperStatuses;
+    }
+
+    private static void setFailedScraperStatus(ScraperStatus scraperStatus) {
+        scraperStatus.setStatus(scraperStatus.status.equals(Status.INITIALISING)
+                || scraperStatus.status.equals(Status.INITIALISATION_FAILED)
+                ? Status.INITIALISATION_FAILED
+                : Status.OUT_OF_DATE);
     }
 
     @Override

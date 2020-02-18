@@ -67,6 +67,17 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+prometheus:
+  serviceMonitor:
+    # Create prometheus-operator ServiceMonitor
+    enabled: true
+    # Interval at which the metrics endpoint is scraped
+    interval: 30s
+    # Path on service which exposes metrics
+    path: /prometheus
+    # Alternative namespace to install the ServiceMonitor in
+    namespace: ""
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -84,6 +95,16 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# Allow configuring the prometheus rule for monitoring scrapers. Disabled by default.
+scraperOutdatedPrometheusRule:
+  enabled: false
+  message: RDAP Ingressd scraper outdated
+  description: The scraper {{ $labels.scraper }} in the pod {{ $labels.kubernetes_pod_name }} is outdated.
+  labels:
+    channel: email
+    team: registry
+    severity: warning
 
 # Additional YAML put into the application's `rdap` profile configuration file as-is.
 application_rdap:
@@ -157,6 +178,8 @@ application_rdap:
           nro:
             enabled: true
         config:
+          # Scraping rate (in minutes)
+          scrapingRateMin: 720
           order:
           - iana
           - nro
