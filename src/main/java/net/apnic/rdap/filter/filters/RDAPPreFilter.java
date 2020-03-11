@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,9 +58,14 @@ public class RDAPPreFilter extends ZuulFilter {
     public Object run() {
         RequestContext context = RequestContext.getCurrentContext();
 
-        LOGGER.info("request: " + context.getRequest().getRequestURI());
+        HttpServletRequest request = context.getRequest();
+        LOGGER.info("request: " + request.getRequestURI());
 
-        RDAPRequestPath path = new RDAPRequestPath(context.getRequest().getRequestURI());
+        String requestPath = request.getQueryString() == null
+                ? request.getRequestURI()
+                : request.getRequestURI() + "?" + request.getQueryString();
+
+        RDAPRequestPath path = new RDAPRequestPath(requestPath);
         context.put(RequestContextKeys.RDAP_REQUEST_PATH.getKey(), path);
 
         try {

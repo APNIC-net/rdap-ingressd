@@ -72,8 +72,12 @@ public interface RDAPAuthorityResolver {
 
     static RDAPAuthority resolveDomains(RDAPRequestPath path, Directory directory)
             throws MalformedRequestException, ResourceNotFoundException {
-        if (path.getRequestParams().length != NO_REQUEST_PARAMS) {
-            throw new MalformedRequestException("Not enough arguments for domain search path segment");
+        if (path.getRequestParams().length > 0) {
+            throw new MalformedRequestException("Invalid path for domain search path segment.");
+        }
+
+        if (path.getQueryString() == null || path.getQueryString().isEmpty()) {
+            throw new MalformedRequestException("Missing query string for domain search.");
         }
 
         return directory.getSearchPathAuthority();
@@ -81,8 +85,12 @@ public interface RDAPAuthorityResolver {
 
     static RDAPAuthority resolveEntities(RDAPRequestPath path, Directory directory)
             throws MalformedRequestException, ResourceNotFoundException {
-        if (path.getRequestParams().length != NO_REQUEST_PARAMS) {
-            throw new MalformedRequestException("Not enough arguments for entities search path segment");
+        if (path.getRequestParams().length > 0) {
+            throw new MalformedRequestException("Invalid path for entity search path segment.");
+        }
+
+        if (path.getQueryString() == null || path.getQueryString().isEmpty()) {
+            throw new MalformedRequestException("Missing query string for entity search.");
         }
 
         return directory.getSearchPathAuthority();

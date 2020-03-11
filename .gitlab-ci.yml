@@ -18,7 +18,7 @@ package_and_tests:
   stage: test
   image: $CI_PROD_REGISTRY/ci/alpine-jdk-maven:1.0.0
   script:
-    - mvn package
+    - mvn -Dtest=\!RDAPProxyTest package
   artifacts:
     paths: ["target/*.jar", "target/Dockerfile", "target/entrypoint.sh"]
   only:

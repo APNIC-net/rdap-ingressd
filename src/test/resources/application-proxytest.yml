@@ -1,0 +1,62 @@
+rdap:
+    # A list of RDAP authorities may be configured ahead of time, if
+    # required.  Each authority has a name, an optional list of
+    # aliases, and a list of RDAP servers. RDAP servers are choosen from the
+    # list based on first server found containing a https connection. If no
+    # server is available with https then the first available http server is
+    # choosen. Alternatively a defaultServer attribute can be specified giving
+    # the URI of the default server to use.
+    authorities:
+        - name: apnic
+          routing:
+              action: proxy
+              target: https://localhost:${proxy_port}
+          ianaBootstrapRefServers:
+              - https://rdap.apnic.net
+              - http://rdap.apnic.net
+
+    routing:
+        # The default routing action to take for authorities. Accepts either
+        # redirect or proxy.
+        defaultAction: redirect
+
+        # Allows rdap-ingressd to proxy unroutable requests to a
+        # default authority. The name of the authority specified here
+        # can be null or a name specified in the 'authorities' section
+        # above. All requests to this authority are proxied.
+        defaultAuthority: apnic
+
+    # List of default notices that are sent with RDAP responses from this 
+    # server.
+    # Each notice in the list takes on the following form
+    # - title: Optional title for the notice
+    # - description: # Array of description lines
+    #     - description line 1
+    #     - description line 2
+    # - links: # Array of link object for the notice
+    #    - href: Non optional URL ref for the link
+    #      rel: Optional relation type
+    #      type: link type
+    notices: []
+
+    scraping:
+        scrapers:
+            # Individual scrapers available in rdap-ingressd can be enabled and
+            # disabled. It's also possible to specify the property baseURI for
+            # each scraper to change the location where data is fetched from.
+            # The special "custom" scraper may be used to fetch multiple sources
+            # of delegated stats data.
+            iana:
+                enabled: false
+            nro:
+                enabled: false
+                baseURI: https://labs.apnic.net/delegated-nro-extended
+            custom:
+              enabled: true
+              entries:
+                - name: proxytest
+                  uri: http://localhost:${custom_scraper_port}
+        config:
+            # Order in which scrapers are run.
+            order:
+            - custom

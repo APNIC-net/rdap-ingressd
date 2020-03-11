@@ -8,11 +8,11 @@ import java.util.Arrays;
  */
 public class RDAPRequestPath
 {
-    public static final String PATH_DELIM_REGEX = "\\/";
     public static final char PATH_SEPARATOR = '/';
 
     private String[] pathParts = null;
     private String requestPath = null;
+    private String queryString;
     private RDAPRequestType requestType = null;
 
     /**
@@ -40,13 +40,16 @@ public class RDAPRequestPath
         }
 
         this.requestPath = requestPath;
-        pathParts = requestPath.split(PATH_DELIM_REGEX);
+        String[] querySplit = requestPath.split("\\?");
+        pathParts = querySplit[0].split("/");
 
         if(pathParts.length < 1)
         {
             throw new IllegalArgumentException(
                 "requestPath does not have enough fields");
         }
+
+        this.queryString = querySplit.length > 1 ? querySplit[1] : null;
     }
 
     /**
@@ -94,5 +97,13 @@ public class RDAPRequestPath
      */
     public String getRequestTypeValue() {
         return pathParts[0];
+    }
+
+    /**
+     * Gets the query string for this request as {@link String}.
+     * @return the request query string
+     */
+    public String getQueryString() {
+        return queryString;
     }
 }
