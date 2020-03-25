@@ -11,6 +11,7 @@ public enum RDAPRequestType {
     ENTITY("entity"),
     ENTITIES("entities"),
     HELP("help"),
+    HISTORY("history"),
     IP("ip"),
     NAMESERVER("nameserver"),
     NAMESERVERS("nameservers");

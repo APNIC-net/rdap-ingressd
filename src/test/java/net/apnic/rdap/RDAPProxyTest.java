@@ -128,4 +128,23 @@ public class RDAPProxyTest {
                 VerificationTimes.once());
         assertThat(response.getStatusCode().value(), is(HttpStatus.SC_OK));
     }
+
+    @Test
+    public void historyProxyTest() {
+        // given the stats configuration defined on "src/test/stats/proxytest_stats" and the mock servers
+        // defined in setup()
+        final String requestPath = "/history/ip/43.0.0.0/14";
+        proxyServer.when(HttpRequest.request()).respond(HttpResponse.response().withStatusCode(HttpStatus.SC_OK));
+
+        // when
+        ResponseEntity<String> response = testRestTemplate.exchange(
+                "http://127.0.0.1:" + port + requestPath,
+                HttpMethod.GET,
+                null,
+                String.class);
+
+        // then
+        proxyServer.verify(HttpRequest.request().withPath(requestPath), VerificationTimes.once());
+        assertThat(response.getStatusCode().value(), is(HttpStatus.SC_OK));
+    }
 }

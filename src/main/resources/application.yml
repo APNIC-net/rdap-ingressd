@@ -47,6 +47,9 @@ zuul:
     help:
       path: /help
       stripPrefix: false
+    history:
+      path: /history/**
+      stripPrefix: false
     ip:
       path: /ip/**
       stripPrefix: false
