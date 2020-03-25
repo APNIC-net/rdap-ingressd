@@ -31,6 +31,7 @@ public class Directory
     private ResourceLocator<Domain> domainLocator;
     private ResourceLocator<Entity> entityLocator;
     private ResourceLocator<Void> helpLocator;
+    private ResourceLocator<Void> historyLocator;
     private ResourceLocator<IpRange> ipLocator;
     private ResourceLocator<NameServer> nsLocator;
     private ResourceLocator<Void> searchPathLocator;
@@ -41,6 +42,8 @@ public class Directory
                      ResourceLocator<Entity> entityLocator,
                      @Qualifier("helpResourceLocator")
                      ResourceLocator<Void> helpLocator,
+                     @Qualifier("historyResourceLocator")
+                     ResourceLocator<Void> historyLocator,
                      ResourceLocator<IpRange> ipLocator,
                      ResourceLocator<NameServer> nsLocator,
                      @Qualifier("searchPathLocator")
@@ -50,6 +53,7 @@ public class Directory
         this.domainLocator = domainLocator;
         this.entityLocator = entityLocator;
         this.helpLocator = helpLocator;
+        this.historyLocator = historyLocator;
         this.ipLocator = ipLocator;
         this.nsLocator = nsLocator;
         this.searchPathLocator = searchPathLocator;
@@ -77,6 +81,10 @@ public class Directory
         throws ResourceNotFoundException
     {
         return locatorProxy(null, helpLocator);
+    }
+
+    public RDAPAuthority getHistoryAuthority() throws ResourceNotFoundException {
+        return locatorProxy(null, historyLocator);
     }
 
     public RDAPAuthority getIPAuthority(IpRange block)

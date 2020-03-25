@@ -30,6 +30,7 @@ public interface RDAPAuthorityResolver {
             case ENTITIES: return RDAPAuthorityResolver::resolveEntities;
             case ENTITY: return RDAPAuthorityResolver::resolveEntity;
             case HELP: return RDAPAuthorityResolver::resolveHelp;
+            case HISTORY: return RDAPAuthorityResolver::resolveHistory;
             case IP: return RDAPAuthorityResolver::resolveIp;
             case NAMESERVER: return RDAPAuthorityResolver::resolveNameserver;
             case NAMESERVERS: return RDAPAuthorityResolver::resolveNameservers;
@@ -116,6 +117,15 @@ public interface RDAPAuthorityResolver {
         }
 
         return directory.getHelpAuthority();
+    }
+
+    static RDAPAuthority resolveHistory(RDAPRequestPath path, Directory directory)
+            throws MalformedRequestException, ResourceNotFoundException {
+        if (path.getRequestParams().length == 0) {
+            throw new MalformedRequestException("Not enough arguments for history path segment.");
+        }
+
+        return directory.getHistoryAuthority();
     }
 
     static RDAPAuthority resolveIp(RDAPRequestPath path, Directory directory)
